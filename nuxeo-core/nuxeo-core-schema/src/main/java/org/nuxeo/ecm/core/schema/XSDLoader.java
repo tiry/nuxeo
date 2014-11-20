@@ -11,22 +11,33 @@
  *     Wojciech Sulejman
  *     Florent Guillaume
  *     Thierry Delprat
+ *     Nicolas Chapurlat <nchapurlat@nuxeo.com>
  */
 package org.nuxeo.ecm.core.schema;
 
+import static com.sun.xml.xsom.XSFacet.FACET_ENUMERATION;
+import static com.sun.xml.xsom.XSFacet.FACET_LENGTH;
+import static com.sun.xml.xsom.XSFacet.FACET_MAXEXCLUSIVE;
+import static com.sun.xml.xsom.XSFacet.FACET_MAXINCLUSIVE;
+import static com.sun.xml.xsom.XSFacet.FACET_MAXLENGTH;
+import static com.sun.xml.xsom.XSFacet.FACET_MINEXCLUSIVE;
+import static com.sun.xml.xsom.XSFacet.FACET_MININCLUSIVE;
+import static com.sun.xml.xsom.XSFacet.FACET_MINLENGTH;
+import static com.sun.xml.xsom.XSFacet.FACET_PATTERN;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.schema.types.ComplexType;
 import org.nuxeo.ecm.core.schema.types.ComplexTypeImpl;
-import org.nuxeo.ecm.core.schema.types.Constraint;
 import org.nuxeo.ecm.core.schema.types.Field;
 import org.nuxeo.ecm.core.schema.types.ListType;
 import org.nuxeo.ecm.core.schema.types.ListTypeImpl;
@@ -37,8 +48,14 @@ import org.nuxeo.ecm.core.schema.types.SimpleTypeImpl;
 import org.nuxeo.ecm.core.schema.types.Type;
 import org.nuxeo.ecm.core.schema.types.TypeBindingException;
 import org.nuxeo.ecm.core.schema.types.TypeException;
+import org.nuxeo.ecm.core.schema.types.constraints.Constraint;
+import org.nuxeo.ecm.core.schema.types.constraints.ConstraintUtils;
+import org.nuxeo.ecm.core.schema.types.constraints.DateIntervalConstraint;
 import org.nuxeo.ecm.core.schema.types.constraints.EnumConstraint;
-import org.nuxeo.ecm.core.schema.types.constraints.StringLengthConstraint;
+import org.nuxeo.ecm.core.schema.types.constraints.LengthConstraint;
+import org.nuxeo.ecm.core.schema.types.constraints.NotNullConstraint;
+import org.nuxeo.ecm.core.schema.types.constraints.NumericIntervalConstraint;
+import org.nuxeo.ecm.core.schema.types.constraints.PatternConstraint;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
@@ -66,6 +83,8 @@ import com.sun.xml.xsom.parser.XSOMParser;
  * Loader of XSD schemas into Nuxeo Schema objects.
  */
 public class XSDLoader {
+
+    private static final String SCHEMAS_VALIDATION = "http://www.nuxeo.org/ecm/schemas/validation/";
 
     private static final Log log = LogFactory.getLog(XSDLoader.class);
 
@@ -454,29 +473,148 @@ public class XSDLoader {
         // add constraints/restrictions to the simple type
         if (type instanceof RestrictionSimpleTypeImpl) {
             RestrictionSimpleTypeImpl restrictionType = (RestrictionSimpleTypeImpl) type;
+
             List<Constraint> constraints = new ArrayList<Constraint>();
-            XSFacet maxLength = restrictionType.getFacet("maxLength");
-            if (maxLength != null) {
-                int min = 0; // for now
-                int max = Integer.parseInt(maxLength.getValue().toString());
-                Constraint constraint = new StringLengthConstraint(min, max);
-                constraints.add(constraint);
+
+            // pattern
+            XSFacet patternFacet = restrictionType.getFacet(FACET_PATTERN);
+            if (patternFacet != null) {
+                if (simpleType.getPrimitiveType().support(
+                        PatternConstraint.class)) {
+                    // String pattern
+                    String pattern = patternFacet.getValue().toString();
+                    Constraint constraint = new PatternConstraint(pattern);
+                    constraints.add(constraint);
+                } else {
+                    logUnsupportedFacetRestriction(schema, fieldName,
+                            simpleType, FACET_PATTERN);
+                }
             }
 
+            // length
+            XSFacet minLengthFacet = restrictionType.getFacet(FACET_MINLENGTH);
+            XSFacet maxLengthFacet = restrictionType.getFacet(FACET_MAXLENGTH);
+            XSFacet lengthFacet = restrictionType.getFacet(FACET_LENGTH);
+            if (maxLengthFacet != null || minLengthFacet != null
+                    || lengthFacet != null) {
+                if (simpleType.getPrimitiveType().support(
+                        LengthConstraint.class)) {
+                    // String Length
+                    Object min = null, max = null;
+                    if (lengthFacet != null) {
+                        min = lengthFacet.getValue().toString();
+                        max = min;
+                    } else {
+                        if (minLengthFacet != null) {
+                            min = minLengthFacet.getValue();
+                        }
+                        if (maxLengthFacet != null) {
+                            max = maxLengthFacet.getValue();
+                        }
+                    }
+                    Constraint constraint = new LengthConstraint(min, max);
+                    constraints.add(constraint);
+                } else {
+                    logUnsupportedFacetRestriction(schema, fieldName,
+                            simpleType, FACET_MINLENGTH, FACET_MAXLENGTH,
+                            FACET_LENGTH);
+                }
+            }
+
+            // Intervals
+            XSFacet minExclusiveFacet = restrictionType.getFacet(FACET_MINEXCLUSIVE);
+            XSFacet minInclusiveFacet = restrictionType.getFacet(FACET_MININCLUSIVE);
+            XSFacet maxExclusiveFacet = restrictionType.getFacet(FACET_MAXEXCLUSIVE);
+            XSFacet maxInclusiveFacet = restrictionType.getFacet(FACET_MAXINCLUSIVE);
+            if (minExclusiveFacet != null || minInclusiveFacet != null
+                    || maxExclusiveFacet != null || maxInclusiveFacet != null) {
+                if (simpleType.getPrimitiveType().support(
+                        NumericIntervalConstraint.class)) {
+                    // Numeric Interval
+                    Object min = null, max = null;
+                    boolean includingMin = true, includingMax = true;
+                    if (minExclusiveFacet != null) {
+                        min = minExclusiveFacet.getValue();
+                        includingMin = false;
+                    } else if (minInclusiveFacet != null) {
+                        min = minInclusiveFacet.getValue();
+                        includingMin = true;
+                    }
+                    if (maxExclusiveFacet != null) {
+                        max = maxExclusiveFacet.getValue();
+                        includingMax = false;
+                    } else if (maxInclusiveFacet != null) {
+                        max = maxInclusiveFacet.getValue();
+                        includingMax = true;
+                    }
+                    Constraint constraint = new NumericIntervalConstraint(min,
+                            includingMin, max, includingMax);
+                    constraints.add(constraint);
+                } else if (simpleType.getPrimitiveType().support(
+                        DateIntervalConstraint.class)) {
+                    // Date Interval
+                    Object min = null, max = null;
+                    boolean includingMin = true, includingMax = true;
+                    if (minExclusiveFacet != null) {
+                        min = minExclusiveFacet.getValue();
+                        includingMin = false;
+                    }
+                    if (minInclusiveFacet != null) {
+                        min = minInclusiveFacet.getValue();
+                        includingMin = true;
+                    }
+                    if (maxExclusiveFacet != null) {
+                        max = maxExclusiveFacet.getValue();
+                        includingMax = false;
+                    }
+                    if (maxInclusiveFacet != null) {
+                        max = maxInclusiveFacet.getValue();
+                        includingMax = true;
+                    }
+                    Constraint constraint = new DateIntervalConstraint(min,
+                            includingMin, max, includingMax);
+                    constraints.add(constraint);
+                } else {
+                    logUnsupportedFacetRestriction(schema, fieldName,
+                            simpleType, FACET_MINEXCLUSIVE, FACET_MININCLUSIVE,
+                            FACET_MAXEXCLUSIVE, FACET_MAXINCLUSIVE);
+                }
+            }
+
+            // Enumeration
             List<XSFacet> enumFacets = restrictionType.getFacets("enumeration");
             if (enumFacets != null && enumFacets.size() > 0) {
-                List<String> enumValues = new ArrayList<String>();
-                for (XSFacet enumFacet : enumFacets) {
-                    enumValues.add(enumFacet.getValue().toString());
+                if (simpleType.getPrimitiveType().support(EnumConstraint.class)) {
+                    // string enumeration
+                    List<String> enumValues = new ArrayList<String>();
+                    for (XSFacet enumFacet : enumFacets) {
+                        enumValues.add(enumFacet.getValue().toString());
+                    }
+                    Constraint constraint = new EnumConstraint(enumValues);
+                    constraints.add(constraint);
+                } else {
+                    logUnsupportedFacetRestriction(schema, fieldName,
+                            simpleType, FACET_ENUMERATION);
                 }
-                Constraint constraint = new EnumConstraint(enumValues);
-                constraints.add(constraint);
             }
 
-            simpleType.setConstraints(constraints.toArray(new Constraint[0]));
+            simpleType.addConstraints(constraints);
         }
 
         return simpleType;
+    }
+
+    private void logUnsupportedFacetRestriction(Schema schema,
+            String fieldName, SimpleTypeImpl simpleType, String... facetNames) {
+        StringBuilder msg = new StringBuilder();
+        msg.append("schema|field|type : ").append(schema.getName());
+        msg.append("|").append(fieldName);
+        msg.append("|").append(simpleType.getPrimitiveType());
+        msg.append(" following restriction facet are not handled by constraints API for this type :");
+        for (String facetName : facetNames) {
+            msg.append(facetName).append(" ");
+        }
+        log.warn(msg.toString());
     }
 
     protected ListType loadListType(Schema schema, XSListSimpleType type) {
@@ -576,7 +714,7 @@ public class XSDLoader {
                             + "#anonymousListType", fakeType, 0, maxOccur);
                     // add the listfield to the current CT
                     String fieldName = ct.getName() + "#anonymousList";
-                    ct.addField(fieldName, listType, null, 0);
+                    ct.addField(fieldName, listType, null, 0, null);
                 } else {
                     processModelGroup(schema, superType, name, ct,
                             term.asModelGroup(), abstractType);
@@ -591,7 +729,7 @@ public class XSDLoader {
                                 fieldType, 0, maxOccur);
                         // add the listfield to the current CT
                         String fieldName = element.getName();
-                        ct.addField(fieldName, listType, null, 0);
+                        ct.addField(fieldName, listType, null, 0, null);
                     }
                 } else {
                     loadComplexTypeElement(schema, ct, element);
@@ -604,7 +742,7 @@ public class XSDLoader {
             for (Field parentField : superType.getFields()) {
                 ct.addField(parentField.getName().getLocalName(),
                         parentField.getType(),
-                        (String) parentField.getDefaultValue(), 0);
+                        (String) parentField.getDefaultValue(), 0, null);
             }
         }
         return ct;
@@ -617,20 +755,42 @@ public class XSDLoader {
             log.warn("Ignoring " + name + " unsupported list type");
             return null;
         }
+        Type type = loadType(schema, element.getType(), element.getName());
+        if (type == null) {
+            log.warn("Unable to find type for " + element.getName());
+            return null;
+        }
+
         XmlString dv = element.getDefaultValue();
         String defValue = null;
         if (dv != null) {
             defValue = dv.value;
         }
-        Type type = loadType(schema, element.getType(), element.getName());
-        if (type == null) {
-            log.warn("Unable to find type for " + element.getName());
-            return null;
-        } else {
-            return new ListTypeImpl(schema.getName(), name, type,
-                    element.getName(), defValue, particle.getMinOccurs(),
-                    particle.getMaxOccurs());
+        int flags = 0;
+        if (defValue == null) {
+            dv = element.getFixedValue();
+            if (dv != null) {
+                defValue = dv.value;
+                flags |= Field.CONSTANT;
+            }
         }
+        boolean computedNillable = isNillable(element);
+        if (computedNillable) {
+            flags |= Field.NILLABLE;
+        }
+
+        Set<Constraint> constraints = new HashSet<Constraint>();
+        if (!computedNillable) {
+            constraints.add(NotNullConstraint.get());
+        }
+        if (type instanceof SimpleType) {
+            SimpleType st = (SimpleType) type;
+            constraints.addAll(st.getConstraints());
+        }
+
+        return new ListTypeImpl(schema.getName(), name, type,
+                element.getName(), defValue, flags, constraints,
+                particle.getMinOccurs(), particle.getMaxOccurs());
     }
 
     protected static ListType createListType(Schema schema, String name,
@@ -667,19 +827,29 @@ public class XSDLoader {
             }
         }
 
-        if (element.isNillable()) {
+        boolean computedNillable = isNillable(element);
+
+        if (computedNillable) {
             flags |= Field.NILLABLE;
         }
 
-        Field field = type.addField(elementName, fieldType, defValue, flags);
+        Set<Constraint> constraints = new HashSet<Constraint>();
+        if (!computedNillable) {
+            constraints.add(NotNullConstraint.get());
+        }
+        if (fieldType instanceof SimpleType) {
+            SimpleType st = (SimpleType) fieldType;
+            constraints.addAll(st.getConstraints());
+        }
+        Field field = type.addField(elementName, fieldType, defValue, flags,
+                constraints);
 
         // set the max field length from the constraints
         if (fieldType instanceof SimpleTypeImpl) {
-            for (Constraint constraint : ((SimpleTypeImpl) fieldType).getConstraints()) {
-                if (constraint instanceof StringLengthConstraint) {
-                    StringLengthConstraint slc = (StringLengthConstraint) constraint;
-                    field.setMaxLength(slc.getMax());
-                }
+            LengthConstraint lc = ConstraintUtils.getConstraint(
+                    field.getConstraints(), LengthConstraint.class);
+            if (lc != null && lc.getMax() != null) {
+                field.setMaxLength(lc.getMax().intValue());
             }
         }
 
@@ -702,7 +872,7 @@ public class XSDLoader {
                 flags |= Field.CONSTANT;
             }
         }
-        return type.addField(elementName, fieldType, defValue, flags);
+        return type.addField(elementName, fieldType, defValue, flags, null);
     }
 
     protected static String getAnonymousTypeName(XSType type, String fieldName) {
@@ -717,6 +887,27 @@ public class XSDLoader {
 
     public List<String> getReferencedXSD() {
         return referencedXSD;
+    }
+
+    /**
+     * ignore case where xsd:nillable is recognized as false by xsom (we don't
+     * know if it's not specified and we want to preserve a default value to
+     * true. Therefore, we provide a custom attribute nxs:nillable to force
+     * nillable as false) NB: if xsd:nillable is present and sets to true,
+     * deducted value will be true even if nxs:nillable is false
+     * 
+     * @since 7.1
+     */
+    protected static boolean isNillable(XSElementDecl element) {
+        boolean computedNillable;
+        String value = element.getForeignAttribute(SCHEMAS_VALIDATION,
+                "nillable");
+        if (!element.isNillable() && value != null && !Boolean.valueOf(value)) {
+            computedNillable = false;
+        } else {
+            computedNillable = true;
+        }
+        return computedNillable;
     }
 
 }

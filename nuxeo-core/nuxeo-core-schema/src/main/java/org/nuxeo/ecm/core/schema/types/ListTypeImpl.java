@@ -14,7 +14,11 @@ package org.nuxeo.ecm.core.schema.types;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.nuxeo.ecm.core.schema.types.constraints.Constraint;
 
 /**
  * The implementation for a List type.
@@ -29,7 +33,7 @@ public class ListTypeImpl extends AbstractType implements ListType {
 
     protected final Field field;
 
-    //TODO: should be removed. use field.defaultvalue instead
+    // TODO: should be removed. use field.defaultvalue instead
     protected String defaultValue;
 
     protected int minOccurs;
@@ -39,17 +43,25 @@ public class ListTypeImpl extends AbstractType implements ListType {
     protected boolean isArray = false;
 
     public ListTypeImpl(String schema, String name, Type type,
-            String fieldName, String defaultValue, int minOccurs, int maxOccurs) {
+            String fieldName, String defaultValue, int flags,
+            Set<Constraint> constraints, int minOccurs, int maxOccurs) {
         super(null, schema, name);
         if (fieldName == null) {
             isArray = true;
             fieldName = "item";
         }
         this.type = type;
-        field = new FieldImpl(QName.valueOf(fieldName), this, type);
+        field = new FieldImpl(QName.valueOf(fieldName), this, type,
+                defaultValue, flags, constraints);
         this.minOccurs = minOccurs;
         this.maxOccurs = maxOccurs;
         this.defaultValue = defaultValue;
+    }
+
+    public ListTypeImpl(String schema, String name, Type type,
+            String fieldName, String defaultValue, int minOccurs, int maxOccurs) {
+        this(schema, name, type, fieldName, defaultValue, 0,
+                new HashSet<Constraint>(), minOccurs, maxOccurs);
     }
 
     public ListTypeImpl(String schema, String name, Type type) {

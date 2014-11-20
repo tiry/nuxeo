@@ -13,6 +13,9 @@
 package org.nuxeo.ecm.core.schema.types;
 
 import java.io.Serializable;
+import java.util.Set;
+
+import org.nuxeo.ecm.core.schema.types.constraints.Constraint;
 
 /**
  * A field is a member of a complex type.
@@ -22,6 +25,7 @@ import java.io.Serializable;
 public interface Field extends Serializable {
 
     int NILLABLE = 1;
+
     int CONSTANT = 2;
 
     /**
@@ -43,9 +47,9 @@ public interface Field extends Serializable {
      * <p>
      * The declaring type may differ from the complex type owning this field.
      * <p>
-     * For example, in the case of a derived complex type,
-     * the field is owned by both the derived type and the base type,
-     * but it's declared only by the base type.
+     * For example, in the case of a derived complex type, the field is owned by
+     * both the derived type and the base type, but it's declared only by the
+     * base type.
      *
      * @return the complex that declared this field
      */
@@ -140,5 +144,12 @@ public interface Field extends Serializable {
      * @param length the length, or -1 for no constraint
      */
     void setMaxLength(int length);
+
+    /**
+     * @return The constraints applied to this field.
+     *
+     * @since 7.1
+     */
+    Set<Constraint> getConstraints();
 
 }

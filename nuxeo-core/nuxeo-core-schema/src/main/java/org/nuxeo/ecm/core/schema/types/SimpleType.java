@@ -9,8 +9,13 @@
  * Contributors:
  *     Bogdan Stefanescu
  *     Florent Guillaume
+ *     Nicolas Chapurlat <nchapurlat@nuxeo.com>
  */
 package org.nuxeo.ecm.core.schema.types;
+
+import java.util.Set;
+
+import org.nuxeo.ecm.core.schema.types.constraints.Constraint;
 
 /**
  * Simple Type.
@@ -27,6 +32,13 @@ public interface SimpleType extends Type {
      */
     boolean isPrimitive();
 
-    SimpleType getPrimitiveType();
+    PrimitiveType getPrimitiveType();
+
+    /**
+     * @return this simple type's constraints
+     *
+     * @since 71
+     */
+    Set<Constraint> getConstraints();
 
 }
