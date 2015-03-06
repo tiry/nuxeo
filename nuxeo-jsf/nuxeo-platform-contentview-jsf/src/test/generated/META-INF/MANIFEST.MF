@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM ContentView JSF Test
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-contentview-j
+ sf.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-contentview-jsf
+Import-Package: javax.faces.context;version="[2.2,3)",javax.inject,org.j
+ unit,org.junit.runner,org.nuxeo.common.utils;version="[0.0,1)",org.nuxe
+ o.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.security;versio
+ n="[0.0,1)",org.nuxeo.ecm.core.api.security.impl;version="[0.0,1)",org.
+ nuxeo.ecm.core.test,org.nuxeo.ecm.core.test.annotations,org.nuxeo.ecm.p
+ latform.contentview.jsf,org.nuxeo.ecm.platform.contentview.json,org.nux
+ eo.ecm.platform.query.api;version="[0.0,1)",org.nuxeo.ecm.platform.quer
+ y.nxql;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.jsf,org.nuxeo.ru
+ ntime.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",o
+ rg.nuxeo.runtime.test,org.nuxeo.runtime.test.runner,org.nuxeo.runtime.t
+ ransaction;version="[0.0,1)",org.skyscreamer.jsonassert
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.contentview.jsf.test
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

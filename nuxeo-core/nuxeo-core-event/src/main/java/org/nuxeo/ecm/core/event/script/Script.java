@@ -35,8 +35,6 @@ import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 import javax.script.SimpleScriptContext;
 
-import org.nuxeo.common.utils.FileUtils;
-
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
@@ -53,7 +51,7 @@ public abstract class Script {
     public static ScriptEngineManager getScripting() {
         if (scripting == null) {
             synchronized (Script.class) {
-                scripting = new ScriptEngineManager();
+                scripting = new ScriptEngineManager(Script.class.getClassLoader());
             }
         }
         return scripting;

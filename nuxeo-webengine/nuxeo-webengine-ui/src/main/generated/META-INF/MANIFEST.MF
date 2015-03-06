@@ -1,0 +1,38 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Webengine UI
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.webengine.nuxeo-webengine-ui
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.webengine.ui;version="5.3.2.SNAPSHOT";uses:="javax.ws.rs,javax.ws.
+ rs.core,org.nuxeo.ecm.webengine.model,org.nuxeo.ecm.webengine.model.imp
+ l",org.nuxeo.ecm.webengine.ui.json;version="5.3.2.SNAPSHOT";uses:="net.
+ sf.json,org.nuxeo.ecm.core.api",org.nuxeo.ecm.webengine.ui.tree;version
+ ="5.3.2.SNAPSHOT";uses:="net.sf.json,org.nuxeo.common.utils,org.nuxeo.e
+ cm.webengine.model",org.nuxeo.ecm.webengine.ui.tree.directory;version="
+ 5.3.2.SNAPSHOT";uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.directory,o
+ rg.nuxeo.ecm.webengine.model,org.nuxeo.ecm.webengine.ui.tree",org.nuxeo
+ .ecm.webengine.ui.tree.document;version="5.3.2.SNAPSHOT";uses:="org.nux
+ eo.ecm.core.api,org.nuxeo.ecm.webengine.model,org.nuxeo.ecm.webengine.u
+ i.tree",skin;version="0.0.0"
+Import-Package: javax.servlet.http;version="[3.0,4)",javax.ws.rs;version
+ ="[1.1,2)",javax.ws.rs.core;version="[1.1,2)",net.sf.json,org.apache.co
+ mmons.logging;version="[1.2,2)",org.nuxeo.common.utils;version="[0.0,1)
+ ",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.repos
+ itory;version="[0.0,1)",org.nuxeo.ecm.directory;version="[0.0,1)",org.n
+ uxeo.ecm.directory.api;version="[0.0,1)",org.nuxeo.ecm.webengine,org.nu
+ xeo.ecm.webengine.forms,org.nuxeo.ecm.webengine.model,org.nuxeo.ecm.web
+ engine.model.impl,org.nuxeo.ecm.webengine.session,org.nuxeo.ecm.webengi
+ ne.ui.tree;version="[5.3,6)",org.nuxeo.ecm.webengine.ui.tree.document;v
+ ersion="[5.3,6)",org.nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Nuxeo-WebModule: org.nuxeo.ecm.webengine.app.WebEngineModule
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Private-Package: .
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"
+Tool: Bnd-0.0.394

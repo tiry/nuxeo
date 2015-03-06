@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-rest-api-server.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-rest-api-server.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-rest-api-server
+Import-Package: javax.servlet;version="[3.0,4)",javax.servlet.http;versi
+ on="[3.0,4)",org.junit,org.mockito,org.mockito.stubbing
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.restapi.server
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

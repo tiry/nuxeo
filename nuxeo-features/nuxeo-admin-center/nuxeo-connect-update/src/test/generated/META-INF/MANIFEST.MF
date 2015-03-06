@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-connect-update.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-connect-update.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-connect-update
+Import-Package: javax.inject,javax.servlet,javax.servlet.http,org.apache
+ .commons.logging;version="[1.2,2)",org.junit,org.junit.runner,org.nuxeo
+ .common.utils;version="[0.0,1)",org.nuxeo.connect,org.nuxeo.connect.dat
+ a,org.nuxeo.connect.downloads,org.nuxeo.connect.update,org.nuxeo.connec
+ t.update.standalone;version="[0.0,1)",org.nuxeo.connect.update.standalo
+ ne.commands,org.nuxeo.connect.update.standalone.registry,org.nuxeo.conn
+ ect.update.task,org.nuxeo.connect.update.util;version="[0.0,1)",org.nux
+ eo.connect.update.xml;version="[0.0,1)",org.nuxeo.runtime.api;version="
+ [0.0,1)",org.nuxeo.runtime.test,org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: config,org.nuxeo.connect.download.tests,org.nuxeo.conne
+ ct.update.live,org.nuxeo.connect.update.live.commands,org.nuxeo.connect
+ .update.live.registry,templates.default,templates
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

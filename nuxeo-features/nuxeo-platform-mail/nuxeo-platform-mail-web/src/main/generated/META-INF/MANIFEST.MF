@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-Category: stateless
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Mail Web
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-mail-web
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: false
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.mail.web.actions;uses:="org.jboss.seam,org.jboss.seam.ann
+ otations,org.jboss.seam.faces,org.nuxeo.ecm.core.api,org.nuxeo.ecm.plat
+ form.ui.web.api,org.nuxeo.ecm.webapp.helpers";version="0.0.0",org.nuxeo
+ .ecm.platform.mail.web.converter;uses:="javax.faces.component,javax.fac
+ es.context,javax.faces.convert";version="0.0.0",org.nuxeo.ecm.platform.
+ mail.web.utils;version="0.0.0"
+Import-Package: javax.faces.component;version="[2.2,3)",javax.faces.cont
+ ext;version="[2.2,3)",javax.faces.convert;version="[2.2,3)",javax.mail;
+ version="[1.4,2)",org.apache.commons.logging;version="[1.2,2)",org.jbos
+ s.seam,org.jboss.seam.annotations,org.jboss.seam.core,org.jboss.seam.fa
+ ces,org.jboss.seam.international,org.nuxeo.ecm.core.api;version="[0.0,1
+ )",org.nuxeo.ecm.platform.mail.utils;version="[0.0,1)",org.nuxeo.ecm.pl
+ atform.mail.web.utils,org.nuxeo.ecm.platform.ui.web.api;version="[0.0,1
+ )",org.nuxeo.ecm.webapp.helpers;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/nxmail-actions-contrib.xml,OSGI-INF/nxmail-ecm
+ -types-contrib.xml,OSGI-INF/nxmail-layouts-contrib.xml,OSGI-INF/nxmail-
+ contentview-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle:  org.nuxeo.ecm.core.api,org.nuxeo.ecm.webapp.core,org.nu
+ xeo.ecm.platform.mail
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

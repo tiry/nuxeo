@@ -51,7 +51,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/test-blob-dispatcher.xml")
+@LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/test-blob-dispatcher.xml")
 public class TestBlobDispatcher {
 
     @Inject

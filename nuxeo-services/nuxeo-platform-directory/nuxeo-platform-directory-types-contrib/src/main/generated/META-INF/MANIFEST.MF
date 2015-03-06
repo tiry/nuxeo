@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: core
+Bundle-ClassPath: .
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Directory
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-directory-typ
+ es-contrib
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: directoryschema;version="0.0.0",doc;version="0.0.0",doc-
+ parent;version="0.0.0"
+Import-Package: javax.annotation;version="1.0",org.nuxeo.ecm.core;api=sp
+ lit,org.nuxeo.ecm.core.api;api=split,org.nuxeo.ecm.directory;api=split
+Nuxeo-Component: OSGI-INF/DirectoryTypes.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

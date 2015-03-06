@@ -37,12 +37,6 @@ import org.nuxeo.ecm.platform.forms.layout.api.service.LayoutStore;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 /**
  * Test layout service API
  *
@@ -52,6 +46,7 @@ public class TestLayoutStoreService extends NXRuntimeTestCase {
 
     private LayoutStore service;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -69,12 +64,13 @@ public class TestLayoutStoreService extends NXRuntimeTestCase {
         LayoutDefinition l = service.getLayoutDefinition("testCategory", "testLayout");
         assertNotNull(l);
         assertEquals(4, l.getRows().length);
-        deployContrib("org.nuxeo.ecm.platform.forms.layout.core.tests", "layouts-core-test-override-contrib.xml");
-        // check override
-        l = service.getLayoutDefinition("testCategory", "testLayout");
-        assertNotNull(l);
-        assertEquals(0, l.getRows().length);
-        undeployContrib("org.nuxeo.ecm.platform.forms.layout.core.tests", "layouts-core-test-override-contrib.xml");
+        try (AutoCloseable context = deployContrib("org.nuxeo.ecm.platform.forms.layout.core.tests",
+                "layouts-core-test-override-contrib.xml")) {
+            // check override
+            l = service.getLayoutDefinition("testCategory", "testLayout");
+            assertNotNull(l);
+            assertEquals(0, l.getRows().length);
+        }
         // check back to original def
         l = service.getLayoutDefinition("testCategory", "testLayout");
         assertNotNull(l);

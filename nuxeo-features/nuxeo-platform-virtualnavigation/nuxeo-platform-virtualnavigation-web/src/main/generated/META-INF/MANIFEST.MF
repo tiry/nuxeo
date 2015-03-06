@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateless
+Bundle-ManifestVersion: 2
+Bundle-Name: nuxeo-platform-virtualnavigation-web
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-virtualnaviga
+ tion-web
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0"
+Nuxeo-Component: OSGI-INF/directorytreemanager-contrib.xml,OSGI-INF/cont
+ entviews-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Provide-Package: org.nuxeo.platform.virtualnavigation
+Require-Bundle: org.nuxeo.runtime,org.nuxeo.ecm.core.api,org.nuxeo.ecm.w
+ ebapp.core,org.nuxeo.ecm.webapp.ui
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

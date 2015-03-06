@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-Category: core, statefull
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: NXUserWorkspace
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-userworkspace
+ -types
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0"
+Nuxeo-Component: OSGI-INF/userworkspace-schemas-contrib.xml, OSGI-INF/us
+ erworkspace-life-cycle-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

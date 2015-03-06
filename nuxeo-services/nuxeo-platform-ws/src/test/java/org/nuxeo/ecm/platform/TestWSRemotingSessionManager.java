@@ -113,7 +113,7 @@ public class TestWSRemotingSessionManager {
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.ecm.platform.tests:login-config.xml")
+    @LocalDeploy("org.nuxeo.ecm.platform.ws:login-config.xml")
     public void testSnapshotProperties() {
         DocumentModel doc = session.createDocumentModel("/", "youps", "File");
         doc.setProperty("dublincore", "title", "huum");

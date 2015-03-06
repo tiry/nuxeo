@@ -1,0 +1,4 @@
+-exportcontents:  *, .
+ExtensionBundle-Activator: org.nuxeo.runtime.logging.jcl.LogAdapterActivator
+Fragment-Host: org.apache.commons.logging
+

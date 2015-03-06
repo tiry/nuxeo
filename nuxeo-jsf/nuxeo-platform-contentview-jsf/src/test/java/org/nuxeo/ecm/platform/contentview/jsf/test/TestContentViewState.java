@@ -74,9 +74,12 @@ import static org.junit.Assert.fail;
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
 @Deploy({ "org.nuxeo.ecm.platform.query.api", //
+        "org.nuxeo.ecm.actions", //
+        "org.nuxeo.ecm.platform.forms.layout.core", //
+        "org.nuxeo.ecm.platform.forms.layout.client", //
         "org.nuxeo.ecm.platform.contentview.jsf", //
 })
-@LocalDeploy("org.nuxeo.ecm.platform.contentview.jsf.test:test-contentview-contrib.xml")
+@LocalDeploy("org.nuxeo.ecm.platform.contentview.jsf:test-contentview-contrib.xml")
 public class TestContentViewState {
 
     @Inject

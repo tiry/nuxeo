@@ -19,6 +19,7 @@
  */
 package org.nuxeo.runtime.model;
 
+
 /**
  * An interface for an adaptable object.
  * <p>

@@ -18,12 +18,6 @@
  */
 package org.nuxeo.ecm.platform.layout.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -67,12 +61,13 @@ public class TestLayoutExport extends NXRuntimeTestCase {
 
     private LayoutStore service;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         deployBundle("org.nuxeo.ecm.platform.forms.layout.core");
-        deployContrib("org.nuxeo.ecm.platform.forms.layout.client", "OSGI-INF/layouts-framework.xml");
-        deployContrib("org.nuxeo.ecm.platform.forms.layout.export.tests", "layouts-test-contrib.xml");
+        deployBundle("org.nuxeo.ecm.platform.forms.layout.client");
+        deployTestContrib("org.nuxeo.ecm.platform.forms.layout.core", "layouts-test-contrib.xml");
         service = Framework.getService(LayoutStore.class);
         assertNotNull(service);
     }

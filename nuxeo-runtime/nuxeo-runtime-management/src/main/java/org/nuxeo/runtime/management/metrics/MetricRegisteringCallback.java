@@ -46,20 +46,6 @@ public class MetricRegisteringCallback extends CallbackSkeleton {
         if (simon.getName() == null) {
             return;
         }
-        register(simon);
-    }
-
-    @Override
-    public void simonDestroyed(Simon simon) {
-        register.unregisterMXBean(simon.getName());
-    }
-
-    @Override
-    public void clear() {
-        register.unregisterAll();
-    }
-
-    protected final void register(Simon simon) {
         SimonSuperMXBean mbean;
         if (simon instanceof Counter) {
             mbean = new CounterMXBeanImpl((Counter) simon);
@@ -70,4 +56,22 @@ public class MetricRegisteringCallback extends CallbackSkeleton {
         }
         register.registerMXBean(mbean, simon.getName(), mbean.getClass(), mbean.getType());
     }
+
+    @Override
+    public void simonDestroyed(Simon simon) {
+        if (simon.getName() == null) {
+            return;
+        }
+        if (simon instanceof Counter) {
+            register.unregisterMXBean(simon.getName());
+        } else if (simon instanceof Stopwatch) {
+            register.unregisterMXBean(simon.getName());
+        }
+    }
+
+    @Override
+    public void clear() {
+        register.unregisterAll();
+    }
+
 }

@@ -39,7 +39,8 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -64,12 +65,11 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.LogManager;
 import org.joda.time.DateTime;
 
 import org.nuxeo.common.Environment;
 import org.nuxeo.launcher.config.ConfigurationGenerator;
-import org.nuxeo.log4j.Log4JHelper;
+import org.nuxeo.runtime.logging.LoggingConfigurator;
 import org.nuxeo.shell.Shell;
 import org.nuxeo.shell.cmds.Interactive;
 import org.nuxeo.shell.cmds.InteractiveShellHandler;
@@ -346,14 +346,15 @@ public class NuxeoFrame extends JFrame {
     protected JTabbedPane buildLogsTab() {
         JTabbedPane logsTabbedPane = new JTabbedPane(SwingConstants.TOP);
         // Get Launcher log file(s)
-        ArrayList<String> logFiles = Log4JHelper.getFileAppendersFiles(LogManager.getLoggerRepository());
+        List<String> logFiles = Arrays.asList(LoggingConfigurator.SELF.getFileAppendersFiles(
+                controller.getConfigurationGenerator().getServerConfigurator().getLogConfFile()));
         // Add nuxeoctl log file
         File nuxeoctlLog = new File(controller.getConfigurationGenerator().getLogDir(), "nuxeoctl.log");
         if (nuxeoctlLog.exists()) {
             logFiles.add(nuxeoctlLog.getAbsolutePath());
         }
         // Get server log file(s)
-        logFiles.addAll(controller.getConfigurationGenerator().getLogFiles());
+        logFiles.addAll(Arrays.asList(controller.getConfigurationGenerator().getLogFiles()));
         for (String logFile : logFiles) {
             addFileToLogsTab(logsTabbedPane, logFile);
         }

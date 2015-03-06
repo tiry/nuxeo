@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.tokenauth.service.TokenAuthenticationService;
 import org.nuxeo.ecm.tokenauth.servlet.TokenAuthenticationServlet;
+import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
@@ -66,18 +67,17 @@ public class TestAnonymousTokenAuthenticationServlet {
             assertEquals(401, status);
 
             // ------------ Test anonymous user allowed ----------------
-            harness.deployContrib("org.nuxeo.ecm.platform.login.token.test",
-                    "OSGI-INF/test-token-authentication-allow-anonymous-token-contrib.xml");
+            try (RuntimeContext context = harness.deployContrib("org.nuxeo.ecm.platform.login.token.test",
+                    "OSGI-INF/test-token-authentication-allow-anonymous-token-contrib.xml")) {
 
-            status = httpClient.executeMethod(getMethod);
-            assertEquals(201, status);
-            String token = getMethod.getResponseBodyAsString();
-            assertNotNull(token);
-            assertNotNull(tokenAuthenticationService.getUserName(token));
-            assertEquals(1, tokenAuthenticationService.getTokenBindings("Guest").size());
+                status = httpClient.executeMethod(getMethod);
+                assertEquals(201, status);
+                String token = getMethod.getResponseBodyAsString();
+                assertNotNull(token);
+                assertNotNull(tokenAuthenticationService.getUserName(token));
+                assertEquals(1, tokenAuthenticationService.getTokenBindings("Guest").size());
+            }
 
-            harness.undeployContrib("org.nuxeo.ecm.platform.login.token.test",
-                    "OSGI-INF/test-token-authentication-allow-anonymous-token-contrib.xml");
         } finally {
             getMethod.releaseConnection();
         }

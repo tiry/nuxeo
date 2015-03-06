@@ -38,13 +38,13 @@ import org.apache.geronimo.transaction.manager.TransactionImpl;
 import org.apache.geronimo.transaction.manager.TransactionManagerImpl;
 import org.apache.geronimo.transaction.manager.TransactionManagerMonitor;
 import org.apache.geronimo.transaction.manager.XidImpl;
-import org.apache.log4j.MDC;
 import org.javasimon.SimonManager;
 import org.javasimon.Stopwatch;
 import org.nuxeo.ecm.core.management.jtajca.TransactionMonitor;
 import org.nuxeo.ecm.core.management.jtajca.TransactionStatistics;
 import org.nuxeo.runtime.jtajca.NuxeoContainer;
 import org.nuxeo.runtime.transaction.TransactionHelper;
+import org.slf4j.MDC;
 
 /**
  * @author matic
@@ -145,7 +145,7 @@ public class DefaultTransactionMonitor implements TransactionManagerMonitor, Tra
         }
         tm.registerInterposedSynchronization(this); // register end status
         if (log.isTraceEnabled()) {
-            log.trace(info.toString());
+            log.trace(info);
         }
     }
 

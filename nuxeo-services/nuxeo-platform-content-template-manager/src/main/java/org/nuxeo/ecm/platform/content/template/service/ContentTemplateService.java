@@ -26,6 +26,8 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 
 public interface ContentTemplateService {
 
+    public static String DISABLED_CONTEXT_KEY = "ContentTemplateService.disabled";
+
     ContentFactory getFactoryForType(String documentType);
 
     void executeFactoryForType(DocumentModel createdDocument);

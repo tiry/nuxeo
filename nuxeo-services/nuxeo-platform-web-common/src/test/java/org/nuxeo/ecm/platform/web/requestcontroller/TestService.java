@@ -28,8 +28,6 @@ import javax.servlet.FilterConfig;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 import org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerManager;
 import org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestControllerService;
 import org.nuxeo.ecm.platform.web.common.requestcontroller.service.RequestFilterConfig;
@@ -38,10 +36,12 @@ import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
 public class TestService extends NXRuntimeTestCase {
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        deployContrib("org.nuxeo.ecm.platform.web.common", "OSGI-INF/web-request-controller-framework.xml");
+        Framework.getRuntime().setProperty("org.nuxeo.ecm.contextPath", "/nuxeo");
+        deployBundle("org.nuxeo.ecm.platform.web.common");
     }
 
     @Test
@@ -52,7 +52,7 @@ public class TestService extends NXRuntimeTestCase {
 
     @Test
     public void testServiceContrib() throws Exception {
-        deployContrib("org.nuxeo.ecm.platform.web.common", "OSGI-INF/web-request-controller-contrib-test.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.web.common", "OSGI-INF/web-request-controller-contrib-test.xml");
 
         RequestControllerManager rcm = Framework.getLocalService(RequestControllerManager.class);
         assertNotNull(rcm);

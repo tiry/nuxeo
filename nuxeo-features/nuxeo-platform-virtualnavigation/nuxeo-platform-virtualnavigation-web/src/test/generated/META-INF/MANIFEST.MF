@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-virtualnavigation-web
+ .tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-virtualnaviga
+ tion-web.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-virtualnavigation-w
+ eb
+Import-Package: org.junit,org.junit.runner,org.nuxeo.ecm.webapp.tree.nav
+ ;version="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.ru
+ ntime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.virtualnavigation.tests
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

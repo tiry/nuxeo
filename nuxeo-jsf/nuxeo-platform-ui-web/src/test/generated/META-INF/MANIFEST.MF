@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-ui-web.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-ui-web.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-ui-web
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.junit,org.
+ nuxeo.ecm.platform.actions;version="[0.0,1)",org.nuxeo.ecm.platform.act
+ ions.ejb;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.api,org.nuxeo.
+ ecm.platform.ui.web.util.beans
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.ui.web
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

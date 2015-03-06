@@ -19,9 +19,6 @@
 
 package org.nuxeo.ecm.core.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +27,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.Blobs;
@@ -38,17 +34,14 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.impl.DocumentModelImpl;
 import org.nuxeo.ecm.core.api.model.Property;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
+@Deploy({"org.nuxeo.ecm.core.schema","org.nuxeo.ecm.core.api"})
+@LocalDeploy("org.nuxeo.ecm.core.schema:OSGI-INF/test-propmodel-types-contrib.xml")
 public class TestBlobExtractor extends NXRuntimeTestCase {
 
     static final Log log = LogFactory.getLog(TestBlobExtractor.class);
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployContrib("org.nuxeo.ecm.core.api.tests", "OSGI-INF/test-propmodel-types-contrib.xml");
-    }
 
     @Test
     public void testCaching() throws Exception {

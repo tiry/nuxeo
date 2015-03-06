@@ -189,6 +189,9 @@ public class RedisComponent extends DefaultComponent implements RedisAdmin {
         if (adapter.isAssignableFrom(RedisExecutor.class)) {
             return adapter.cast(executor);
         }
+        if (adapter.isAssignableFrom(RedisAdmin.class)) {
+            return adapter.cast(this);
+        }
         return super.getAdapter(adapter);
     }
 

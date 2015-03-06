@@ -36,8 +36,8 @@ import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
+import org.nuxeo.ecm.core.test.NoopRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.ecm.core.test.annotations.RepositoryInit;
 import org.nuxeo.ecm.directory.Session;
 import org.nuxeo.ecm.directory.api.DirectoryService;
 import org.nuxeo.ecm.platform.publisher.api.PublicationNode;
@@ -48,8 +48,6 @@ import org.nuxeo.ecm.platform.publisher.impl.finder.AbstractRootSectionsFinder;
 import org.nuxeo.ecm.platform.publisher.impl.finder.DefaultRootSectionsFinder;
 import org.nuxeo.ecm.platform.publisher.test.TestServiceRootFinder.Populate;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.model.RegistrationInfo;
-import org.nuxeo.runtime.model.impl.DefaultRuntimeContext;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
@@ -63,7 +61,7 @@ public class TestServiceRootFinder extends PublisherTestCase {
     @Inject
     PublisherService service;
 
-    public static class Populate implements RepositoryInit {
+    public static class Populate extends NoopRepositoryInit {
 
         protected static Populate self;
 
@@ -239,18 +237,14 @@ public class TestServiceRootFinder extends PublisherTestCase {
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.publisher.core:OSGI-INF/publisher-finder-contrib-test.xml")
     public void testSectionRootFinderContrib() throws Exception {
 
         RootSectionFinder finder = service.getRootSectionFinder(session);
 
         assertTrue(finder instanceof DefaultRootSectionsFinder);
 
-        RegistrationInfo info = new DefaultRuntimeContext().deploy("OSGI-INF/publisher-finder-contrib-test.xml");
-        try {
-            finder = service.getRootSectionFinder(session);
-        } finally {
-            info.getManager().unregister(info);
-        }
+        finder = service.getRootSectionFinder(session);
 
         assertTrue(finder instanceof SampleRootSectionFinder);
 

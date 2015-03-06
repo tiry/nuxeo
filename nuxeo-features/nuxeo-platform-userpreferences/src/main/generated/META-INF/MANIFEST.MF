@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo User Preferences
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-userpreferenc
+ es
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.userpreferences;uses:="org.nuxeo.ecm.core.api,org.nuxeo.e
+ cm.core.api.localconfiguration,org.nuxeo.ecm.localconf,org.nuxeo.ecm.pl
+ atform.userworkspace.api,org.nuxeo.runtime.model";version="0.0.0"
+Import-Package: org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.api.localconfiguration;version="[0.0,1)",org.nuxeo.ecm.localconf;ve
+ rsion="[0.0,1)",org.nuxeo.ecm.platform.userworkspace.api;version="[0.0,
+ 1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.model;ver
+ sion="[0.0,1)"
+Nuxeo-Component: OSGI-INF/userpreferences-framework.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

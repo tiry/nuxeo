@@ -35,9 +35,9 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.api.impl.DocumentLocationImpl;
+import org.nuxeo.ecm.core.test.NoopRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.ecm.core.test.annotations.RepositoryInit;
 import org.nuxeo.ecm.platform.publisher.api.PublicationNode;
 import org.nuxeo.ecm.platform.publisher.api.PublicationTree;
 import org.nuxeo.ecm.platform.publisher.api.PublishedDocument;
@@ -47,9 +47,8 @@ import org.nuxeo.ecm.platform.publisher.impl.service.ProxyTree;
 import org.nuxeo.ecm.platform.publisher.impl.service.PublisherServiceImpl;
 import org.nuxeo.ecm.platform.publisher.test.TestServiceWithCore.Populate;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.model.RegistrationInfo;
-import org.nuxeo.runtime.model.impl.DefaultRuntimeContext;
 import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
 /**
@@ -61,7 +60,7 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 @Deploy({ "org.nuxeo.ecm.platform.versioning", "org.nuxeo.ecm.platform.versioning.api" })
 public class TestServiceWithCore extends PublisherTestCase {
 
-    public static class Populate implements RepositoryInit {
+    public static class Populate extends NoopRepositoryInit {
 
         protected static Populate self;
 
@@ -152,8 +151,8 @@ public class TestServiceWithCore extends PublisherTestCase {
         assertEquals(Populate.self.doc2Publish.getRef().toString(), publishedDocVersion.getSourceId());
 
         // check tree features about proxy detection
-        List<PublishedDocument> detectedProxies = tree.getExistingPublishedDocument(new DocumentLocationImpl(
-                publishedDocVersion));
+        List<PublishedDocument> detectedProxies = tree.getExistingPublishedDocument(
+                new DocumentLocationImpl(publishedDocVersion));
         assertTrue(detectedProxies.size() == 1);
 
         detectedProxies = tree.getPublishedDocumentInNode(nodes.get(0));
@@ -287,31 +286,27 @@ public class TestServiceWithCore extends PublisherTestCase {
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.publisher.core:OSGI-INF/publisher-remote-contrib-test.xml")
     public void testCleanUp() throws Exception {
-        RegistrationInfo ri = new DefaultRuntimeContext().deploy("OSGI-INF/publisher-remote-contrib-test.xml");
-        try {
+        PublisherServiceImpl service = (PublisherServiceImpl) Framework.getLocalService(PublisherService.class);
 
-            PublisherServiceImpl service = (PublisherServiceImpl) Framework.getLocalService(PublisherService.class);
+        assertEquals(0, service.getLiveTreeCount());
 
-            assertEquals(0, service.getLiveTreeCount());
+        // get a local tree
+        PublicationTree ltree = service.getPublicationTree("DefaultSectionsTree-default-domain", session, null);
+        assertEquals(1, service.getLiveTreeCount());
 
-            // get a local tree
-            PublicationTree ltree = service.getPublicationTree("DefaultSectionsTree-default-domain", session, null);
-            assertEquals(1, service.getLiveTreeCount());
+        // get a remote tree
+        PublicationTree rtree = service.getPublicationTree("ClientRemoteTree", session, null);
+        assertEquals(3, service.getLiveTreeCount());
 
-            // get a remote tree
-            PublicationTree rtree = service.getPublicationTree("ClientRemoteTree", session, null);
-            assertEquals(3, service.getLiveTreeCount());
+        // release local tree
+        ltree.release();
+        assertEquals(2, service.getLiveTreeCount());
 
-            // release local tree
-            ltree.release();
-            assertEquals(2, service.getLiveTreeCount());
+        // release remote tree
+        rtree.release();
+        assertEquals(0, service.getLiveTreeCount());
 
-            // release remote tree
-            rtree.release();
-            assertEquals(0, service.getLiveTreeCount());
-        } finally {
-            ri.getManager().unregister(ri);
-        }
     }
 }

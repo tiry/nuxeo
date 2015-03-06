@@ -19,38 +19,29 @@
  */
 package org.nuxeo.ecm.platform.usermanager;
 
-import java.util.Arrays;
-
 import javax.inject.Inject;
 
-import org.junit.After;
 import org.junit.runner.RunWith;
-import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.ecm.directory.sql.SQLDirectoryFeature;
+import org.nuxeo.runtime.test.NXRuntimeTestCase;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class) // to init properties for SQL datasources
-@Deploy({ "org.nuxeo.ecm.core.schema", //
-        "org.nuxeo.ecm.core.api", //
-        "org.nuxeo.ecm.core", //
-        "org.nuxeo.ecm.core.event", //
+@Features(SQLDirectoryFeature.class) // to init properties for SQL datasources
+@Deploy({
+        "org.nuxeo.ecm.core.cache", //
         "org.nuxeo.ecm.platform.usermanager.api", //
         "org.nuxeo.ecm.platform.usermanager", //
-        "org.nuxeo.ecm.directory.api", //
-        "org.nuxeo.ecm.directory", //
-        "org.nuxeo.ecm.directory.sql", //
-        "org.nuxeo.ecm.directory.types.contrib", //
         "org.nuxeo.ecm.platform.query.api", //
 })
-@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/usermanager-inmemory-cache-config.xml", //
-        "org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/userservice-config.xml", //
+@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager:test-usermanagerimpl/usermanager-inmemory-cache-config.xml", //
+        "org.nuxeo.ecm.platform.usermanager:test-usermanagerimpl/userservice-config.xml", //
+        "org.nuxeo.ecm.platform.usermanager:test-usermanagerimpl/directory-config.xml"
 })
-public abstract class UserManagerTestCase {
+public abstract class UserManagerTestCase extends NXRuntimeTestCase {
 
     @Inject
     protected UserManager userManager;
@@ -66,26 +57,5 @@ public abstract class UserManagerTestCase {
 //        fireFrameworkStarted();
     }
 
-    @After
-    public void cleanup() {
-        DocumentModelList users = userManager.searchUsers(null);
-        for (DocumentModel user : users) {
-            String userId = user.getId();
-            if (userId.equals(userManager.getAnonymousUserId())) {
-                continue;
-            }
-            if (userId.startsWith("Administrator")) {
-                // comes from a CSV
-                continue;
-            }
-            userManager.getPrincipal(userId); // init relation tables needed on delete
-            userManager.deleteUser(userId);
-        }
-        for (String groupId : Arrays.asList("group1", "group2", "group3")) {
-            if (userManager.getGroup(groupId) != null) {
-                userManager.deleteGroup(groupId);
-            }
-        }
-    }
 
 }

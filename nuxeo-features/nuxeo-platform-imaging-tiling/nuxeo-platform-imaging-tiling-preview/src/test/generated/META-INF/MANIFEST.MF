@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-imaging-tiling-previe
+ w.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-imaging-tilin
+ g-preview.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-imaging-tiling-prev
+ iew
+Import-Package: com.google.gwt.junit.client,org.nuxeo.ecm.platform.pictu
+ res.tiles.gwt.client.model
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.pictures.tiles.gwt.client
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

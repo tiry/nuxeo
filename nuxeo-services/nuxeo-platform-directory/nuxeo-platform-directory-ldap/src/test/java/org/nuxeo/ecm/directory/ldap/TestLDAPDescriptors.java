@@ -26,10 +26,7 @@ import java.util.Map;
 
 import javax.naming.directory.SearchControls;
 
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.nuxeo.common.xmap.XMap;
 import org.nuxeo.ecm.directory.DirectoryException;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
@@ -42,10 +39,7 @@ public class TestLDAPDescriptors extends NXRuntimeTestCase {
 
     protected LDAPServerDescriptor server2;
 
-    public static URL getResource(String resource) {
-        return Thread.currentThread().getContextClassLoader().getResource(resource);
-    }
-
+    @Override
     @Test
     public void setUp() throws Exception {
         super.setUp();

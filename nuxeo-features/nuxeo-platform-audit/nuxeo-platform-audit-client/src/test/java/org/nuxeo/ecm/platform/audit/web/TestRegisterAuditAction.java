@@ -21,32 +21,29 @@
 
 package org.nuxeo.ecm.platform.audit.web;
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import javax.inject.Inject;
 
+import org.junit.Test;
 import org.nuxeo.ecm.platform.actions.Action;
 import org.nuxeo.ecm.platform.actions.ActionService;
+import org.nuxeo.ecm.platform.actions.ejb.ActionManager;
+import org.nuxeo.ecm.webapp.WebappFeature;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
 
 /**
  * @author <a href="mailto:ja@nuxeo.com">Julien Anguenot</a>
  */
+@Features(WebappFeature.class)
+@Deploy("org.nuxeo.ecm.platform.audit.web")
 public class TestRegisterAuditAction extends NXRuntimeTestCase {
 
-    ActionService as;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployContrib("org.nuxeo.ecm.platform.audit.web.tests", "actions-bundle.xml");
-        deployContrib("org.nuxeo.ecm.platform.audit.web.tests", "nxauditclient-bundle.xml");
-        as = (ActionService) runtime.getComponent(ActionService.ID);
-    }
+    @Inject ActionManager as;
 
     @Test
     public void testRegistration() {
-        Action act1 = as.getActionRegistry().getAction("TAB_CONTENT_HISTORY");
+        Action act1 = ((ActionService)as).getActionRegistry().getAction("TAB_CONTENT_HISTORY");
 
         assertEquals("action.view.history", act1.getLabel());
         assertEquals("/icons/file.gif", act1.getIcon());

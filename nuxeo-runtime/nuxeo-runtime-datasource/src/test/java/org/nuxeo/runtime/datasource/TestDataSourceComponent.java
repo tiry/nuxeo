@@ -53,19 +53,13 @@ public class TestDataSourceComponent {
 
     private static final String XADATASOURCE_PG_CONTRIB = "org.nuxeo.runtime.datasource:xadatasource-pg-contrib.xml";
 
-    /** This directory will be deleted and recreated. */
-    private static final String DIRECTORY = "target/test/h2";
-
-    /** Property used in the datasource URL. */
-    private static final String PROP_NAME = "ds.test.home";
-
     private static final String COUNT_SQL = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SESSIONS";
 
     private static final String COUNT_SQL_PG = "SELECT COUNT(*) FROM PG_STAT_ACTIVITY";
 
     @Test
     public void testJNDIName() throws Exception {
-        assertEquals("java:comp/env/jdbc/foo", DataSourceHelper.getDataSourceJNDIName("foo"));
+        assertEquals("java:comp/jdbc/foo", DataSourceHelper.getDataSourceJNDIName("foo"));
     }
 
     protected static void checkDataSourceOk(String name, boolean autocommit) throws Exception {

@@ -35,12 +35,12 @@ import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
-import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.platform.mimetype.MimetypeDetectionException;
 import org.nuxeo.ecm.platform.mimetype.MimetypeNotFoundException;
 import org.nuxeo.ecm.platform.preview.adapter.MimeTypePreviewer;
 import org.nuxeo.ecm.platform.preview.adapter.PreviewAdapterManager;
 import org.nuxeo.ecm.platform.preview.api.HtmlPreviewAdapter;
+import org.nuxeo.ecm.webapp.WebappFeature;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
@@ -52,9 +52,9 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
  * @author tiry
  */
 @RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
+@Features(WebappFeature.class)
 @Deploy({ "org.nuxeo.ecm.platform.commandline.executor", "org.nuxeo.ecm.platform.convert",
-        "org.nuxeo.ecm.platform.preview", "org.nuxeo.ecm.platform.dublincore" })
+        "org.nuxeo.ecm.platform.preview"})
 public class TestService {
 
     @Test

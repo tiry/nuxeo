@@ -23,21 +23,16 @@ package org.nuxeo.runtime.services.event;
 
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.xmap.annotation.XNode;
 import org.nuxeo.common.xmap.annotation.XNodeList;
 import org.nuxeo.common.xmap.annotation.XObject;
+import org.nuxeo.runtime.RuntimeServiceException;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
 @XObject("listener")
 public class ListenerDescriptor {
-
-    private static final NullListener NULL_LISTENER = new NullListener();
-
-    private static final Log log = LogFactory.getLog(ListenerDescriptor.class);
 
     @XNodeList(value = "topic", type = String[].class, componentType = String.class)
     String[] topics;
@@ -49,8 +44,7 @@ public class ListenerDescriptor {
         try {
             listener = listenerClass.newInstance();
         } catch (ReflectiveOperationException e) {
-            log.error(e);
-            listener = NULL_LISTENER;
+            throw new RuntimeServiceException("Cannot load " + listenerClass, e);
         }
     }
 

@@ -59,7 +59,8 @@ public class AnnotationQueryTest {
 
     private final AnnotationQuery query = new AnnotationQuery();
 
-    private final AnnotationManager manager = new AnnotationManager();
+
+    protected final AnnotationManager manager = new AnnotationManager();
 
     @Test
     public void testgetAnnotationsForURIs() throws Exception {

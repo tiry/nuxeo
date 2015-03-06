@@ -1,0 +1,30 @@
+<configuration>
+
+
+	<define name="appname" class="org.nuxeo.runtime.logging.logback.LogbackAppNameProvider" />
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+	</appender>
+
+	<appender name="TRACE" class="ch.qos.logback.core.FileAppender">
+		<file>target/trace-${appname}.log</file>
+		<append>false</append>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg{%X}%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="info">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="TRACE" />
+	</root>
+
+	<logger name="org.nuxeo" level="trace" />
+
+</configuration>

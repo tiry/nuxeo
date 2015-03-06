@@ -79,7 +79,7 @@ public class ManagedConnectionImpl implements ManagedConnection, ManagedConnecti
      * List of listeners set by the application server which we must notify of all activity happening on our
      * {@link Connection}.
      */
-    private final ListenerList listeners;
+    private final ListenerList<ConnectionEventListener> listeners;
 
     /**
      * Creates a new physical connection to the underlying storage. Called by the {@link ManagedConnectionFactory} when
@@ -92,7 +92,7 @@ public class ManagedConnectionImpl implements ManagedConnection, ManagedConnecti
         out = managedConnectionFactory.getLogWriter();
         this.managedConnectionFactory = managedConnectionFactory;
         connections = new HashSet<ConnectionImpl>();
-        listeners = new ListenerList();
+        listeners = new ListenerList<>(ConnectionEventListener.class);
         // create the underlying session
         session = managedConnectionFactory.getConnection();
         xaresource = session.getXAResource();

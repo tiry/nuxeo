@@ -30,8 +30,10 @@ import org.nuxeo.ecm.core.api.DataModel;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
+import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.directory.Directory;
 import org.nuxeo.ecm.directory.DirectoryException;
+import org.nuxeo.ecm.directory.DirectoryServiceImpl;
 import org.nuxeo.ecm.directory.Session;
 import org.nuxeo.ecm.directory.api.DirectoryService;
 import org.nuxeo.ecm.platform.login.test.ClientLoginFeature;
@@ -40,6 +42,7 @@ import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
+import org.nuxeo.runtime.test.runner.RuntimeFeature;
 import org.nuxeo.runtime.test.runner.SimpleFeature;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
@@ -51,21 +54,36 @@ import com.google.inject.name.Names;
  * @since 6.0
  */
 @Features({ CoreFeature.class, ClientLoginFeature.class })
-@Deploy({ "org.nuxeo.ecm.directory.api", //
+@Deploy({ //
+        "org.nuxeo.ecm.directory.api", //
         "org.nuxeo.ecm.directory", //
         "org.nuxeo.ecm.core.schema", //
         "org.nuxeo.ecm.directory.types.contrib", //
         "org.nuxeo.ecm.directory.sql" })
-@LocalDeploy("org.nuxeo.ecm.directory.sql:nxdirectory-ds.xml")
+@LocalDeploy({ "org.nuxeo.ecm.directory.sql:test-sql-directories-schema-override.xml",
+        "org.nuxeo.ecm.directory.sql:test-sql-directories-bundle.xml" })
+@RepositoryConfig(cleanup=Granularity.METHOD)
 public class SQLDirectoryFeature extends SimpleFeature {
     public static final String USER_DIRECTORY_NAME = "userDirectory";
 
     public static final String GROUP_DIRECTORY_NAME = "groupDirectory";
 
     @Override
+    public void start(FeaturesRunner runner) throws Exception {
+        runner.getFeature(RuntimeFeature.class).getHarness().deployTestContrib("org.nuxeo.ecm.directory.sql",
+                "nxdirectory-ds.xml");
+        List<Directory> directories = ((DirectoryServiceImpl) Framework.getService(DirectoryService.class)).getDirectories();
+        for (Directory each:directories) {
+            each.getSession().close();
+        }
+    }
+
+    @Override
     public void configure(final FeaturesRunner runner, Binder binder) {
-        bindDirectory(binder, USER_DIRECTORY_NAME);
-        bindDirectory(binder, GROUP_DIRECTORY_NAME);
+        List<Directory> directories = ((DirectoryServiceImpl) Framework.getService(DirectoryService.class)).getDirectories();
+        for (Directory each:directories) {
+            bindDirectory(binder, each.getName());
+        }
     }
 
     protected void bindDirectory(Binder binder, final String name) {

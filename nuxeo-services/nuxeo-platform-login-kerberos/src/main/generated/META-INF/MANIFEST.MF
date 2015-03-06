@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Kerberos authentication
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-kerbero
+ s
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.ui.web.auth.krb5;uses:="javax.servlet.http,org.nuxeo.ecm.
+ platform.api.login,org.nuxeo.ecm.platform.ui.web.auth.interfaces";versi
+ on="0.0.0"
+Import-Package: javax.security.auth,javax.security.auth.login,javax.serv
+ let;version="[3.0,4)",javax.servlet.http;version="[3.0,4)",org.apache.c
+ ommons.codec.binary;version="[1.9,2)",org.apache.commons.logging;versio
+ n="[1.2,2)",org.ietf.jgss,org.nuxeo.ecm.platform.api.login;version="[0.
+ 0,1)",org.nuxeo.ecm.platform.ui.web.auth.interfaces;version="[0.0,1)",o
+ rg.nuxeo.ecm.platform.web.common.vh;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/Kerberos-authenticator-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.login,org.nuxeo.ecm.platform.web.
+ common
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

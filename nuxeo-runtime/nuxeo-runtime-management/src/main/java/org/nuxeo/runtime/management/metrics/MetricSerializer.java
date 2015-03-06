@@ -73,10 +73,12 @@ public class MetricSerializer implements MetricSerializerMXBean {
 
     @Override
     public void resetOutput() throws IOException {
+        closeOutput();
         if (file == null) {
             createTempFile();
+        } else {
+            file.delete();
         }
-        closeOutput();
         outputStream = new XStream().createObjectOutputStream(new FileWriter(file));
         for (String name : SimonManager.simonNames()) {
             SimonManager.getSimon(name).reset();
@@ -89,11 +91,11 @@ public class MetricSerializer implements MetricSerializerMXBean {
 
     @Override
     public void closeOutput() throws IOException {
-        if (outputStream == null) {
-            return;
+        if (outputStream != null) {
+            outputStream.close();
         }
-        outputStream.close();
         outputStream = null;
+        file = null;
     }
 
     private void createTempFile() throws IOException {

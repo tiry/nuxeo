@@ -21,18 +21,11 @@
 
 package org.nuxeo.ecm.core.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -58,13 +51,14 @@ import org.nuxeo.ecm.core.schema.types.Schema;
 import org.nuxeo.runtime.RuntimeService;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author Bogdan Stefanescu
  */
-// We're declaring variables as HashMaps / ArrayLists so they can be
-// Serializable
-@SuppressWarnings({ "CollectionDeclaredAsConcreteClass" })
+@Deploy({"org.nuxeo.ecm.core.schema","org.nuxeo.ecm.core.api"})
+@LocalDeploy("org.nuxeo.ecm.core.schema:OSGI-INF/test-propmodel-types-contrib.xml")
 public class TestPropertyModel extends NXRuntimeTestCase {
 
     protected RuntimeService runtime;
@@ -73,7 +67,7 @@ public class TestPropertyModel extends NXRuntimeTestCase {
 
     protected DocumentPartImpl dp;
 
-    static <T> ArrayList<T> arrayList(T... args) {
+    static <T> ArrayList<T> arrayList(@SuppressWarnings("unchecked") T... args) {
         ArrayList<T> list = new ArrayList<T>(args.length);
         list.addAll(Arrays.asList(args));
         return list;
@@ -183,11 +177,11 @@ public class TestPropertyModel extends NXRuntimeTestCase {
         }
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployContrib("org.nuxeo.ecm.core.api.tests", "OSGI-INF/test-propmodel-types-contrib.xml");
+
         SchemaManager mgr = Framework.getService(SchemaManager.class);
         // XSDLoader loader = new XSDLoader((SchemaManagerImpl) mgr);
         // schema = loader.loadSchema("test", "book",
@@ -269,11 +263,6 @@ public class TestPropertyModel extends NXRuntimeTestCase {
             return false;
         }
         return true;
-    }
-
-    // Duplicated from NXRuntimeTestCase
-    public static URL getResource(String resource) {
-        return Thread.currentThread().getContextClassLoader().getResource(resource);
     }
 
     @Test

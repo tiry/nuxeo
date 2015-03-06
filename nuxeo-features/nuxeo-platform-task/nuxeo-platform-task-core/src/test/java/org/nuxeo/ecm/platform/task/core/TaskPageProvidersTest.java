@@ -35,46 +35,24 @@ import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.NuxeoGroup;
 import org.nuxeo.ecm.core.api.NuxeoPrincipal;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
-import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.ecm.core.test.annotations.Granularity;
-import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.query.api.PageProvider;
 import org.nuxeo.ecm.platform.query.api.PageProviderService;
 import org.nuxeo.ecm.platform.task.TaskService;
 import org.nuxeo.ecm.platform.task.dashboard.DashBoardItem;
 import org.nuxeo.ecm.platform.task.providers.UserTaskPageProvider;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
-import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @since 5.4.2
  */
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.platform.content.template", //
-    "org.nuxeo.ecm.directory", //
-    "org.nuxeo.ecm.platform.usermanager", //
-    "org.nuxeo.ecm.directory.types.contrib", //
-    "org.nuxeo.ecm.directory.sql", //
-    "org.nuxeo.ecm.platform.task.core", //
-    "org.nuxeo.ecm.platform.task.testing", //
-})
-@LocalDeploy({
-    "org.nuxeo.ecm.platform.test:test-usermanagerimpl/directory-config.xml"    , //
-    "org.nuxeo.ecm.platform.query.api:OSGI-INF/pageprovider-framework.xml"    , //
-    "org.nuxeo.ecm.platform.task.core.test:OSGI-INF/pageproviders-contrib.xml"    , //
-})
-public class TaskPageProvidersTest {
+@LocalDeploy({ "org.nuxeo.ecm.platform.task.core:OSGI-INF/pageproviders-contrib.xml" })
+public class TaskPageProvidersTest extends TaskTestCase {
 
     @Inject
     protected CoreSession session;
@@ -116,8 +94,8 @@ public class TaskPageProvidersTest {
     public void testTaskPageProvider() throws Exception {
         Map<String, Serializable> properties = new HashMap<String, Serializable>();
         properties.put(UserTaskPageProvider.CORE_SESSION_PROPERTY, (Serializable) session);
-        PageProvider<DashBoardItem> taskProvider = (PageProvider<DashBoardItem>) ppService.getPageProvider(
-                "current_user_tasks", null, null, null, properties, (Object[]) null);
+        PageProvider<DashBoardItem> taskProvider = (PageProvider<DashBoardItem>) ppService
+                .getPageProvider("current_user_tasks", null, null, null, properties, (Object[]) null);
         List<DashBoardItem> tasks = taskProvider.getCurrentPage();
         assertNotNull(tasks);
         assertEquals(1, tasks.size());
@@ -158,8 +136,8 @@ public class TaskPageProvidersTest {
     public void testTaskPageProviderSorting() {
         Map<String, Serializable> properties = new HashMap<>();
         properties.put(UserTaskPageProvider.CORE_SESSION_PROPERTY, (Serializable) session);
-        PageProvider<DashBoardItem> taskProvider = (PageProvider<DashBoardItem>) ppService.getPageProvider(
-                "current_user_tasks_sort_asc", null, null, null, properties, (Object[]) null);
+        PageProvider<DashBoardItem> taskProvider = (PageProvider<DashBoardItem>) ppService
+                .getPageProvider("current_user_tasks_sort_asc", null, null, null, properties, (Object[]) null);
         List<DashBoardItem> tasks = taskProvider.getCurrentPage();
         assertNotNull(tasks);
         assertEquals("Test Task Name", tasks.get(0).getName());

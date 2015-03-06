@@ -20,7 +20,6 @@
 
 package org.nuxeo.ecm.core.security;
 
-import static org.nuxeo.ecm.core.CoreUTConstants.CORE_BUNDLE;
 import static org.nuxeo.ecm.core.CoreUTConstants.CORE_TESTS_BUNDLE;
 import static org.nuxeo.ecm.core.api.security.Access.DENY;
 import static org.nuxeo.ecm.core.api.security.Access.GRANT;
@@ -32,21 +31,18 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 
-import org.junit.Before;
+import javax.inject.Inject;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JUnit4Mockery;
-import org.junit.After;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
+import org.nuxeo.ecm.core.CoreTestCase;
 import org.nuxeo.ecm.core.api.Lock;
 import org.nuxeo.ecm.core.api.impl.UserPrincipal;
 import org.nuxeo.ecm.core.model.Document;
-import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
-public class TestSecurityPolicyService extends NXRuntimeTestCase {
+public class TestSecurityPolicyService extends CoreTestCase {
 
     static final String creator = "Bodie";
 
@@ -56,26 +52,10 @@ public class TestSecurityPolicyService extends NXRuntimeTestCase {
 
     static final Principal userPrincipal = new UserPrincipal("Bubbles", new ArrayList<String>(), false, false);
 
+    @Inject
     private SecurityPolicyService service;
 
     protected Mockery mockery = new JUnit4Mockery();
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployContrib(CORE_BUNDLE, "OSGI-INF/SecurityService.xml");
-        deployContrib(CORE_BUNDLE, "OSGI-INF/permissions-contrib.xml");
-        deployContrib(CORE_BUNDLE, "OSGI-INF/security-policy-contrib.xml");
-        service = Framework.getService(SecurityPolicyService.class);
-        assertNotNull(service);
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-        service = null;
-    }
 
     @Test
     public void testPolicies() throws Exception {

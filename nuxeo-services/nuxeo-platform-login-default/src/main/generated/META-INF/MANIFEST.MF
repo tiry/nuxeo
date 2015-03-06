@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Login Default Web Support
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-default
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .platform.login.web;uses:="org.nuxeo.ecm.platform.ui.web.auth,org.nuxeo
+ .ecm.platform.ui.web.auth.interfaces";version="0.0.0"
+Import-Package: javax.security.auth,javax.security.auth.login,org.nuxeo.
+ ecm.core.api.local;version="[0.0,1)",org.nuxeo.ecm.platform.api.login;v
+ ersion="[0.0,1)",org.nuxeo.ecm.platform.ui.web.auth;version="[0.0,1)",o
+ rg.nuxeo.ecm.platform.ui.web.auth.interfaces;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/auth-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

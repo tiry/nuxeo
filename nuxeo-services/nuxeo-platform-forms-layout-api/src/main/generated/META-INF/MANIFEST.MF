@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Forms Layout API Fragment
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-forms-layout-
+ api
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.forms.layout;version="0.0.0",org.nuxeo.ecm.platform.forms
+ .layout.api;version="0.0.0",org.nuxeo.ecm.platform.forms.layout.api.con
+ verters;uses:="org.nuxeo.ecm.platform.forms.layout.api";version="0.0.0"
+ ,org.nuxeo.ecm.platform.forms.layout.api.exceptions;version="0.0.0",org
+ .nuxeo.ecm.platform.forms.layout.api.impl;uses:="org.nuxeo.ecm.platform
+ .forms.layout.api";version="0.0.0",org.nuxeo.ecm.platform.forms.layout.
+ api.service;uses:="org.nuxeo.ecm.platform.forms.layout.api,org.nuxeo.ec
+ m.platform.forms.layout.api.converters";version="0.0.0",org.nuxeo.ecm.p
+ latform.forms.layout.functions;uses:="org.nuxeo.ecm.platform.forms.layo
+ ut.api";version="0.0.0"
+Import-Package: org.nuxeo.ecm.platform.forms.layout.api,org.nuxeo.ecm.pl
+ atform.forms.layout.api.converters,org.nuxeo.ecm.platform.forms.layout.
+ api.service,org.nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

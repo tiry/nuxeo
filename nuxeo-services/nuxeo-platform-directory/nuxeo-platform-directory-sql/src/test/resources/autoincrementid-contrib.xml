@@ -13,7 +13,7 @@
 
       <schema>intIdSchema</schema>
       <dataSource>java:/nxsqldirectory</dataSource>
-      <table>users</table>
+      <table>intid</table>
       <idField>id</idField>
       <autoincrementIdField>true</autoincrementIdField> <!-- what we test -->
       <createTablePolicy>always</createTablePolicy>

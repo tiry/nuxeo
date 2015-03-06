@@ -47,18 +47,23 @@ import org.nuxeo.ecm.platform.relations.api.util.RelationConstants;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.relations.api", //
-        "org.nuxeo.ecm.relations", //
-        "org.nuxeo.ecm.relations.jena", //
-        "org.nuxeo.ecm.relations.core.listener", //
-        "org.nuxeo.ecm.platform.comment.api", //
-        "org.nuxeo.ecm.platform.comment", //
-        "org.nuxeo.ecm.platform.relations.core.listener.tests", //
+@Deploy({
+    "org.nuxeo.ecm.platform.content.template",//
+    "org.nuxeo.ecm.relations.api", //
+    "org.nuxeo.ecm.relations", //
+    "org.nuxeo.ecm.relations.jena", //
+    "org.nuxeo.ecm.platform.notification.api", //
+    "org.nuxeo.ecm.platform.notification.core", //
+    "org.nuxeo.ecm.platform.comment.api", //
+    "org.nuxeo.ecm.platform.comment", //
+    "org.nuxeo.ecm.relations.core.listener", //
 })
+@LocalDeploy("org.nuxeo.ecm.relations.core.listener:test-relation-jena-contrib.xml")
 public class TestPublishRelationsListener {
 
     protected static final Resource conformsTo = new ResourceImpl("http://purl.org/dc/terms/ConformsTo");

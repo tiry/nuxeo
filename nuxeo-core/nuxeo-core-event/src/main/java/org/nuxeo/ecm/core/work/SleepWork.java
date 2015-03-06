@@ -142,6 +142,7 @@ public class SleepWork extends AbstractWork {
             doneLatch.countDown();
             finishLatch.await();
         }
+        return;
     }
 
     @Override

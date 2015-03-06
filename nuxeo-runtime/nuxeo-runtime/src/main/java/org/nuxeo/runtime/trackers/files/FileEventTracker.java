@@ -17,6 +17,7 @@ package org.nuxeo.runtime.trackers.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,8 +27,6 @@ import org.apache.commons.io.FileDeleteStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.xmap.annotation.XObject;
-import org.nuxeo.runtime.RuntimeServiceEvent;
-import org.nuxeo.runtime.RuntimeServiceListener;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
@@ -105,6 +104,17 @@ public class FileEventTracker extends DefaultComponent {
         public void onFile(File file, Object marker) {
             delegate.track(file, marker, deleteStrategy);
         }
+
+        void exit() {
+            File file = new File("");
+            delegate.track(file, file);
+            WeakReference<File> ref = new WeakReference<>(file);
+            file = null;
+            while(ref.get() != null) {
+                System.gc();
+            }
+            delegate.exitWhenFinished();
+        }
     }
 
     protected class ThreadDelegate implements FileEventHandler {
@@ -181,29 +191,27 @@ public class FileEventTracker extends DefaultComponent {
     @Override
     public void applicationStarted(ComponentContext context) {
         resetThreadDelegate();
-        Framework.addListener(new RuntimeServiceListener() {
-
-            @Override
-            public void handleEvent(RuntimeServiceEvent event) {
-                if (event.id != RuntimeServiceEvent.RUNTIME_ABOUT_TO_STOP) {
-                    return;
-                }
-                Framework.removeListener(this);
-                setThreadDelegate(false);
-            }
-        });
     }
 
     @Override
     public void deactivate(ComponentContext context) {
-        resetThreadDelegate();
-        if (Framework.getService(EventService.class) != null) {
-            if (threadsListener.isInstalled()) {
-                threadsListener.uninstall();
+        try {
+            try {
+                if (isThreadDelegateInstalled()) {
+                    resetThreadDelegate();
+                }
+            } finally {
+                if (Framework.getService(EventService.class) != null) {
+                    if (threadsListener.isInstalled()) {
+                        threadsListener.uninstall();
+                    }
+                    filesListener.uninstall();
+                }
+                gc.exit();
             }
-            filesListener.uninstall();
+        } finally {
+            self = null;
         }
-        self = null;
         super.deactivate(context);
     }
 
@@ -225,8 +233,12 @@ public class FileEventTracker extends DefaultComponent {
         return actual;
     }
 
+    protected boolean isThreadDelegateInstalled() {
+        return threads.get() != null;
+    }
+
     protected void setThreadDelegate(boolean isLongRunning) {
-        if (threads.get() != null) {
+        if (isThreadDelegateInstalled()) {
             throw new IllegalStateException("Thread delegate already installed");
         }
         threads.set(new ThreadDelegate(isLongRunning));

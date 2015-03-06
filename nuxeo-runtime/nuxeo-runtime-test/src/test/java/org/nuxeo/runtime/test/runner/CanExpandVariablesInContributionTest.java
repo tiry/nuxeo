@@ -42,7 +42,7 @@ public class CanExpandVariablesInContributionTest {
     @Before
     public void deployComponent() throws Exception {
         RuntimeContext ctx = runtime.getContext();
-        System.setProperty("nuxeo.test.domain", "test");
+        Framework.getProperties().setProperty("nuxeo.test.domain", "test");
         Framework.getProperties().setProperty("nuxeo.test.contrib", "contrib");
         InlineRef contribRef = new InlineRef("test", "<component name=\"${nuxeo.test.domain}:${nuxeo.test.contrib}\"/>");
         ctx.deploy(contribRef);

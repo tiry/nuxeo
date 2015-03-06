@@ -21,48 +21,58 @@
 
 package org.nuxeo.runtime.osgi;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
+import java.net.JarURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.nuxeo.common.Environment;
-import org.nuxeo.common.codec.CryptoProperties;
-import org.nuxeo.common.utils.FileUtils;
+import org.nuxeo.common.LoaderConstants;
+import org.nuxeo.common.trycompanion.Try;
+import org.nuxeo.common.trycompanion.TryCompanion;
+import org.nuxeo.common.utils.ExceptionUtils;
 import org.nuxeo.common.utils.TextTemplate;
-import org.nuxeo.runtime.AbstractRuntimeService;
 import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.Version;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentName;
 import org.nuxeo.runtime.model.RegistrationInfo;
 import org.nuxeo.runtime.model.RuntimeContext;
+import org.nuxeo.runtime.model.impl.AbstractRuntimeService;
 import org.nuxeo.runtime.model.impl.ComponentPersistence;
 import org.nuxeo.runtime.model.impl.RegistrationInfoImpl;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.namespace.extender.ExtenderNamespace;
 
 /**
  * The default implementation of NXRuntime over an OSGi compatible environment.
@@ -92,58 +102,59 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
 
     public static final Version VERSION = Version.parseString("1.4.0");
 
-    private static final Log log = LogFactory.getLog(OSGiRuntimeService.class);
+    private final Log log = LogFactory.getLog(OSGiRuntimeService.class);
 
-    private final BundleContext bundleContext;
+    protected final BundleContext bundleContext;
 
-    private final Map<String, RuntimeContext> contexts;
+    protected boolean appStarted = false;
 
-    private boolean appStarted = false;
+    protected final String name;
 
     /**
      * OSGi doesn't provide a method to lookup bundles by symbolic name. This table is used to map symbolic names to
      * bundles. This map is not handling bundle versions.
      */
-    final Map<String, Bundle> bundles;
+    protected final Map<String, Bundle> bundlesByName = new ConcurrentHashMap<String, Bundle>();
 
-    final ComponentPersistence persistence;
+    protected final ComponentPersistence persistence;
+
+    protected static Map<String, String> toMap(Dictionary<?, ?> dict) {
+        if (dict == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> map = new HashMap<String, String>();
+        Enumeration<?> keys = dict.keys();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            map.put(key.toString(), dict.get(key).toString());
+        }
+        return map;
+    }
 
     public OSGiRuntimeService(BundleContext context) {
         this(new OSGiRuntimeContext(context.getBundle()), context);
     }
 
     public OSGiRuntimeService(OSGiRuntimeContext runtimeContext, BundleContext context) {
-        super(runtimeContext);
+        super(runtimeContext, Environment.getDefault().getProperties());
+        runtimeContext.register(this);
         bundleContext = context;
-        bundles = new ConcurrentHashMap<>();
-        contexts = new ConcurrentHashMap<>();
-        String bindAddress = context.getProperty(PROP_NUXEO_BIND_ADDRESS);
-        if (bindAddress != null) {
-            properties.put(PROP_NUXEO_BIND_ADDRESS, bindAddress);
+        name = getProperty(LoaderConstants.APP_NAME, NAME);
+        setProperty(OSGiRuntimeService.PROP_HOME_DIR,
+                getProperty(OSGiRuntimeService.PROP_HOME_DIR, getProperty(LoaderConstants.HOME_DIR)));
+        URL configLocation = context.getBundle().getResource("/OSGI-INF/nuxeo.properties");
+        if (configLocation != null) {
+            setProperty(OSGiRuntimeService.PROP_CONFIG_DIR, configLocation.toExternalForm());
         }
-        String homeDir = getProperty(PROP_HOME_DIR);
-        log.debug("Home directory: " + homeDir);
-        if (homeDir != null) {
-            workingDir = new File(homeDir);
-        } else {
-            workingDir = bundleContext.getDataFile("/");
-        }
-        // environment may not be set by some bootstrappers (like tests) - we create it now if not yet created
-        Environment env = Environment.getDefault();
-        if (env == null) {
-            env = new Environment(workingDir);
-            Environment.setDefault(env);
-            env.setServerHome(workingDir);
-            env.init();
-        }
+        workingDir = Environment.getDefault().getHome();
+        log.debug("Home directory: " + workingDir);
         workingDir.mkdirs();
         persistence = new ComponentPersistence(this);
-        log.debug("Working directory: " + workingDir);
     }
 
     @Override
     public String getName() {
-        return NAME;
+        return name;
     }
 
     @Override
@@ -157,115 +168,80 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
 
     @Override
     public Bundle getBundle(String symbolicName) {
-        return bundles.get(symbolicName);
+        return bundlesByName.get(symbolicName);
     }
 
     public Map<String, Bundle> getBundlesMap() {
-        return bundles;
+        return bundlesByName;
     }
 
     public ComponentPersistence getComponentPersistence() {
         return persistence;
     }
 
-    public synchronized RuntimeContext createContext(Bundle bundle) {
-        RuntimeContext ctx = contexts.get(bundle.getSymbolicName());
-        if (ctx == null) {
-            // workaround to handle fragment bundles
-            ctx = new OSGiRuntimeContext(bundle);
-            contexts.put(bundle.getSymbolicName(), ctx);
-            loadComponents(bundle, ctx);
+    public OSGiRuntimeContext getOrCreateContext(Bundle bundle) throws RuntimeServiceException {
+        OSGiRuntimeContext ctx = getContext(bundle);
+        if (ctx != null) {
+            return ctx;
         }
+        if (bundle.equals(runtimeContext.getBundle())) {
+            ctx = (OSGiRuntimeContext) runtimeContext;
+            if (ctx.isActivated()) {
+                return ctx;
+            }
+        } else {
+            ctx = new OSGiRuntimeContext(bundle);
+        }
+        ctx.register(this);
         return ctx;
     }
 
-    public synchronized void destroyContext(Bundle bundle) {
-        RuntimeContext ctx = contexts.remove(bundle.getSymbolicName());
-        if (ctx != null) {
-            ctx.destroy();
-        }
-    }
-
-    public synchronized RuntimeContext getContext(Bundle bundle) {
-        return contexts.get(bundle.getSymbolicName());
-    }
-
-    public synchronized RuntimeContext getContext(String symbolicName) {
-        return contexts.get(symbolicName);
+    public OSGiRuntimeContext getContext(Bundle bundle) {
+        return (OSGiRuntimeContext) getContext(bundle.getSymbolicName());
     }
 
     @Override
     protected void doStart() {
+        super.doStart();
+        runtimeContext.activate();
         bundleContext.addFrameworkListener(this);
         try {
             loadConfig();
-        } catch (IOException e) {
-            throw new RuntimeServiceException(e);
-        }
-        // load configuration if any
-        loadComponents(bundleContext.getBundle(), context);
+        } catch (IOException | BundleException cause) {
+            throw new RuntimeException("Cannot load configuration", cause);
+        } // load configuration if any
     }
 
     @Override
     protected void doStop() {
         bundleContext.removeFrameworkListener(this);
+        super.doStop();
+        runtimeContext.destroy();
+    }
+
+    @Override
+    public void reloadProperties() {
+        super.reloadProperties();
         try {
-            super.doStop();
-        } finally {
-            context.destroy();
+            loadConfig();
+        } catch (IOException | BundleException cause) {
+            throw new RuntimeServiceException("Cannot reload config", cause);
         }
     }
 
-    protected void loadComponents(Bundle bundle, RuntimeContext ctx) {
-        String list = getComponentsList(bundle);
-        String name = bundle.getSymbolicName();
-        log.debug("Bundle: " + name + " components: " + list);
-        if (list == null) {
-            return;
-        }
-        StringTokenizer tok = new StringTokenizer(list, ", \t\n\r\f");
-        while (tok.hasMoreTokens()) {
-            String path = tok.nextToken();
-            URL url = bundle.getEntry(path);
-            log.debug("Loading component for: " + name + " path: " + path + " url: " + url);
-            if (url != null) {
-                try {
-                    ctx.deploy(url);
-                } catch (IOException e) {
-                    // just log error to know where is the cause of the exception
-                    log.error("Error deploying resource: " + url);
-                    Framework.handleDevError(e);
-                    throw new RuntimeServiceException("Cannot deploy: " + url, e);
-                }
-            } else {
-                String message = "Unknown component '" + path + "' referenced by bundle '" + name + "'";
-                log.error(message + ". Check the MANIFEST.MF");
-                Framework.handleDevError(null);
-                warnings.add(message);
-            }
-        }
-    }
-
-    public static String getComponentsList(Bundle bundle) {
-        return (String) bundle.getHeaders().get("Nuxeo-Component");
-    }
-
-    protected boolean loadConfigurationFromProvider() throws IOException {
-        // TODO use a OSGi service for this.
-        Iterable<URL> provider = Environment.getDefault().getConfigurationProvider();
-        if (provider == null) {
-            return false;
-        }
-        Iterator<URL> it = provider.iterator();
-        ArrayList<URL> props = new ArrayList<>();
-        ArrayList<URL> xmls = new ArrayList<>();
-        while (it.hasNext()) {
-            URL url = it.next();
+    // TODO use a OSGi service for this.
+    protected void loadConfigurationFromProvider(RuntimeContext context, Iterable<URL> provider) throws IOException {
+        List<URL> blacklists = new ArrayList<URL>();
+        List<URL> props = new ArrayList<URL>();
+        List<URL> xmls = new ArrayList<URL>();
+        for (URL url : provider) {
             String path = url.getPath();
-            if (path.endsWith("-config.xml")) {
+            if (path.endsWith(".xml")) {
                 xmls.add(url);
             } else if (path.endsWith(".properties")) {
                 props.add(url);
+            } else if (path.endsWith("blacklist")) {
+                blacklists.add(url);
             }
         }
         Comparator<URL> comp = new Comparator<URL>() {
@@ -274,99 +250,56 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
                 return o1.getPath().compareTo(o2.getPath());
             }
         };
-        Collections.sort(xmls, comp);
+        loadBlacklists(blacklists, comp);
+        loadProperties(props, comp);
+        loadComponents(context, xmls, comp);
+    }
+
+    protected void loadProperties(List<URL> props, Comparator<URL> comp) throws IOException {
+        Collections.sort(props, comp);
         for (URL url : props) {
-            loadProperties(url);
+            loadProperties(url.openStream());
         }
-        for (URL url : xmls) {
-            context.deploy(url);
-        }
-        return true;
     }
 
-    protected void loadConfig() throws IOException {
+    protected void loadComponents(RuntimeContext context, List<URL> urls, Comparator<URL> comp) {
+        Collections.sort(urls, comp);
+        for (URL url : urls) {
+            try {
+                context.deploy(url);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Cannot load config from " + url, e);
+            }
+        }
+    }
+
+    protected void loadBlacklists(List<URL> blacklists, Comparator<URL> comp) {
+        Function<URL, BufferedReader> opener = url -> {
+            try {
+                return new BufferedReader(new InputStreamReader(url.openStream()));
+            } catch (IOException cause) {
+                return null;
+            }
+        };
+        manager.setBlacklist(blacklists.stream()
+                .sorted(comp)
+                .map(opener)
+                .filter(reader -> reader != null)
+                .flatMap(reader -> reader.lines())
+                .collect(Collectors.toSet()));
+    }
+
+    protected void loadConfig() throws IOException, BundleException {
         Environment env = Environment.getDefault();
-        if (env != null) {
-            log.debug("Configuration: host application: " + env.getHostApplicationName());
-        } else {
-            log.warn("Configuration: no host application");
-            return;
+        log.info("Configuration: host application: " + env.getHostApplicationName());
+
+        Iterable<URL> provider = Environment.getDefault().getConfigurationProvider();
+        if (provider != null) {
+            loadConfigurationFromProvider(runtimeContext, provider);
         }
-
-        File blacklistFile = new File(env.getConfig(), "blacklist");
-        if (blacklistFile.isFile()) {
-            List<String> lines = FileUtils.readLines(blacklistFile);
-            Set<String> blacklist = new HashSet<>();
-            for (String line : lines) {
-                line = line.trim();
-                if (line.length() > 0) {
-                    blacklist.add(line);
-                }
-            }
-            manager.setBlacklist(new HashSet<>(lines));
-        }
-
-        if (loadConfigurationFromProvider()) {
-            return;
-        }
-
-        String configDir = bundleContext.getProperty(PROP_CONFIG_DIR);
-        if (configDir != null && configDir.contains(":/")) { // an url of a config file
-            log.debug("Configuration: " + configDir);
-            URL url = new URL(configDir);
-            log.debug("Configuration:   loading properties url: " + configDir);
-            loadProperties(url);
-            return;
-        }
-
-        // TODO: in JBoss there is a deployer that will deploy nuxeo
-        // configuration files ..
-        boolean isNotJBoss4 = !isJBoss4(env);
-
-        File dir = env.getConfig();
-        // File dir = new File(configDir);
-        String[] names = dir.list();
-        if (names != null) {
-            Arrays.sort(names, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    return o1.compareToIgnoreCase(o2);
-                }
-            });
-            printDeploymentOrderInfo(names);
-            for (String name : names) {
-                if (name.endsWith("-config.xml") || name.endsWith("-bundle.xml")) {
-                    // TODO because of some dep bugs (regarding the deployment of demo-ds.xml), we cannot let the
-                    // runtime deploy config dir at beginning...
-                    // until fixing this we deploy config dir from NuxeoDeployer
-                    if (isNotJBoss4) {
-                        File file = new File(dir, name);
-                        log.debug("Configuration: deploy config component: " + name);
-                        try {
-                            context.deploy(file.toURI().toURL());
-                        } catch (IOException e) {
-                            throw new IllegalArgumentException("Cannot load config from " + file, e);
-                        }
-                    }
-                } else if (name.endsWith(".config") || name.endsWith(".ini") || name.endsWith(".properties")) {
-                    File file = new File(dir, name);
-                    log.debug("Configuration: loading properties: " + name);
-                    loadProperties(file);
-                } else {
-                    log.debug("Configuration: ignoring: " + name);
-                }
-            }
-        } else if (dir.isFile()) { // a file - load it
-            log.debug("Configuration: loading properties: " + dir);
-            loadProperties(dir);
-        } else {
-            log.debug("Configuration: no configuration file found");
-        }
-
-        loadDefaultConfig();
     }
 
-    protected static void printDeploymentOrderInfo(String[] fileNames) {
+    protected void printDeploymentOrderInfo(String[] fileNames) {
         if (log.isDebugEnabled()) {
             StringBuilder buf = new StringBuilder();
             for (String fileName : fileNames) {
@@ -374,70 +307,6 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
             }
             log.debug("Deployment order of configuration files: " + buf.toString());
         }
-    }
-
-    @Override
-    public void reloadProperties() throws IOException {
-        File dir = Environment.getDefault().getConfig();
-        String[] names = dir.list();
-        if (names != null) {
-            Arrays.sort(names, new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    return o1.compareToIgnoreCase(o2);
-                }
-            });
-            CryptoProperties props = new CryptoProperties(System.getProperties());
-            for (String name : names) {
-                if (name.endsWith(".config") || name.endsWith(".ini") || name.endsWith(".properties")) {
-                    FileInputStream in = new FileInputStream(new File(dir, name));
-                    try {
-                        props.load(in);
-                    } finally {
-                        in.close();
-                    }
-                }
-            }
-            // replace the current runtime properties
-            properties = props;
-        }
-    }
-
-    /**
-     * Loads default properties.
-     * <p>
-     * Used for backward compatibility when adding new mandatory properties
-     * </p>
-     */
-    protected void loadDefaultConfig() {
-        String varName = "org.nuxeo.ecm.contextPath";
-        if (Framework.getProperty(varName) == null) {
-            properties.setProperty(varName, "/nuxeo");
-        }
-    }
-
-    public void loadProperties(File file) throws IOException {
-        InputStream in = new BufferedInputStream(new FileInputStream(file));
-        try {
-            loadProperties(in);
-        } finally {
-            in.close();
-        }
-    }
-
-    public void loadProperties(URL url) throws IOException {
-        InputStream in = url.openStream();
-        try {
-            loadProperties(in);
-        } finally {
-            if (in != null) {
-                in.close();
-            }
-        }
-    }
-
-    public void loadProperties(InputStream in) throws IOException {
-        properties.load(in);
     }
 
     /**
@@ -477,58 +346,182 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
         }.processText(expression);
     }
 
-    protected void notifyComponentsOnStarted() {
-        List<RegistrationInfo> ris = new ArrayList<>(manager.getRegistrations());
-        Collections.sort(ris, new RIApplicationStartedComparator());
-        for (RegistrationInfo ri : ris) {
-            try {
-                ri.notifyApplicationStarted();
-            } catch (RuntimeException e) {
-                log.error("Failed to notify component '" + ri.getName() + "' on application started", e);
+    protected void notifyComponentsOnStarted() throws RuntimeServiceException {
+        Map<Integer, Set<RegistrationInfo>> index = new TreeMap<>();
+        manager.getRegistrations().stream().forEach(ri -> {
+            Integer level = Integer.valueOf(ri.getApplicationStartedOrder());
+            if (!index.containsKey(level)) {
+                index.put(level, new HashSet<RegistrationInfo>());
             }
+            index.get(level).add(ri);
+        });
+        for (Integer level : index.keySet()) {
+            try {
+                TryCompanion.<Void> of(RuntimeServiceException.class)
+                        .forEachAndCollect(index.get(level).stream(), RegistrationInfo::notifyApplicationStarted)
+                        .orElseThrow(() -> new RuntimeServiceException("Caught errors at level " + level));
+            } catch (RuntimeServiceException errors) {
+                log.error(errors.getMessage(), errors);
+            }
+        }
+    }
+
+    protected static class CompoundEnumerationBuilder {
+
+        protected final ArrayList<Enumeration<URL>> collected = new ArrayList<Enumeration<URL>>();
+
+        public CompoundEnumerationBuilder add(Enumeration<URL> e) {
+            collected.add(e);
+            return this;
+        }
+
+        public Enumeration<URL> build() {
+            return new CompoundEnumeration<URL>(collected);
+        }
+
+    }
+
+    protected static class CompoundEnumeration<E> implements Enumeration<E> {
+
+        protected final Iterator<Enumeration<E>> enums;
+
+        @SafeVarargs
+        public CompoundEnumeration(Enumeration<E>... enums) {
+            this(new Iterator<Enumeration<E>>() {
+
+                int index = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return index < enums.length;
+                }
+
+                @Override
+                public Enumeration<E> next() {
+                    if (index >= enums.length) {
+                        throw new NoSuchElementException();
+                    }
+                    return enums[index++];
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+
+            });
+        }
+
+        public CompoundEnumeration(Iterable<Enumeration<E>> enums) {
+            this(enums.iterator());
+        }
+
+        public CompoundEnumeration(Iterator<Enumeration<E>> enums) {
+            this.enums = enums;
+        }
+
+        Enumeration<E> current;
+
+        @Override
+        public boolean hasMoreElements() {
+            if (current != null && current.hasMoreElements()) {
+                return true;
+            }
+            while (enums.hasNext()) {
+                current = enums.next();
+                if (current.hasMoreElements()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public E nextElement() {
+            return current.nextElement();
+        }
+
+    }
+
+    protected static class BundleConfigurationProvider implements Iterable<URL> {
+        protected final Bundle bundle;
+
+        protected BundleConfigurationProvider(Bundle bundle) {
+            this.bundle = bundle;
+        }
+
+        @Override
+        public Iterator<URL> iterator() {
+            CompoundEnumerationBuilder builder = new CompoundEnumerationBuilder();
+            builder.add(bundle.findEntries("/", "*.properties", true));
+            builder.add(bundle.findEntries("/", "*-config.xml", true));
+            builder.add(bundle.findEntries("/", "*-bundle.xml", true));
+            final Enumeration<URL> entries = builder.build();
+            return new Iterator<URL>() {
+
+                @Override
+                public boolean hasNext() {
+                    return entries.hasMoreElements();
+                }
+
+                @Override
+                public URL next() {
+                    return entries.nextElement();
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+
+            };
+
         }
     }
 
     protected static class RIApplicationStartedComparator implements Comparator<RegistrationInfo> {
         @Override
         public int compare(RegistrationInfo r1, RegistrationInfo r2) {
-            int cmp = Integer.compare(r1.getApplicationStartedOrder(), r2.getApplicationStartedOrder());
-            if (cmp == 0) {
-                // fallback on name order, to be deterministic
-                cmp = r1.getName().getName().compareTo(r2.getName().getName());
-            }
-            return cmp;
+            return r1.getApplicationStartedOrder() - r2.getApplicationStartedOrder();
         }
     }
 
-    public void fireApplicationStarted() {
-        synchronized (this) {
-            if (appStarted) {
-                return;
-            }
-            appStarted = true;
+    public void fireApplicationStarted() throws RuntimeServiceException {
+        TryCompanion.<Void> of(RuntimeServiceException.class)
+                .empty()
+                .consume(self -> handleApplicationStarted(self))
+                .run(() -> notifyComponentsOnStarted())
+                .peek(self -> printStatusMessage())
+                .orElseThrow(() -> new RuntimeServiceException("Caught errors while handling application started"));
+    }
+
+    protected Try<Void> handleApplicationStarted(Try<Void> companion) {
+        if (appStarted) {
+            return companion;
         }
-        try {
-            persistence.loadPersistedComponents();
-        } catch (RuntimeException | IOException e) {
-            log.error("Failed to load persisted components", e);
-        }
-        // deploy a fake component that is marking the end of startup
-        // XML components that needs to be deployed at the end need to put a
-        // requirement
-        // on this marker component
-        deployFrameworkStartedComponent();
-        notifyComponentsOnStarted();
-        // print the startup message
-        printStatusMessage();
+        appStarted = true;
+        return companion
+                .run(() -> persistence.loadPersistedComponents())
+                .run(() -> deployFrameworkStartedComponent());
+
     }
 
     /* --------------- FrameworkListener API ------------------ */
 
+    int startlevel = 0;
+
     @Override
     public void frameworkEvent(FrameworkEvent event) {
-        if (event.getType() == FrameworkEvent.STARTED) {
+        int type = event.getType();
+        if (type == FrameworkEvent.STARTED) {
             fireApplicationStarted();
+            startlevel = bundleContext.getBundle().adapt(FrameworkStartLevel.class).getStartLevel();
+        } else if (type == FrameworkEvent.STARTLEVEL_CHANGED) {
+            int newlevel = bundleContext.getBundle().adapt(FrameworkStartLevel.class).getStartLevel();
+            if (newlevel > startlevel) {
+                startlevel = newlevel;
+                fireApplicationStarted();
+            }
         }
     }
 
@@ -540,34 +533,26 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
         } else {
             log.error(msg);
         }
-    }
+   }
 
-    protected void deployFrameworkStartedComponent() {
+    protected void deployFrameworkStartedComponent() throws RuntimeServiceException {
         RegistrationInfoImpl ri = new RegistrationInfoImpl(FRAMEWORK_STARTED_COMP);
-        ri.setContext(context);
+        ri.setContext(runtimeContext);
         // this will register any pending components that waits for the
         // framework to be started
         manager.register(ri);
     }
 
     public Bundle findHostBundle(Bundle bundle) {
-        String hostId = (String) bundle.getHeaders().get(Constants.FRAGMENT_HOST);
-        log.debug("Looking for host bundle: " + bundle.getSymbolicName() + " host id: " + hostId);
-        if (hostId != null) {
-            int p = hostId.indexOf(';');
-            if (p > -1) { // remove version or other extra information if any
-                hostId = hostId.substring(0, p);
-            }
-            RuntimeContext ctx = contexts.get(hostId);
-            if (ctx != null) {
-                log.debug("Context was found for host id: " + hostId);
-                return ctx.getBundle();
-            } else {
-                log.warn("No context found for host id: " + hostId);
-
-            }
+        String hostId = bundle.getHeaders().get(Constants.FRAGMENT_HOST);
+        if (hostId == null) {
+            return bundle;
         }
-        return null;
+        int p = hostId.indexOf(';');
+        if (p > -1) { // remove version or other extra information if any
+            hostId = hostId.substring(0, p);
+        }
+        return bundlesByName.get(hostId);
     }
 
     protected File getEclipseBundleFileUsingReflection(Bundle bundle) {
@@ -584,40 +569,35 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
             Field fileField = entry.getClass().getDeclaredField("file");
             fileField.setAccessible(true);
             return (File) fileField.get(entry);
-        } catch (ReflectiveOperationException e) {
-            log.error("Cannot access to eclipse bundle system files of " + bundle.getSymbolicName());
-            return null;
+        } catch (Exception cause) {
+            ExceptionUtils.checkInterrupt(cause);
+            throw new RuntimeServiceException(
+                    "Cannot access to eclipse bundle system files of " + bundle.getSymbolicName(), cause);
         }
     }
 
     @Override
     public File getBundleFile(Bundle bundle) {
-        File file;
-        String location = bundle.getLocation();
         String vendor = Framework.getProperty(Constants.FRAMEWORK_VENDOR);
-        String name = bundle.getSymbolicName();
-
         if ("Eclipse".equals(vendor)) { // equinox framework
-            log.debug("getBundleFile (Eclipse): " + name + "->" + location);
             return getEclipseBundleFileUsingReflection(bundle);
-        } else if (location.startsWith("file:")) { // nuxeo osgi adapter
-            try {
-                file = FileUtils.urlToFile(location);
-            } catch (MalformedURLException e) {
-                log.error("getBundleFile: Unable to create " + " for bundle: " + name + " as URI: " + location);
-                return null;
+        }
+        String location = bundle.getLocation();
+        try {
+            URL url = new URL(bundle.getLocation());
+            String scheme = url.getProtocol();
+            if ("file".equals(scheme)) {
+                return Paths.get(url.toURI()).toFile();
             }
-        } else { // may be a file path - this happens when using
-            // JarFileBundle (for ex. in nxshell)
-            file = new File(location);
+            if ("jar".equals(scheme)) {
+                JarURLConnection connection = (JarURLConnection) url.openConnection();
+                return new File(connection.getJarFileURL().toURI());
+            }
+        } catch (URISyntaxException | IOException cause) {
+            throw new RuntimeServiceException("Cannot handle " + location, cause);
         }
-        if (file != null && file.exists()) {
-            log.debug("getBundleFile: " + name + " bound to file: " + file);
-            return file;
-        } else {
-            log.debug("getBundleFile: " + name + " cannot bind to nonexistent file: " + file);
-            return null;
-        }
+
+        throw new RuntimeServiceException("Unknown " + location + ", cannot locate file");
     }
 
     public static final boolean isJBoss4(Environment env) {
@@ -630,6 +610,21 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
             return false;
         }
         return "JBoss".equals(hn) && hv.startsWith("4");
+    }
+
+    protected void addWarning(String message) {
+        warnings.add(message);
+    }
+
+    public OSGiRuntimeContext installBundle(Bundle bundle) throws RuntimeServiceException {
+        if (!bundle.adapt(BundleWiring.class)
+                .getRequiredWires(ExtenderNamespace.EXTENDER_NAMESPACE)
+                .stream()
+                .anyMatch(wire -> wire.getProvider().getBundle() == getContext().getBundle())) {
+            return null;
+        }
+        bundlesByName.put(bundle.getSymbolicName(), bundle);
+        return getOrCreateContext(bundle);
     }
 
 }

@@ -11,6 +11,7 @@
 
   <service>
     <provide interface="org.mortbay.jetty.Server"/>
+    <provide interface="org.mortbay.jetty.Connector"/>
   </service>
 
   <extension-point name="webapp">

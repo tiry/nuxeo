@@ -21,22 +21,41 @@
 
 package org.nuxeo.runtime.model;
 
-import java.io.IOException;
 import java.net.URL;
 
 import org.nuxeo.runtime.RuntimeService;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.osgi.framework.Bundle;
 
 /**
  * The runtime context.
  * <p>
- * Runtime contexts are used to create components. They provides custom methods to load classes and find resources.
+ * Runtime contexts are used to create components. They provides custom methods
+ * to load classes and find resources.
  * <p>
- * Runtime contexts are generally attached to a bundle context (or module deployment context)
+ * Runtime contexts are generally attached to a bundle context (or module
+ * deployment context)
  *
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ *
  */
 public interface RuntimeContext extends AutoCloseable {
+
+    int UNREGISTERED = 0;
+
+    int REGISTERED = 1;
+
+    int RESOLVING = 2;
+
+    int RESOLVED = 3;
+
+    int STARTING = 4;
+
+    int ACTIVATED = 5;
+
+    int STOPPING = 6;
+
+    int UNRESOLVING = 7;
 
     /**
      * Gets the current runtime service.
@@ -46,7 +65,8 @@ public interface RuntimeContext extends AutoCloseable {
     RuntimeService getRuntime();
 
     /**
-     * Gets the container bundle or null if we are not running in an OSGi environment.
+     * Gets the container bundle or null if we are not running in an OSGi
+     * environment.
      */
     Bundle getBundle();
 
@@ -59,6 +79,12 @@ public interface RuntimeContext extends AutoCloseable {
      * @see ClassLoader#loadClass(String)
      */
     Class<?> loadClass(String className) throws ClassNotFoundException;
+
+    /**
+     * Returns this bundle class loader
+     * @return
+     */
+    ClassLoader getClassLoader();
 
     /**
      * Finds a resource having the given name.
@@ -85,20 +111,24 @@ public interface RuntimeContext extends AutoCloseable {
      * <p>
      * Do nothing if component is already deployed.
      * <p>
-     * Returns the registration info of the new deployed component or null if the component was not deployed.
+     * Returns the registration info of the new deployed component or null if
+     * the component was not deployed.
      *
      * @param url the url of the XML descriptor
-     * @return the component registration info or null if registration failed for some reason
+     * @return the component registration info or null if registration failed
+     *         for some reason
+     * @throws Exception if any error occurs
      */
-    RegistrationInfo deploy(URL url) throws IOException;
+    RegistrationInfo[] deploy(URL url) throws RuntimeServiceException;
 
     /**
      * Same as {@link #deploy(URL)} but using a {@link StreamRef} as argument.
      *
      * @param ref
      * @return
+     * @throws Exception
      */
-    RegistrationInfo deploy(StreamRef ref) throws IOException;
+    RegistrationInfo[] deploy(StreamRef ref) throws RuntimeServiceException;
 
     /**
      * Undeploys a component XML descriptor given its URL.
@@ -106,15 +136,18 @@ public interface RuntimeContext extends AutoCloseable {
      * Do nothing if no component was registered for the given URL.
      *
      * @param url the URL of the XML descriptor
+     * @throws Exception if any error occurs
      */
-    void undeploy(URL url) throws IOException;
+    void undeploy(URL url) throws RuntimeServiceException;
 
     /**
-     * Same as {@link #undeploy(URL)} but using a {@link StreamRef} as stream reference.
+     * Same as {@link #undeploy(URL)} but using a {@link StreamRef} as stream
+     * reference.
      *
      * @param ref
+     * @throws Exception
      */
-    void undeploy(StreamRef ref) throws IOException;
+    void undeploy(StreamRef ref) throws RuntimeServiceException;
 
     /**
      * Checks whether the component XML file at given URL was deployed.
@@ -125,7 +158,8 @@ public interface RuntimeContext extends AutoCloseable {
     boolean isDeployed(URL url);
 
     /**
-     * Checks whether the component XML file given by the StreamRef argument was deployed.
+     * Checks whether the component XML file given by the StreamRef argument was
+     * deployed.
      *
      * @param ref
      * @return
@@ -137,15 +171,19 @@ public interface RuntimeContext extends AutoCloseable {
      * <p>
      * If the component is already deployed do nothing.
      * <p>
-     * The location is interpreted as a relative path inside the bundle (jar) containing the component - and will be
-     * loaded using {@link RuntimeContext#getLocalResource(String)}.
+     * The location is interpreted as a relative path inside the bundle (jar)
+     * containing the component - and will be loaded using
+     * {@link RuntimeContext#getLocalResource(String)}.
      * <p>
-     * Returns the registration info of the new deployed component or null if the component was not deployed.
+     * Returns the registration info of the new deployed component or null if
+     * the component was not deployed.
      *
      * @param location the location
-     * @return the component registration info or null if registration failed for some reason
+     * @return the component registration info or null if registration failed
+     *         for some reason
+     * @throws Exception
      */
-    RegistrationInfo deploy(String location);
+    RegistrationInfo[] deploy(String location) throws RuntimeServiceException;
 
     /**
      * Undeploys the component at the given location if any was deployed.
@@ -153,8 +191,9 @@ public interface RuntimeContext extends AutoCloseable {
      * If the component was not deployed do nothing.
      *
      * @param location the location of the component to undeploy
+     * @throws Exception if any error occurs
      */
-    void undeploy(String location);
+    void undeploy(String location) throws RuntimeServiceException;
 
     /**
      * Checks if the component at the given location is deployed.
@@ -163,6 +202,11 @@ public interface RuntimeContext extends AutoCloseable {
      * @return true if deployed, false otherwise
      */
     boolean isDeployed(String location);
+
+    /**
+     * @since 5.7
+     */
+    boolean isActivated();
 
     /**
      * Destroys this context.
@@ -178,5 +222,31 @@ public interface RuntimeContext extends AutoCloseable {
     default void close() {
         destroy();
     }
+
+    /**
+     * @since 5.7
+     */
+    int getState();
+
+    /**
+     * List registered components
+     *
+     * @since 7.3
+     */
+    RegistrationInfo[] getRegisteredInfos();
+
+    /**
+     * List resolved components
+     *
+     * @since 7.3
+     */
+    RegistrationInfo[] getResolvedInfos();
+
+    /**
+     * List pending components
+     *
+     * @since 7.3
+     */
+    RegistrationInfo[] getPendingInfos();
 
 }

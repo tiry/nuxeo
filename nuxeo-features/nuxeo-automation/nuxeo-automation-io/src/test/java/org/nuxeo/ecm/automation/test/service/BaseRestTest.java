@@ -1,54 +1,70 @@
 /*
- * (C) Copyright 2014 Nuxeo SA (http://nuxeo.com/) and others.
+ * (C) Copyright 2014 Nuxeo SA (http://nuxeo.com/) and contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser General Public License
+ * (LGPL) version 2.1 which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-2.1.html
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
  *
  * Contributors:
  *     Nelson Silva <nelson.silva@inevo.pt>
  */
 package org.nuxeo.ecm.automation.test.service;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.HttpHeaders;
 
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.runner.RunWith;
+import org.nuxeo.ecm.automation.io.AutomationIOFeature;
+import org.nuxeo.ecm.automation.io.services.enricher.ContentEnricherService;
+import org.nuxeo.ecm.automation.io.services.enricher.ContentEnricherServiceImpl;
+import org.nuxeo.ecm.automation.jaxrs.io.documents.JsonDocumentListWriter;
+import org.nuxeo.ecm.automation.jaxrs.io.documents.JsonDocumentWriter;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.io.registry.MarshallerHelper;
-import org.nuxeo.ecm.core.io.registry.MarshallingConstants;
-import org.nuxeo.ecm.core.io.registry.context.RenderingContext;
-import org.nuxeo.ecm.core.io.registry.context.RenderingContext.CtxBuilder;
-import org.nuxeo.ecm.core.io.registry.context.RenderingContextImpl.RenderingContextBuilder;
-import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.ecm.core.test.annotations.Granularity;
+import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * @since 6.0
  */
-@Deploy("org.nuxeo.ecm.core.io")
-public class BaseRestTest {
+@RunWith(FeaturesRunner.class)
+@RepositoryConfig(cleanup = Granularity.METHOD)
+@Features(AutomationIOFeature.class)
+public abstract class BaseRestTest {
+    protected static final String[] NO_SCHEMA = new String[] {};
+
+    private static final String[] ALL_SCHEMAS = new String[] { "*" };
 
     @Inject
     protected CoreSession session;
+
+    @Inject
+    ContentEnricherService rcs;
 
     @Inject
     JsonFactory factory;
@@ -79,27 +95,37 @@ public class BaseRestTest {
      * Content Enrichers.
      */
     protected String getFullDocumentAsJson(DocumentModel doc, String category) throws Exception {
-        RenderingContextBuilder builder = CtxBuilder.builder();
-        builder.properties(MarshallingConstants.WILDCARD_VALUE);
-        builder.enrichDoc(category == null ? "children" : category);
-        builder.fetch("document", "versionLabel");
-        return MarshallerHelper.objectToJson(doc, builder.get());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JsonGenerator jg = getJsonGenerator(out);
+        // When it is written as Json with appropriate headers
+        JsonDocumentWriter.writeDocument(jg, doc, ALL_SCHEMAS, null, getFakeHeaders(category), null);
+        jg.flush();
+        return out.toString();
     }
 
     /**
      * Returns the JSON representation of the document. A category may be passed to have impact on the Content Enrichers
      */
     protected String getDocumentAsJson(DocumentModel doc, String category) throws Exception {
-        RenderingContext ctx = CtxBuilder.enrichDoc(category == null ? "children" : category).get();
-        return MarshallerHelper.objectToJson(doc, ctx);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JsonGenerator jg = getJsonGenerator(out);
+        // When it is written as Json with appropriate headers
+        JsonDocumentWriter.writeDocument(jg, doc, NO_SCHEMA, new HashMap<String, String>(), getFakeHeaders(category),
+                null);
+        jg.flush();
+        return out.toString();
     }
 
     /**
      * Returns the JSON representation of these docs. A category may be passed to have impact on the Content Enrichers
      */
     protected String getDocumentsAsJson(List<DocumentModel> docs, String category) throws Exception {
-        RenderingContext ctx = CtxBuilder.enrichDoc(category == null ? "children" : category).get();
-        return MarshallerHelper.listToJson(DocumentModel.class, docs, ctx);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        JsonGenerator jg = getJsonGenerator(out);
+        // When it is written as Json with appropriate headers
+        JsonDocumentListWriter.writeDocuments(jg, docs, NO_SCHEMA, getFakeHeaders(category), null);
+        jg.flush();
+        return out.toString();
     }
 
     /**
@@ -113,4 +139,18 @@ public class BaseRestTest {
         return factory.createJsonGenerator(out);
     }
 
+    protected HttpHeaders getFakeHeaders() {
+        return getFakeHeaders(null);
+    }
+
+    protected HttpHeaders getFakeHeaders(String category) {
+        HttpHeaders headers = mock(HttpHeaders.class);
+
+        when(headers.getRequestHeader(JsonDocumentWriter.DOCUMENT_PROPERTIES_HEADER)).thenReturn(
+                Arrays.asList(NO_SCHEMA));
+
+        when(headers.getRequestHeader(ContentEnricherServiceImpl.NXCONTENT_CATEGORY_HEADER)).thenReturn(
+                Arrays.asList(new String[] { category == null ? "test" : category }));
+        return headers;
+    }
 }

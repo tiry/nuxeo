@@ -20,24 +20,18 @@
 
 package org.nuxeo.ecm.admin.runtime;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.PropertyResourceBundle;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.connect.update.Version;
-import org.nuxeo.osgi.BundleFile;
-import org.nuxeo.osgi.BundleImpl;
-import org.nuxeo.osgi.JarBundleFile;
 import org.nuxeo.runtime.RuntimeService;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.RegistrationInfo;
@@ -89,56 +83,19 @@ public class RuntimeInstrospection {
     }
 
     protected static SimplifiedBundleInfo getBundleSimplifiedInfo(Bundle bundle) {
-        if (!(bundle instanceof BundleImpl)) {
-            return null;
-        }
-        BundleImpl nxBundle = (BundleImpl) bundle;
-        BundleFile file = nxBundle.getBundleFile();
-        File jarFile = null;
-        if (file instanceof JarBundleFile) {
-            JarBundleFile jar = (JarBundleFile) file;
-            jarFile = jar.getFile();
-        }
-        if (jarFile == null || jarFile.isDirectory()) {
-            return null;
-        }
-        SimplifiedBundleInfo result = null;
-        try (ZipFile zFile = new ZipFile(jarFile)) {
-            // Look for a pom.properties to extract its Maven version
-            Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                if (entry.getName().endsWith("pom.properties")) {
-                    try (InputStream pomStream = zFile.getInputStream(entry)) {
-                        PropertyResourceBundle prb = new PropertyResourceBundle(pomStream);
-                        String version = prb.getString("version");
-                        result = new SimplifiedBundleInfo(bundle.getSymbolicName(), version);
-                    }
-                    break;
-                }
+        try {
+            Enumeration<URL> props = bundle.findEntries("META-INF", "pom.properties", true);
+            if (!props.hasMoreElements()) {
+                throw new FileNotFoundException();
             }
-        } catch (IOException e) {
-            log.debug(e.getMessage(), e);
-        }
-        if (result == null) {
-            // Fall back on the filename to extract a version
-            try {
-                Version version = new Version(jarFile.getName());
-                result = new SimplifiedBundleInfo(bundle.getSymbolicName(), version.toString());
-            } catch (NumberFormatException e) {
-                log.debug(e.getMessage());
+            try (InputStream is = props.nextElement().openStream()) {
+                return new SimplifiedBundleInfo(bundle.getSymbolicName(),
+                        new PropertyResourceBundle(is).getString("version"));
             }
-        }
-        if (result == null) {
+        } catch (IOException cause) {
             // Fall back on the MANIFEST Bundle-Version
-            try {
-                org.osgi.framework.Version version = bundle.getVersion();
-                result = new SimplifiedBundleInfo(bundle.getSymbolicName(), version.toString());
-            } catch (RuntimeException e) {
-                log.debug(e.getMessage());
-                result = new SimplifiedBundleInfo(bundle.getSymbolicName(), "unknown");
-            }
+            org.osgi.framework.Version version = bundle.getVersion();
+            return new SimplifiedBundleInfo(bundle.getSymbolicName(), version.toString());
         }
-        return result;
     }
 }

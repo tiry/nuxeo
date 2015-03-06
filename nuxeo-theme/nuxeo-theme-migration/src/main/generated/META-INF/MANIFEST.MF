@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-Category: web
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: NXThemes Migration
+Bundle-SymbolicName: org.nuxeo.theme.nuxeo-theme-migration
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .theme.migration.service;uses:="org.nuxeo.runtime.model";version="0.0.0
+ ",org.nuxeo.theme.migration.service.descriptors;uses:="org.nuxeo.common
+ .xmap.annotation";version="0.0.0",org.nuxeo.theme.migration.tag.compone
+ nt;uses:="javax.faces.component,javax.faces.context";version="0.0.0",or
+ g.nuxeo.theme.migration.tag.handler;uses:="com.sun.faces.facelets.tag,j
+ avax.faces.component,javax.faces.view.facelets";version="0.0.0"
+Import-Package: com.sun.faces.facelets.tag;version="[2.2,3)",com.sun.fac
+ es.facelets.tag.ui;version="[2.2,3)",javax.faces.component;version="[2.
+ 2,3)",javax.faces.context;version="[2.2,3)",javax.faces.view;version="[
+ 2.2,3)",javax.faces.view.facelets;version="[2.2,3)",org.nuxeo.common.xm
+ ap.annotation;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.tag.handl
+ er;version="[0.0,1)",org.nuxeo.ecm.web.resources.api;version="[0.0,1)",
+ org.nuxeo.ecm.web.resources.api.service;version="[0.0,1)",org.nuxeo.ecm
+ .web.resources.core;version="[0.0,1)",org.nuxeo.runtime;version="[0.0,1
+ )",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.logging;ve
+ rsion="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.nuxeo.the
+ me.styling.service;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.ui,org.nuxeo.theme.styling
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -23,8 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.net.URL;
 
 import javax.inject.Inject;
 
@@ -89,8 +88,8 @@ public class TestOauth2Client {
 
     protected void localDeploy(String filename) throws Exception {
         ComponentDescriptorReader reader = new ComponentDescriptorReader();
-        File file = new File(this.getClass().getResource(filename).toURI());
-        RegistrationInfo info = reader.read(Framework.getRuntime().getContext(), new FileInputStream(file));
+        URL resource = this.getClass().getResource(filename);
+        RegistrationInfo info = reader.read(Framework.getRuntime().getContext(), resource)[0];
         Framework.getRuntime().getComponentManager().register(info);
     }
 }

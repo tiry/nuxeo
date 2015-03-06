@@ -42,6 +42,7 @@ public class FragmentRegistry extends DependencyTree<String, FragmentDescriptor>
     protected final Map<String, FragmentDescriptor> fragments = new HashMap<String, FragmentDescriptor>();
 
     public void add(FragmentDescriptor fragment) {
+        log.info("Added " + fragment.name);
         if (fragments.containsKey(fragment.name)) {
             FragmentDescriptor existing = fragments.get(fragment.name);
             log.error(String.format("Overriding fragment with name '%s' and path '%s' "
@@ -115,7 +116,7 @@ public class FragmentRegistry extends DependencyTree<String, FragmentDescriptor>
     }
 
     protected void commitFragments() {
-
+        log.info("committing");
         // update requires depending on requiredBy
         for (FragmentDescriptor fd : fragments.values()) {
             if (fd.requiredBy != null && fd.requiredBy.length > 0) {

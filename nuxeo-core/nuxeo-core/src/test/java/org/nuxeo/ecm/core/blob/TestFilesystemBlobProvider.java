@@ -45,12 +45,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-
 import org.nuxeo.ecm.core.api.repository.RepositoryManager;
 import org.nuxeo.ecm.core.blob.BlobManager.BlobInfo;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.mockito.MockitoFeature;
-import org.nuxeo.runtime.mockito.RuntimeService;
+import org.nuxeo.runtime.test.mockito.MockitoFeature;
+import org.nuxeo.runtime.test.mockito.RuntimeService;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
@@ -111,12 +110,9 @@ public class TestFilesystemBlobProvider {
         assertFalse(blobProvider.supportsUserUpdate());
 
         // check that we can allow user updates of blobs by configuration
-        harness.deployContrib("org.nuxeo.ecm.core.tests", "OSGI-INF/test-fs-blobprovider-override.xml");
-        try {
+        try (AutoCloseable context = harness.deployContrib("org.nuxeo.ecm.core.tests", "OSGI-INF/test-fs-blobprovider-override.xml")) {
             blobProvider = blobManager.getBlobProvider(PROVIDER_ID);
             assertTrue(blobProvider.supportsUserUpdate());
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.core.tests", "OSGI-INF/test-fs-blobprovider-override.xml");
         }
     }
 

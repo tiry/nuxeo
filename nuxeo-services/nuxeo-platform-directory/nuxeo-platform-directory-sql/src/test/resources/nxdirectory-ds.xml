@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <component name="ds:nxdirectory-test">
   <extension target="org.nuxeo.runtime.datasource" point="datasources">
-    <datasource name="jdbc/nxsqldirectory" driverClassName="${nuxeo.test.vcs.driver}"
-      url="${nuxeo.test.vcs.url}" username="${nuxeo.test.vcs.user}" password="${nuxeo.test.vcs.password}" 
-      maxPoolSize="20" minPoolSize="5"/>
+    <link name="jdbc/nxsqldirectory" global="jdbc/${nuxeo.test.vcs.database}"/>
   </extension>
 </component>

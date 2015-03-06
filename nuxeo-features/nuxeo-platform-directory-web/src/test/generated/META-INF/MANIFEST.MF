@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-directory-web.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-directory-web
+ .tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-directory-web
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.director
+ y;version="[0.0,1)",org.nuxeo.ecm.directory.api;version="[0.0,1)",org.n
+ uxeo.ecm.directory.api.ui,org.nuxeo.runtime.api;version="[0.0,1)",org.n
+ uxeo.runtime.model;version="[0.0,1)",org.nuxeo.runtime.test,org.nuxeo.r
+ untime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.directory.ui,testdirectorydata
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

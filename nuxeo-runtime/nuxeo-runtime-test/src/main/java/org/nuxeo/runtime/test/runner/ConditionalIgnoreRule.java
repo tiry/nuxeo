@@ -80,7 +80,7 @@ public class ConditionalIgnoreRule implements MethodRule, TestRule {
     }
 
     public static final class IgnoreIsolated implements Condition {
-        boolean isIsolated = "org.nuxeo.runtime.testsuite.IsolatedClassloader".equals(getClass().getClassLoader()
+        boolean isIsolated = "org.nuxeo.osgi.bootstrap.OSGiClassLoader".equals(getClass().getClassLoader()
                                                                                                 .getClass()
                                                                                                 .getName());
 

@@ -18,13 +18,13 @@
  */
 package org.nuxeo.connect.update.task.live.commands;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.nuxeo.connect.update.PackageException;
 import org.nuxeo.connect.update.task.Command;
 import org.nuxeo.connect.update.task.Task;
 import org.nuxeo.connect.update.task.standalone.commands.ReloadPropertiesPlaceholder;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.api.Framework;
 
 /**
@@ -38,7 +38,7 @@ public class ReloadProperties extends ReloadPropertiesPlaceholder {
     protected Command doRun(Task task, Map<String, String> prefs) throws PackageException {
         try {
             Framework.getRuntime().reloadProperties();
-        } catch (IOException e) {
+        } catch (RuntimeServiceException e) {
             throw new PackageException("Failed to reload properties", e);
         }
         return new ReloadProperties();

@@ -20,6 +20,7 @@
 package org.nuxeo.ecm.directory.sql;
 
 import java.io.Serializable;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +30,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import javax.transaction.Transaction;
 
 import org.nuxeo.common.xmap.annotation.XNode;
 import org.nuxeo.common.xmap.annotation.XObject;
@@ -42,6 +45,7 @@ import org.nuxeo.ecm.core.storage.sql.jdbc.dialect.Dialect;
 import org.nuxeo.ecm.directory.AbstractReference;
 import org.nuxeo.ecm.directory.Directory;
 import org.nuxeo.ecm.directory.DirectoryException;
+import org.nuxeo.runtime.transaction.TransactionHelper;
 
 @XObject(value = "tableReference")
 public class TableReference extends AbstractReference {
@@ -83,11 +87,25 @@ public class TableReference extends AbstractReference {
         return (SQLDirectory) dir;
     }
 
-    private void initialize(SQLSession sqlSession) throws DirectoryException {
+    private void initialize(SQLDirectory directory) {
+        Transaction tx = TransactionHelper.suspendTransaction();
+        try {
+            try (Connection connection = directory.getConnection(true)) {
+                initialize(connection);
+                initialized = true;
+            } catch (SQLException cause) {
+                throw new DirectoryException("Cannot initialize " + this, cause);
+            }
+        } finally {
+            TransactionHelper.resumeTransaction(tx);
+        }
+    }
+
+    private void initialize(Connection connection) throws DirectoryException {
         SQLDirectory directory = getSQLSourceDirectory();
         String createTablePolicy = directory.getConfig().createTablePolicy;
         Table table = getTable();
-        SQLHelper helper = new SQLHelper(sqlSession.sqlConnection, table, dataFileName, createTablePolicy);
+        SQLHelper helper = new SQLHelper(connection, table, dataFileName, createTablePolicy);
         helper.setupTable();
     }
 
@@ -265,8 +283,8 @@ public class TableReference extends AbstractReference {
 
     public void removeLinksFor(String column, String entryId, SQLSession session) throws DirectoryException {
         Table table = getTable();
-        String sql = String.format("DELETE FROM %s WHERE %s = ?", table.getQuotedName(), table.getColumn(column)
-                                                                                              .getQuotedName());
+        String sql = String.format("DELETE FROM %s WHERE %s = ?", table.getQuotedName(),
+                table.getColumn(column).getQuotedName());
         if (session.logger.isLogEnabled()) {
             session.logger.logSQL(sql, Collections.<Serializable> singleton(entryId));
         }
@@ -428,10 +446,7 @@ public class TableReference extends AbstractReference {
 
     protected SQLSession getSQLSession() throws DirectoryException {
         if (!initialized) {
-            try (SQLSession sqlSession = (SQLSession) getSourceDirectory().getSession()) {
-                initialize(sqlSession);
-                initialized = true;
-            }
+            initialize((SQLDirectory)getSourceDirectory());
         }
         return (SQLSession) getSourceDirectory().getSession();
     }
@@ -444,8 +459,7 @@ public class TableReference extends AbstractReference {
      */
     protected void maybeInitialize(SQLSession sqlSession) throws DirectoryException {
         if (!initialized) {
-            initialize(sqlSession);
-            initialized = true;
+            initialize((SQLDirectory)sqlSession.getDirectory());
         }
     }
 
@@ -463,6 +477,7 @@ public class TableReference extends AbstractReference {
 
     private Dialect getDialect() throws DirectoryException {
         if (dialect == null) {
+            getSQLSourceDirectory().getSession().close();
             dialect = getSQLSourceDirectory().getDialect();
         }
         return dialect;

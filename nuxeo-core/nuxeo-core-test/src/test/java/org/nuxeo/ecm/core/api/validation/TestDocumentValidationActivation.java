@@ -33,14 +33,14 @@ import org.nuxeo.ecm.core.api.validation.DocumentValidationService.Forcing;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 // Look at the @Test(expected=...) to understand the tests
 // for those tests, both saveDocument, createDocument and importDocument validation context are enable by default
 @RunWith(FeaturesRunner.class)
-@Deploy({ "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-validation-activation-contrib.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.core.test:OSGI-INF/test-validation-activation-contrib.xml" })
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
 public class TestDocumentValidationActivation {

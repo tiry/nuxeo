@@ -28,17 +28,24 @@ import java.lang.reflect.Field;
  */
 public class XFieldAccessor implements XAccessor {
 
-    private final Field field;
+    protected final Field field;
 
     public XFieldAccessor(Field field) {
         this.field = field;
         this.field.setAccessible(true);
     }
 
-    public Class getType() {
+    @Override
+    public Class<?> getType() {
         return field.getType();
     }
 
+    @Override
+    public Class<?> getMemberType() {
+        return field.getType();
+    }
+
+    @Override
     public void setValue(Object instance, Object value) {
         try {
             field.set(instance, value);
@@ -47,12 +54,18 @@ public class XFieldAccessor implements XAccessor {
         }
     }
 
+    @Override
     public Object getValue(Object instance) {
         try {
             return field.get(instance);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        return field.toGenericString();
     }
 
 }

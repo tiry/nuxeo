@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.nuxeo.theme</groupId>
     <artifactId>nuxeo-theme-parent</artifactId>
-    <version>8.1-SNAPSHOT</version>
+    <version>0.0-reload-SNAPSHOT</version>
   </parent>
 
   <artifactId>nuxeo-theme-styling</artifactId>
@@ -42,6 +42,17 @@
       <groupId>javax.inject</groupId>
       <artifactId>javax.inject</artifactId>
     </dependency>
+
+    <!-- resource processors -->
+    <dependency>
+      <groupId>ro.isdc.wro4j</groupId>
+      <artifactId>wro4j-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vaadin</groupId>
+      <artifactId>vaadin-sass-compiler</artifactId>
+    </dependency>
+
 
     <!-- test scope -->
     <dependency>

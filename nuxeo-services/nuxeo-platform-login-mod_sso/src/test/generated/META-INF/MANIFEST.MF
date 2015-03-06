@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo mod_sso Login Module extension
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-mod_sso
+ .tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-login-mod_sso
+Import-Package: javax.servlet;version="[3.0,4)",javax.servlet.http;versi
+ on="[3.0,4)",org.jboss.seam.mock,org.junit,org.nuxeo.ecm.platform.api.l
+ ogin;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.nu
+ xeo.runtime.test
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: WEB-INF,org.nuxeo.ecm.platform.ui.web.auth.proxy
+Require-Bundle: org.nuxeo.ecm.platform.login.Proxy
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

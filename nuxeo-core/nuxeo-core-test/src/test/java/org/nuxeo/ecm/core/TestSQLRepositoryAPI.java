@@ -1581,7 +1581,8 @@ public class TestSQLRepositoryAPI {
         assertTrue(name5.startsWith(name4));
 
         DocumentRef[] refs = { returnedChildDocs.get(0).getRef(), returnedChildDocs.get(1).getRef(),
-                returnedChildDocs.get(2).getRef(), returnedChildDocs.get(3).getRef(), returnedChildDocs.get(4).getRef() };
+                returnedChildDocs.get(2).getRef(), returnedChildDocs.get(3).getRef(),
+                returnedChildDocs.get(4).getRef() };
         session.removeDocuments(refs);
 
         assertFalse(session.exists(returnedChildDocs.get(0).getRef()));
@@ -1635,7 +1636,8 @@ public class TestSQLRepositoryAPI {
 
         // here's the different ordering
         DocumentRef[] refs = { returnedChildDocs.get(1).getRef(), returnedChildDocs.get(0).getRef(),
-                returnedChildDocs.get(4).getRef(), returnedChildDocs.get(3).getRef(), returnedChildDocs.get(2).getRef() };
+                returnedChildDocs.get(4).getRef(), returnedChildDocs.get(3).getRef(),
+                returnedChildDocs.get(2).getRef() };
         session.removeDocuments(refs);
 
         assertFalse(session.exists(returnedChildDocs.get(0).getRef()));
@@ -3495,8 +3497,8 @@ public class TestSQLRepositoryAPI {
         typeName = CoreSession.IMPORT_PROXY_TYPE;
         parentRef = new IdRef(folderId);
         name = "myproxy";
-        DocumentModel proxy = new DocumentModelImpl((String) null, typeName, pid, new Path(name), null, null,
-                parentRef, null, null, null, null);
+        DocumentModel proxy = new DocumentModelImpl((String) null, typeName, pid, new Path(name), null, null, parentRef,
+                null, null, null, null);
         proxy.putContextData(CoreSession.IMPORT_PROXY_TARGET_ID, vid);
         proxy.putContextData(CoreSession.IMPORT_PROXY_VERSIONABLE_ID, id);
         session.importDocuments(Collections.singletonList(proxy));
@@ -3598,7 +3600,7 @@ public class TestSQLRepositoryAPI {
      * {@code true}.
      */
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/test-listeners-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/test-listeners-contrib.xml")
     public void testDoNotFireIncrementBeforeUpdateEventsOnVersion() throws Exception {
         DocumentModel root = session.getRootDocument();
         DocumentModel doc = new DocumentModelImpl(root.getPathAsString(), "doc", "File");
@@ -3661,7 +3663,7 @@ public class TestSQLRepositoryAPI {
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/test-listeners-all-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/test-listeners-all-contrib.xml")
     public void testVersioningEvents() throws Exception {
         DocumentModel doc = new DocumentModelImpl("/", "doc", "File");
         doc = session.createDocument(doc);
@@ -3796,7 +3798,7 @@ public class TestSQLRepositoryAPI {
      * PREVIOUS_DOCUMENT_MODEL received by the event holds the correct info.
      */
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/test-listener-beforemod-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/test-listener-beforemod-contrib.xml")
     public void testBeforeModificationListenerRename() throws Exception {
         DocumentModel doc = session.createDocumentModel("/", "doc", "File");
         doc.setProperty("dublincore", "title", "t1");
@@ -3827,21 +3829,23 @@ public class TestSQLRepositoryAPI {
         // remove MyDocType from known types
         DocumentTypeDescriptor dtd = ((SchemaManagerImpl) schemaManager).getDocumentTypeDescriptor("MyDocType");
         ((SchemaManagerImpl) schemaManager).unregisterDocumentType(dtd);
-
-        reopenSession();
-        assertFalse(session.hasChildren(rootRef));
-        assertEquals(0, session.getChildren(rootRef).size());
         try {
-            session.getDocument(docRef);
-            fail("shouldn't be able to get doc with obsolete type");
-        } catch (DocumentNotFoundException e) {
-            assertTrue(e.getMessage(), e.getMessage().contains("Unknown document type: MyDocType"));
-        }
-        try {
-            session.getChild(rootRef, "doc");
-            fail("shouldn't be able to get doc with obsolete type");
-        } catch (DocumentNotFoundException e) {
-            assertTrue(e.getMessage(), e.getMessage().contains("Unknown document type: MyDocType"));
+            reopenSession();
+            assertEquals(0, session.getChildren(rootRef).size());
+            try {
+                session.getDocument(docRef);
+                fail("shouldn't be able to get doc with obsolete type");
+            } catch (DocumentNotFoundException e) {
+                assertTrue(e.getMessage(), e.getMessage().contains("Unknown document type: MyDocType"));
+            }
+            try {
+                session.getChild(rootRef, "doc");
+                fail("shouldn't be able to get doc with obsolete type");
+            } catch (DocumentNotFoundException e) {
+                assertTrue(e.getMessage(), e.getMessage().contains("Unknown document type: MyDocType"));
+            }
+        } finally {
+            ((SchemaManagerImpl) schemaManager).registerDocumentType(dtd);
         }
     }
 
@@ -3876,7 +3880,6 @@ public class TestSQLRepositoryAPI {
         file2 = session.createDocument(file2);
         DocumentModel file3 = session.createDocumentModel("/", "file3", "File");
         file3 = session.createDocument(file3);
-        session.save();
         nextTransaction();
 
         // start some changes
@@ -3894,7 +3897,6 @@ public class TestSQLRepositoryAPI {
         // create file5
         DocumentModel file5 = session.createDocumentModel("/", "file5", "File");
         file5 = session.createDocument(file5);
-        session.save();
 
         // more changes
         // modify again file1 title
@@ -3907,7 +3909,6 @@ public class TestSQLRepositoryAPI {
         session.saveDocument(file4);
         // remove file5
         session.removeDocument(file5.getRef());
-        session.save();
 
         // abort the transaction
         TransactionHelper.setTransactionRollbackOnly();

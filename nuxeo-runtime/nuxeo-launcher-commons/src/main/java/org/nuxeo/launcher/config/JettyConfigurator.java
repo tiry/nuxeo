@@ -66,11 +66,6 @@ public class JettyConfigurator extends ServerConfigurator {
     }
 
     @Override
-    public File getLogConfFile() {
-        return new File(getConfigDir(), "log4j.xml");
-    }
-
-    @Override
     public File getConfigDir() {
         return new File(generator.getNuxeoHome(), Environment.DEFAULT_CONFIG_DIR);
     }

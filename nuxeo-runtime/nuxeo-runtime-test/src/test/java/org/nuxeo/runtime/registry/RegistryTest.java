@@ -18,12 +18,10 @@
  */
 package org.nuxeo.runtime.registry;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import org.junit.Test;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentName;
+import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
 /**
@@ -33,40 +31,25 @@ public class RegistryTest extends NXRuntimeTestCase {
 
     @Test
     public void testReload() throws Exception {
-        deployContrib("org.nuxeo.runtime.test.tests", "CompA.xml");
 
+        loadAndUnload();
+        loadAndUnload();
+    }
+
+    void loadAndUnload() {
+        try (RuntimeContext a = deployContrib("org.nuxeo.runtime.test.tests", "CompA.xml")) {
+            assertNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
+            try (RuntimeContext b = deployContrib("org.nuxeo.runtime.test.tests", "CompB.xml")) {
+                assertNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
+                try (RuntimeContext c = deployContrib("org.nuxeo.runtime.test.tests", "CompC.xml")) {
+                    assertNotNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
+                    assertNotNull(Framework.getRuntime().getComponent(new ComponentName("CompB")));
+                }
+                assertNull(Framework.getRuntime().getComponent(new ComponentName("CompC")));
+            }
+            assertNull(Framework.getRuntime().getComponent(new ComponentName("CompB")));
+        }
         assertNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
-
-        deployContrib("org.nuxeo.runtime.test.tests", "CompB.xml");
-
-        assertNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
-
-        deployContrib("org.nuxeo.runtime.test.tests", "CompC.xml");
-
-        assertNotNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
-        assertNotNull(Framework.getRuntime().getComponent(new ComponentName("CompB")));
-
-        undeployContrib("org.nuxeo.runtime.test.tests", "CompC.xml");
-        undeployContrib("org.nuxeo.runtime.test.tests", "CompA.xml");
-        undeployContrib("org.nuxeo.runtime.test.tests", "CompB.xml");
-
-        assertNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
-        assertNull(Framework.getRuntime().getComponent(new ComponentName("CompB")));
-
-        deployContrib("org.nuxeo.runtime.test.tests", "CompA.xml");
-
-        assertNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
-
-        deployContrib("org.nuxeo.runtime.test.tests", "CompB.xml");
-
-        assertNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
-
-        deployContrib("org.nuxeo.runtime.test.tests", "CompC.xml");
-
-        assertNotNull(Framework.getRuntime().getComponent(new ComponentName("CompA")));
-        assertNotNull(Framework.getRuntime().getComponent(new ComponentName("CompB")));
-        assertNotNull(Framework.getRuntime().getComponent(new ComponentName("CompC")));
-
     }
 
 }

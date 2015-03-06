@@ -25,35 +25,21 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
-import java.net.URLStreamHandlerFactory;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.nuxeo.common.utils.Base64;
-import org.nuxeo.common.utils.URLStreamHandlerFactoryInstaller;
+import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.services.url.URLStreamHandlers;
 
 public class InlineURLFactory {
 
     public static void install() {
-        shf = new InlineURLStreamHandlerFactory();
-        try {
-            URLStreamHandlerFactoryInstaller.installURLStreamHandlerFactory(shf);
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot install inline URLs", e);
-        }
+        Framework.getService(URLStreamHandlers.class).register("inline", InlineURLStreamHandler.class);
     }
 
-    protected static URLStreamHandlerFactory shf;
-
     public static void uninstall() {
-        try {
-            URLStreamHandlerFactoryInstaller.uninstallURLStreamHandlerFactory(shf);
-        } catch (Exception cause) {
-            throw new RuntimeException("Cannot uninstall inline URLs", cause);
-        } finally {
-            shf = null;
-        }
-
+        Framework.getService(URLStreamHandlers.class).unregister("inline");
     }
 
     public static <T> byte[] marshall(T content) throws IOException {
@@ -79,7 +65,9 @@ public class InlineURLFactory {
     }
 
     public static URL newURL(String mimetype, byte[] data) throws IOException {
-        return new URL("inline:".concat(mimetype).concat(";base64,".concat(Base64.encodeBytes(data))));
+        ;
+
+        return new URL("inline:".concat(mimetype).concat(";base64,".concat(Base64.getEncoder().encodeToString(data))));
     }
 
     public static <T> T newObject(Class<T> clazz, URL url) throws IOException {
@@ -97,7 +85,7 @@ public class InlineURLFactory {
         @SuppressWarnings("unused")
         String mimetype = matcher.group(1);
         String data = matcher.group(2);
-        return Base64.decode(data);
+        return Base64.getDecoder().decode(data);
     }
 
 }

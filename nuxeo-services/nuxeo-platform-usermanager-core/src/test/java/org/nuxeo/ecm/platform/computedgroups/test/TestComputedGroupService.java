@@ -19,12 +19,6 @@
 
 package org.nuxeo.ecm.platform.computedgroups.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,11 +29,9 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.NuxeoGroup;
-import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.platform.computedgroups.ComputedGroupsService;
 import org.nuxeo.ecm.platform.computedgroups.ComputedGroupsServiceImpl;
 import org.nuxeo.ecm.platform.computedgroups.GroupComputer;
@@ -47,29 +39,12 @@ import org.nuxeo.ecm.platform.computedgroups.GroupComputerDescriptor;
 import org.nuxeo.ecm.platform.computedgroups.UserManagerWithComputedGroups;
 import org.nuxeo.ecm.platform.usermanager.NuxeoPrincipalImpl;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
-import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.ecm.platform.usermanager.UserManagerTestCase;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.test.runner.RuntimeHarness;
 
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class) // to init properties for SQL datasources
-@Deploy({ "org.nuxeo.ecm.core.schema", //
-        "org.nuxeo.ecm.core.api", //
-        "org.nuxeo.ecm.core", //
-        "org.nuxeo.ecm.core.event", //
-        "org.nuxeo.ecm.platform.usermanager.api", //
-        "org.nuxeo.ecm.platform.usermanager", //
-        "org.nuxeo.ecm.directory.api", //
-        "org.nuxeo.ecm.directory.types.contrib", //
-        "org.nuxeo.ecm.directory", //
-        "org.nuxeo.ecm.directory.sql", //
-})
-@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager.tests:computedgroups-contrib.xml", //
-        "org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/directory-config.xml", //
-        })
-public class TestComputedGroupService {
+@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager:computedgroups-contrib.xml" })
+public class TestComputedGroupService extends UserManagerTestCase {
 
     @Inject
     protected RuntimeHarness harness;
@@ -139,40 +114,34 @@ public class TestComputedGroupService {
         um.updateUser(userModel);
 
         NuxeoPrincipalImpl principal = (NuxeoPrincipalImpl) um.getPrincipal("User1");
-        assertEquals(1, principal.getVirtualGroups().size());
         assertTrue(principal.getVirtualGroups().contains("Grp1"));
-        assertEquals(2, principal.getAllGroups().size());
         assertTrue(principal.getAllGroups().contains("Grp1"));
         assertTrue(principal.getAllGroups().contains("StaticGroup"));
 
         principal = (NuxeoPrincipalImpl) um.getPrincipal("User2");
-        assertEquals(1, principal.getVirtualGroups().size());
         assertTrue(principal.getVirtualGroups().contains("Grp2"));
-        assertEquals(1, principal.getAllGroups().size());
         assertTrue(principal.getAllGroups().contains("Grp2"));
 
         principal = (NuxeoPrincipalImpl) um.getPrincipal("User12");
-        assertEquals(2, principal.getVirtualGroups().size());
         assertTrue(principal.getVirtualGroups().contains("Grp1"));
         assertTrue(principal.getVirtualGroups().contains("Grp2"));
-        assertEquals(2, principal.getAllGroups().size());
+        assertTrue(principal.getAllGroups().contains("Grp1"));
+        assertTrue(principal.getAllGroups().contains("Grp2"));
 
         NuxeoGroup group = um.getGroup("Grp1");
-        assertEquals(2, group.getMemberUsers().size());
         assertTrue(group.getMemberUsers().contains("User1"));
         assertTrue(group.getMemberUsers().contains("User12"));
 
         group = um.getGroup("Grp2");
-        assertEquals(2, group.getMemberUsers().size());
+        assertTrue(group.getMemberUsers().contains("User2"));
+        assertTrue(group.getMemberUsers().contains("User12"));
     }
 
     @Test
     public void testCompanyComputer() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.platform.usermanager.tests", "companycomputedgroups-contrib.xml");
-        try {
+        try (AutoCloseable infos = harness.deployContrib("org.nuxeo.ecm.platform.usermanager.tests",
+                "companycomputedgroups-contrib.xml")) {
             dotTestCompanyComputer();
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.usermanager.tests", "companycomputedgroups-contrib.xml");
         }
     }
 

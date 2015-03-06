@@ -19,12 +19,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.javasimon.Sample;
 import org.javasimon.SimonManager;
 import org.javasimon.Split;
 import org.javasimon.Stopwatch;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.runtime.test.runner.Features;
@@ -35,7 +35,8 @@ import org.nuxeo.runtime.test.runner.RuntimeFeature;
 @Features(RuntimeFeature.class)
 public class MetricSerializerTestCase {
 
-    final MetricSerializer srv = new MetricSerializer();
+    @Inject
+    MetricSerializer srv;
 
     static class Context {
         public String getInfo() {
@@ -55,22 +56,16 @@ public class MetricSerializerTestCase {
         }
     }
 
-    @Before
-    public void enableManager() {
-        SimonManager.enable();
-    }
-
-    @After
-    public void disableManager() {
-        SimonManager.disable();
-    }
-
     @Test
     public void testService() throws IOException {
         srv.resetOutput();
-        srv.toStream(newSample());
-        srv.flushOuput();
-        assertTrue(srv.getOutputFile().length() > 0);
+        try {
+            srv.toStream(newSample());
+            srv.flushOuput();
+            assertTrue(srv.getOutputFile().length() > 0);
+        } finally {
+            srv.resetOutput();
+        }
     }
 
 }

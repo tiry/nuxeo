@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentName;
 import org.nuxeo.runtime.model.DefaultComponent;
 import org.nuxeo.runtime.model.Extension;
@@ -39,6 +40,10 @@ public class ComponentWithXPoint extends DefaultComponent {
 
     final List<DummyContribution> contribs = new ArrayList<DummyContribution>();
 
+    @Override
+    public void activate(ComponentContext context) {
+        return;
+    }
     @Override
     public void registerExtension(Extension extension) {
         Object[] contribs = extension.getContributions();

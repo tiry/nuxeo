@@ -199,11 +199,20 @@ public class ResourcePublisherService extends DefaultComponent implements Resour
             if (resource.mbean == null) {
                 throw new IllegalStateException(resource.managementName + " is not bound");
             }
+            MBeanServer server;
             try {
-                MBeanServer server = serverLocatorService.lookupServer(resource.managementName);
+                server = serverLocatorService.lookupServer(resource.managementName);
+            } catch (ManagementRuntimeException cause) {
+                return;
+            }
+            if (!server.isRegistered(resource.managementName)) {
+                log.warn("no such resource " + resource.managementName);
+                return;
+            }
+            try {
                 server.unregisterMBean(resource.managementName);
             } catch (JMException e) {
-                throw ManagementRuntimeException.wrap("Cannot unbind " + resource, e);
+                log.warn("no such resource " + resource.managementName);
             } finally {
                 resource.mbean = null;
                 if (ResourcePublisherService.log.isDebugEnabled()) {
@@ -403,7 +412,7 @@ public class ResourcePublisherService extends DefaultComponent implements Resour
         resourcesRegistry.doUnbind(resource);
     }
 
-    protected void bindForTest(MBeanServer server, ObjectName name, Object instance, Class<?> clazz)
+    public void bindForTest(MBeanServer server, ObjectName name, Object instance, Class<?> clazz)
             throws JMException, InvalidTargetObjectTypeException {
         resourcesRegistry.doBind(server, name, instance, clazz);
     }

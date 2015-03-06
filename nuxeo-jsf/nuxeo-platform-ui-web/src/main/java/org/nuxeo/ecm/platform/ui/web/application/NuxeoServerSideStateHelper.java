@@ -40,24 +40,18 @@
 
 package org.nuxeo.ecm.platform.ui.web.application;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.io.IOException;
-
-import javax.faces.FacesException;
-import javax.faces.context.FacesContext;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.ResponseWriter;
-import javax.faces.component.UIViewRoot;
-
-import com.sun.faces.util.TypedCollections;
-import com.sun.faces.util.LRUMap;
-import com.sun.faces.util.Util;
-import com.sun.faces.util.RequestStateManager;
-
 import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.AutoCompleteOffOnViewState;
 import static com.sun.faces.config.WebConfiguration.BooleanWebContextInitParameter.EnableViewStateIdRendering;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.faces.FacesException;
+import javax.faces.component.UIViewRoot;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.faces.context.ResponseWriter;
 import javax.faces.render.ResponseStateManager;
 
 import org.apache.commons.logging.Log;
@@ -66,6 +60,10 @@ import org.jboss.seam.contexts.Contexts;
 import org.jboss.seam.core.Conversation;
 
 import com.sun.faces.renderkit.ServerSideStateHelper;
+import com.sun.faces.util.LRUMap;
+import com.sun.faces.util.RequestStateManager;
+import com.sun.faces.util.TypedCollections;
+import com.sun.faces.util.Util;
 
 /**
  * @since 6.0

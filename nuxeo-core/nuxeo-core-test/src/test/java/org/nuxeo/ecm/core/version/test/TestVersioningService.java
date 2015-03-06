@@ -233,7 +233,7 @@ public class TestVersioningService {
 
     @SuppressWarnings("deprecation")
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:test-versioningservice-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:test-versioningservice-contrib.xml")
     public void testOldNuxeoVersioning() throws Exception {
         ((VersioningComponent) service).service = new CompatVersioningService();
 
@@ -326,7 +326,7 @@ public class TestVersioningService {
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:test-versioning-nooptions.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:test-versioning-nooptions.xml")
     public void testNoOptions() throws Exception {
         DocumentModel doc = session.createDocumentModel("/", "doc", "File");
         doc = session.createDocument(doc);

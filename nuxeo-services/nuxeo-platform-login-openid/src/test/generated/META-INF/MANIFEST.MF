@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo OpenID Test module
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-openid.
+ tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-login-openid
+Import-Package: org.junit,org.junit.runner,org.nuxeo.ecm.core.test,org.n
+ uxeo.ecm.core.test.annotations,org.nuxeo.runtime.api;version="[0.0,1)",
+ org.nuxeo.runtime.test.runner
+Nuxeo-Component: OSGI-INF/openid-connect-provider-registry.xml,OSGI-INF/
+ openid-google-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.oauth2.openid
+Require-Bundle: org.nuxeo.ecm.platform.login
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

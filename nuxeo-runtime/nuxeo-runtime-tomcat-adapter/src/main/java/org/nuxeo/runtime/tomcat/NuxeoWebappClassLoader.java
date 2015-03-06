@@ -21,40 +21,49 @@
 
 package org.nuxeo.runtime.tomcat;
 
+import java.io.IOException;
 import java.net.URL;
-
 import org.apache.catalina.loader.WebappClassLoader;
-import org.nuxeo.osgi.application.MutableClassLoader;
+import org.apache.catalina.util.ServerInfo;
+import org.nuxeo.osgi.application.FrameworkBootstrap;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-public class NuxeoWebappClassLoader extends WebappClassLoader implements MutableClassLoader {
-
-    public NuxeoWebappClassLoader() {
-    }
+public class NuxeoWebappClassLoader extends WebappClassLoader {
 
     public NuxeoWebappClassLoader(ClassLoader parent) {
         super(parent);
+        hasExternalRepositories = true;
     }
+
+    final FrameworkBootstrap bootstrap = bootstrap();
 
     @Override
-    public void addURL(URL url) {
-        super.addURL(url);
+    public URL[] getURLs() {
+        return bootstrap.getURLs(); // scanned jars
     }
 
-    @Override
-    public void setParentClassLoader(ClassLoader pcl) {
-        super.setParentClassLoader(pcl);
-    }
-
-    public ClassLoader getParentClassLoader() {
-        return parent;
-    }
-
-    @Override
-    public ClassLoader getClassLoader() {
-        return this;
+    protected FrameworkBootstrap bootstrap() {
+        try {
+            FrameworkBootstrap bootstrap = new FrameworkBootstrap(this,
+                    "org.apache.tomcat,org.apache.el,org.apache.jasper,org.apache.catalina,org.apache.naming",
+                    NuxeoLauncher.self.homedir);
+            String info = ServerInfo.getServerInfo();
+            int i = info.indexOf('/'); // Apache Tomcat/6.0.35
+            String version;
+            if (i > 0) {
+                version = info.substring(i + 1);
+            } else {
+                version = ServerInfo.getServerNumber(); // 6.0.35.0
+            }
+            bootstrap.setHostName("Tomcat");
+            bootstrap.setHostVersion(version);
+            bootstrap.initialize();
+            return bootstrap;
+        } catch (IOException | RuntimeException cause) {
+            throw new RuntimeException("Cannot initialize framework", cause);
+        }
     }
 
 }

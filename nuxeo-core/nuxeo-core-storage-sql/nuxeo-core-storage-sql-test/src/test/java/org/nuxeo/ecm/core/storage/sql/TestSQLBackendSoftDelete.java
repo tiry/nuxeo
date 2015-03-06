@@ -18,7 +18,6 @@
  */
 package org.nuxeo.ecm.core.storage.sql;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
 import java.util.Calendar;

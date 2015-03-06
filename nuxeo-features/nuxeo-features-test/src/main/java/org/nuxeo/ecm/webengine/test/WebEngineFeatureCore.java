@@ -18,10 +18,13 @@
  */
 package org.nuxeo.ecm.webengine.test;
 
+import org.nuxeo.ecm.webapp.WebappFeature;
 import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.SimpleFeature;
 
-@Deploy({ "org.nuxeo.ecm.webengine.core", "org.nuxeo.ecm.platform.web.common" })
+@Features(WebappFeature.class)
+@Deploy({ "org.nuxeo.ecm.webengine.core"})
 public class WebEngineFeatureCore extends SimpleFeature {
 
 }

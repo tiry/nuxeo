@@ -20,11 +20,10 @@
 
 package org.nuxeo.runtime.model.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.xmap.XMap;
 import org.nuxeo.common.xmap.annotation.XNode;
 import org.nuxeo.common.xmap.annotation.XObject;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -32,12 +31,11 @@ import org.w3c.dom.ranges.DocumentRange;
 import org.w3c.dom.ranges.Range;
 
 /**
- * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ * @author  <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ *
  */
 @XObject("config")
 public class ConfigurationDescriptorImpl {
-
-    private static final Log log = LogFactory.getLog(ConfigurationDescriptorImpl.class);
 
     private static final Object NULL = new Object();
 
@@ -71,9 +69,8 @@ public class ConfigurationDescriptorImpl {
                     Class<?> cl = Thread.currentThread().getContextClassLoader().loadClass(klass);
                     xmap.register(cl);
                     config = xmap.load(element);
-                } catch (ClassNotFoundException e) {
-                    config = NULL;
-                    log.error(e, e);
+                } catch (Exception cause) {
+                    throw new RuntimeServiceException("Cannot load configuration descriptor of " + klass, cause);
                 }
             } else {
                 config = NULL;

@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateless
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Audit WebService Fragment
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-audit-ws
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.audit.ws;uses:="javax.jws,javax.jws.soap,org.nuxeo.ecm.pl
+ atform.audit.api,org.nuxeo.ecm.platform.audit.ws.api,org.nuxeo.ecm.plat
+ form.ws";version="0.0.0",org.nuxeo.ecm.platform.audit.ws.api;uses:="jav
+ ax.jws,org.nuxeo.ecm.platform.api.ws,org.nuxeo.ecm.platform.audit.ws";v
+ ersion="0.0.0",org.nuxeo.ecm.platform.audit.ws.delegate;uses:="javax.na
+ ming,org.nuxeo.ecm.platform.audit.ws.api";version="0.0.0"
+Import-Package: javax.jws,javax.jws.soap,javax.naming,org.apache.commons
+ .logging;version="[1.2,2)",org.nuxeo.ecm.core.schema.utils;version="[0.
+ 0,1)",org.nuxeo.ecm.platform.api.ws;version="[0.0,1)",org.nuxeo.ecm.pla
+ tform.api.ws.session;version="[0.0,1)",org.nuxeo.ecm.platform.audit.api
+ ;version="[0.0,1)",org.nuxeo.ecm.platform.audit.ws,org.nuxeo.ecm.platfo
+ rm.audit.ws.api,org.nuxeo.ecm.platform.ws;version="[0.0,1)",org.nuxeo.r
+ untime.api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/endpoint-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform,org.nuxeo.ecm.actions,org.nuxeo.e
+ cm.platform.audit.api,org.nuxeo.ecm.webapp.core
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

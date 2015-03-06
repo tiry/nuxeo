@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Contributors:
  *     Nuxeo - initial API and implementation
  *
@@ -36,8 +36,7 @@ public final class PrimitiveArrays {
     private PrimitiveArrays() {
     }
 
-    @SuppressWarnings({ "ObjectEquality" })
-    public static Object toPrimitiveArray(Collection<Object> col, Class primitiveArrayType) {
+    public static Object toPrimitiveArray(Collection<Object> col, Class<?> primitiveArrayType) {
         if (primitiveArrayType == Integer.TYPE) {
             return toIntArray(col);
         } else if (primitiveArrayType == Long.TYPE) {
@@ -58,10 +57,10 @@ public final class PrimitiveArrays {
         return null;
     }
 
-    public static int[] toIntArray(Collection col) {
+    public static int[] toIntArray(Collection<?> col) {
         int size = col.size();
         int[] ar = new int[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Integer) it.next();
@@ -69,10 +68,10 @@ public final class PrimitiveArrays {
         return ar;
     }
 
-    public static long[] toLongArray(Collection col) {
+    public static long[] toLongArray(Collection<?> col) {
         int size = col.size();
         long[] ar = new long[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Long) it.next();
@@ -80,10 +79,10 @@ public final class PrimitiveArrays {
         return ar;
     }
 
-    public static double[] toDoubleArray(Collection col) {
+    public static double[] toDoubleArray(Collection<?> col) {
         int size = col.size();
         double[] ar = new double[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Double) it.next();
@@ -91,10 +90,10 @@ public final class PrimitiveArrays {
         return ar;
     }
 
-    public static float[] toFloatArray(Collection col) {
+    public static float[] toFloatArray(Collection<?> col) {
         int size = col.size();
         float[] ar = new float[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Float) it.next();
@@ -102,10 +101,10 @@ public final class PrimitiveArrays {
         return ar;
     }
 
-    public static boolean[] toBooleanArray(Collection col) {
+    public static boolean[] toBooleanArray(Collection<?> col) {
         int size = col.size();
         boolean[] ar = new boolean[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Boolean) it.next();
@@ -113,10 +112,10 @@ public final class PrimitiveArrays {
         return ar;
     }
 
-    public static short[] toShortArray(Collection col) {
+    public static short[] toShortArray(Collection<?> col) {
         int size = col.size();
         short[] ar = new short[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Short) it.next();
@@ -124,10 +123,10 @@ public final class PrimitiveArrays {
         return ar;
     }
 
-    public static byte[] toByteArray(Collection col) {
+    public static byte[] toByteArray(Collection<?> col) {
         int size = col.size();
         byte[] ar = new byte[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Byte) it.next();
@@ -135,10 +134,10 @@ public final class PrimitiveArrays {
         return ar;
     }
 
-    public static char[] toCharArray(Collection col) {
+    public static char[] toCharArray(Collection<?> col) {
         int size = col.size();
         char[] ar = new char[size];
-        Iterator it = col.iterator();
+        Iterator<?> it = col.iterator();
         int i = 0;
         while (it.hasNext()) {
             ar[i++] = (Character) it.next();

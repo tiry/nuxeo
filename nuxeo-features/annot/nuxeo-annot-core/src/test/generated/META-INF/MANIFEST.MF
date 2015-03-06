@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateful
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Annotations Test
+Bundle-SymbolicName: org.nuxeo.ecm.annot.nuxeo-annot-core.tests
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.annot.nuxeo-annot-core
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",
+ org.nuxeo.ecm.core.event,org.nuxeo.ecm.core.test,org.nuxeo.ecm.platform
+ .annotations.api;version="[0.0,1)",org.nuxeo.ecm.platform.relations.api
+ ;version="[0.0,1)",org.nuxeo.ecm.platform.relations.api.impl;version="[
+ 0.0,1)",org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runtime.api;versi
+ on="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.nuxeo.runtim
+ e.test,org.nuxeo.runtime.test.runner,org.nuxeo.runtime.transaction
+Nuxeo-Component: OSGI-INF/test-ann-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.annotations,org.nuxeo.ecm.platfo
+ rm.annotations.service
+Require-Bundle: org.nuxeo.ecm.platform.annotations.api
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.model.PropertyNotFoundException;
 import org.nuxeo.ecm.core.uidgen.UIDGenerator;
 import org.nuxeo.ecm.core.uidgen.UIDSequencer;
@@ -133,6 +134,7 @@ public class UIDGeneratorComponent extends DefaultComponent implements UIDGenera
     }
 
     protected void registerSequencers(Extension extension, final Object[] contribs) {
+        NuxeoException errors = new NuxeoException("registering sequencers");
         for (Object contrib : contribs) {
             UIDSequencerProviderDescriptor seqDescriptor = (UIDSequencerProviderDescriptor) contrib;
             String name = seqDescriptor.getName();
@@ -144,18 +146,32 @@ public class UIDGeneratorComponent extends DefaultComponent implements UIDGenera
                 }
                 sequencers.put(name, seq);
                 sequencerContribs.put(name, seqDescriptor);
-            } catch (Exception e) {
-                log.error("Unable to create UIDSequencer with name " + name, e);
+            } catch (Exception cause) {
+                errors.addInfo("Unable to create UIDSequencer with name " + name);
+                errors.addSuppressed(cause);
             }
+        }
+        if (errors.getSuppressed().length > 0) {
+            throw errors;
         }
     }
 
     protected void unregisterSequencers(Extension extension, final Object[] contribs) {
+        NuxeoException errors = new NuxeoException("unregistering sequencers");
         for (Object contrib : contribs) {
             UIDSequencerProviderDescriptor seqDescriptor = (UIDSequencerProviderDescriptor) contrib;
             String name = seqDescriptor.getName();
-            sequencers.remove(name);
+            UIDSequencer seq = sequencers.remove(name);
             sequencerContribs.remove(name);
+            try {
+                seq.dispose();
+            } catch (Exception cause) {
+                errors.addInfo("Unable to dispose UIDSequencer with name " + name);
+                errors.addSuppressed(cause);
+            }
+        }
+        if (errors.getSuppressed().length > 0) {
+            throw errors;
         }
     }
 
@@ -168,7 +184,9 @@ public class UIDGeneratorComponent extends DefaultComponent implements UIDGenera
 
             UIDGenerator generator;
             try {
-                generator = (UIDGenerator) extension.getContext().loadClass(generatorDescriptor.getClassName()).newInstance();
+                generator = (UIDGenerator) extension.getContext()
+                        .loadClass(generatorDescriptor.getClassName())
+                        .newInstance();
             } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }

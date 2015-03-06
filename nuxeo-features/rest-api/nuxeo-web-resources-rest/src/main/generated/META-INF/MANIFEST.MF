@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Web Resources REST
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-web-resources-rest
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.restapi.server.jaxrs.resource.wro;uses:="javax.servlet,javax.servl
+ et.http,javax.ws.rs,javax.ws.rs.core,javax.ws.rs.ext,org.nuxeo.ecm.webe
+ ngine.model,org.nuxeo.ecm.webengine.model.impl";version="0.0.0"
+Fragment-Host: org.nuxeo.ecm.platform.restapi.server
+Import-Package: javax.servlet;version="[3.0,4)",javax.servlet.http;versi
+ on="[3.0,4)",javax.ws.rs;version="[1.1,2)",javax.ws.rs.core;version="[1
+ .1,2)",javax.ws.rs.ext;version="[1.1,2)",org.apache.commons.logging;ver
+ sion="[1.2,2)",org.nuxeo.ecm.webengine.model,org.nuxeo.ecm.webengine.mo
+ del.impl
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

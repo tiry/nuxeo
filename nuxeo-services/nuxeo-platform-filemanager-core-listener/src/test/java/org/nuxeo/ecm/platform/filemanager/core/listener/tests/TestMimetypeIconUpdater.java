@@ -50,13 +50,16 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  */
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.ecm.platform.filemanager.api", //
+@Deploy({ //
+        "org.nuxeo.ecm.platform.query.api", //
+        "org.nuxeo.ecm.platform.filemanager.api", //
         "org.nuxeo.ecm.platform.filemanager.core", //
+        "org.nuxeo.ecm.platform.filemanager.core.listener", //
         "org.nuxeo.ecm.platform.types.api", //
         "org.nuxeo.ecm.platform.types.core", //
 })
-@LocalDeploy({ "org.nuxeo.ecm.platform.filemanager.core.listener:OSGI-INF/filemanager-iconupdater-event-contrib.xml",
-        "org.nuxeo.ecm.platform.filemanager.core.listener.test:OSGI-INF/core-type-contrib.xml" })
+@LocalDeploy({
+        "org.nuxeo.ecm.platform.filemanager.core.listener:OSGI-INF/core-type-contrib.xml" })
 public class TestMimetypeIconUpdater {
 
     @Inject

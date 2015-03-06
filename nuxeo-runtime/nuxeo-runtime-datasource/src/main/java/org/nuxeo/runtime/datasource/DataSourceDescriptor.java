@@ -34,11 +34,11 @@ import javax.sql.DataSource;
 import javax.sql.XADataSource;
 
 import org.apache.commons.logging.LogFactory;
-import org.apache.tomcat.jdbc.naming.GenericNamingResourcesFactory;
 import org.nuxeo.common.xmap.annotation.XNode;
 import org.nuxeo.common.xmap.annotation.XNodeMap;
 import org.nuxeo.common.xmap.annotation.XObject;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.jtajca.NamingResourcesFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -136,7 +136,7 @@ public class DataSourceDescriptor {
             poolReference = new Reference(XADataSource.class.getName(), PoolFactory.class.getName(), null);
             poolReference.add(new StringRefAddr("dataSourceJNDI", xaName));
             xaReference = new Reference(Framework.expandVars(xaDataSource),
-                    GenericNamingResourcesFactory.class.getName(), null);
+                    NamingResourcesFactory.class.getName(), null);
             for (Entry<String, String> e : properties.entrySet()) {
                 String key = e.getKey();
                 String value = Framework.expandVars(e.getValue());

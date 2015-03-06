@@ -18,14 +18,13 @@
  */
 package org.nuxeo.ecm.platform.query.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import javax.inject.Inject;
 
 import org.junit.Test;
 import org.nuxeo.ecm.platform.query.nxql.NXQLQueryBuilder;
-import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.services.config.ConfigurationService;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author <a href="mailto:ei@nuxeo.com">Eugen Ionica</a>
@@ -70,16 +69,17 @@ public class TestTextSearchCleaner extends NXRuntimeTestCase {
         assertEquals("= 'a -b'", NXQLQueryBuilder.serializeFullText("a !#$%&()*+,-./:;<=>?@^`{|}~ -b"));
     }
 
+    @Inject
+    ConfigurationService cs;
+
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.query.api:configuration-test-contrib.xml")
     public void testCustomCleaner() throws Exception {
-        deployContrib("org.nuxeo.ecm.platform.query.api.test", "configuration-test-contrib.xml");
-        ConfigurationService cs = Framework.getService(ConfigurationService.class);
         String s = cs.getProperty(NXQLQueryBuilder.IGNORED_CHARS_KEY);
         assertEquals("&/{}()", s);
         assertNotNull(s);
         assertEquals("= 'a $ b'", NXQLQueryBuilder.serializeFullText("a $ b"));
         assertEquals("= '10.3'", NXQLQueryBuilder.serializeFullText("10.3"));
-        undeployContrib("org.nuxeo.ecm.platform.query.api.test", "configuration-test-contrib.xml");
     }
 
 }

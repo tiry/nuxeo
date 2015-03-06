@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.elasticsearch.nuxeo-elasticsearch-seqgen.tests
+Bundle-SymbolicName: org.nuxeo.elasticsearch.nuxeo-elasticsearch-seqgen.
+ tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.elasticsearch.nuxeo-elasticsearch-seqgen
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.uidgen;version="[0.0,1)",org.nuxeo.elasticsearch.test,org.nuxeo.runt
+ ime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.elasticsearch.seqgen
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

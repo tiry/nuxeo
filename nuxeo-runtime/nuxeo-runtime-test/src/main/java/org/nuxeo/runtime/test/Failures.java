@@ -22,13 +22,13 @@ package org.nuxeo.runtime.test;
 
 import java.util.List;
 
-import junit.framework.AssertionFailedError;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
+
+import junit.framework.AssertionFailedError;
 
 /**
  * Utility class for working with {@link org.junit.runner.Result#getFailures()}

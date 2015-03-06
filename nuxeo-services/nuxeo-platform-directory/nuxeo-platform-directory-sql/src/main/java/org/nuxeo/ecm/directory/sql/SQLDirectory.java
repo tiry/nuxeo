@@ -30,6 +30,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -145,72 +146,78 @@ public class SQLDirectory extends AbstractDirectory {
      * @since 6.0
      */
     protected void initConnection() {
-        Connection sqlConnection = getConnection();
+        Transaction tx = TransactionHelper.suspendTransaction();
         try {
-            dialect = Dialect.createDialect(sqlConnection, null);
-
-            if (config.initDependencies != null) {
-                // initialize dependent directories first
-                final RuntimeService runtime = Framework.getRuntime();
-                DirectoryServiceImpl directoryService = (DirectoryServiceImpl) runtime.getComponent(DirectoryService.NAME);
-                for (String dependency : config.initDependencies) {
-                    log.debug("initializing dependencies first: " + dependency);
-                    Directory dir = directoryService.getDirectory(dependency);
-                    dir.getName();
-                }
-            }
-            // setup table and fields maps
-            table = SQLHelper.addTable(config.tableName, dialect, useNativeCase());
-            SchemaManager schemaManager = Framework.getLocalService(SchemaManager.class);
-            schema = schemaManager.getSchema(config.schemaName);
-            if (schema == null) {
-                throw new DirectoryException("schema not found: " + config.schemaName);
-            }
-            schemaFieldMap = new LinkedHashMap<>();
-            storedFieldNames = new LinkedList<>();
-            boolean hasPrimary = false;
-            for (Field f : schema.getFields()) {
-                String fieldName = f.getName().getLocalName();
-                schemaFieldMap.put(fieldName, f);
-
-                if (!isReference(fieldName)) {
-                    // list of fields that are actually stored in the table of
-                    // the current directory and not read from an external
-                    // reference
-                    storedFieldNames.add(fieldName);
-
-                    boolean isId = fieldName.equals(config.getIdField());
-                    ColumnType type = ColumnType.fromField(f);
-                    if (isId && config.isAutoincrementIdField()) {
-                        type = ColumnType.AUTOINC;
-                    }
-                    Column column = SQLHelper.addColumn(table, fieldName, type, useNativeCase());
-                    if (isId) {
-                        if (config.isAutoincrementIdField()) {
-                            column.setIdentity(true);
-                        }
-                        column.setPrimary(true);
-                        column.setNullable(false);
-                        hasPrimary = true;
-                    }
-                }
-            }
-            if (!hasPrimary) {
-                throw new DirectoryException(String.format(
-                        "Directory '%s' id field '%s' is not present in schema '%s'", getName(), getIdField(),
-                        getSchema()));
-            }
-
-            SQLHelper helper = new SQLHelper(sqlConnection, table, config.dataFileName,
-                    config.getDataFileCharacterSeparator(), config.createTablePolicy);
-            helper.setupTable();
-
-        } finally {
+            Connection sqlConnection = getConnection(true);
             try {
-                sqlConnection.close();
-            } catch (SQLException e) {
-                throw new DirectoryException(e);
+                dialect = Dialect.createDialect(sqlConnection, null);
+
+                if (config.initDependencies != null) {
+                    // initialize dependent directories first
+                    final RuntimeService runtime = Framework.getRuntime();
+                    DirectoryServiceImpl directoryService = (DirectoryServiceImpl) runtime
+                            .getComponent(DirectoryService.NAME);
+                    for (String dependency : config.initDependencies) {
+                        log.debug("initializing dependencies first: " + dependency);
+                        Directory dir = directoryService.getDirectory(dependency);
+                        dir.getName();
+                    }
+                }
+                // setup table and fields maps
+                table = SQLHelper.addTable(config.tableName, dialect, useNativeCase());
+                SchemaManager schemaManager = Framework.getLocalService(SchemaManager.class);
+                schema = schemaManager.getSchema(config.schemaName);
+                if (schema == null) {
+                    throw new DirectoryException("schema not found: " + config.schemaName);
+                }
+                schemaFieldMap = new LinkedHashMap<>();
+                storedFieldNames = new LinkedList<>();
+                boolean hasPrimary = false;
+                for (Field f : schema.getFields()) {
+                    String fieldName = f.getName().getLocalName();
+                    schemaFieldMap.put(fieldName, f);
+
+                    if (!isReference(fieldName)) {
+                        // list of fields that are actually stored in the table of
+                        // the current directory and not read from an external
+                        // reference
+                        storedFieldNames.add(fieldName);
+
+                        boolean isId = fieldName.equals(config.getIdField());
+                        ColumnType type = ColumnType.fromField(f);
+                        if (isId && config.isAutoincrementIdField()) {
+                            type = ColumnType.AUTOINC;
+                        }
+                        Column column = SQLHelper.addColumn(table, fieldName, type, useNativeCase());
+                        if (isId) {
+                            if (config.isAutoincrementIdField()) {
+                                column.setIdentity(true);
+                            }
+                            column.setPrimary(true);
+                            column.setNullable(false);
+                            hasPrimary = true;
+                        }
+                    }
+                }
+                if (!hasPrimary) {
+                    throw new DirectoryException(
+                            String.format("Directory '%s' id field '%s' is not present in schema '%s'", getName(),
+                                    getIdField(), getSchema()));
+                }
+
+                SQLHelper helper = new SQLHelper(sqlConnection, table, config.dataFileName,
+                        config.getDataFileCharacterSeparator(), config.createTablePolicy);
+                helper.setupTable();
+
+            } finally {
+                try {
+                    sqlConnection.close();
+                } catch (SQLException e) {
+                    throw new DirectoryException(e);
+                }
             }
+        } finally {
+            TransactionHelper.resumeTransaction(tx);
         }
     }
 
@@ -241,11 +248,11 @@ public class SQLDirectory extends AbstractDirectory {
         }
     }
 
-    public Connection getConnection() throws DirectoryException {
+    public Connection getConnection(boolean nosharing) throws DirectoryException {
         try {
             if (!StringUtils.isEmpty(config.dataSourceName)) {
                 // try single-datasource non-XA mode
-                Connection connection = ConnectionHelper.getConnection(config.dataSourceName);
+                Connection connection = ConnectionHelper.getConnection(config.dataSourceName, nosharing);
                 if (connection != null) {
                     if (ConnectionHelper.useSingleConnection(config.dataSourceName)) {
                         connection.setAutoCommit(TransactionHelper.isNoTransaction());

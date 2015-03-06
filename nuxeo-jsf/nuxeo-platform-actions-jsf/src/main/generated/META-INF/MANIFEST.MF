@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Actions JSF
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-actions-jsf
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.actions.jsf;uses:="javax.el,javax.faces.context,org.nuxeo
+ .ecm.platform.actions";version="0.0.0",org.nuxeo.ecm.platform.actions.s
+ eam;uses:="javax.el,org.nuxeo.ecm.platform.actions,org.nuxeo.ecm.platfo
+ rm.el";version="0.0.0"
+Import-Package: com.sun.faces.facelets.el;version="[2.2,3)",javax.el,jav
+ ax.faces.application;version="[2.2,3)",javax.faces.context;version="[2.
+ 2,3)",org.apache.commons.lang;version="[2.6,3)",org.jboss.el,org.jboss.
+ el.lang,org.jboss.seam.el,org.nuxeo.ecm.core.api;version="[0.0,1)",org.
+ nuxeo.ecm.platform.actions;version="[0.0,1)",org.nuxeo.ecm.platform.el;
+ version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.util;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/action-widgettypes-contrib.xml,OSGI-INF/action
+ -widgettypes-dev-contrib.xml,OSGI-INF/widgettypes-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

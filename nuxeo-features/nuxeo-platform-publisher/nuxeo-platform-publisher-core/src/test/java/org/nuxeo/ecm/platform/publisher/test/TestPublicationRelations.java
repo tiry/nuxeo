@@ -36,8 +36,8 @@ import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.PathRef;
+import org.nuxeo.ecm.core.test.NoopRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.ecm.core.test.annotations.RepositoryInit;
 import org.nuxeo.ecm.platform.publisher.api.PublicationNode;
 import org.nuxeo.ecm.platform.publisher.api.PublicationTree;
 import org.nuxeo.ecm.platform.publisher.api.PublishedDocument;
@@ -59,7 +59,7 @@ public class TestPublicationRelations extends PublisherTestCase {
 
     private static final Log log = LogFactory.getLog(TestPublicationRelations.class);
 
-    public static class Populate implements RepositoryInit {
+    public static class Populate extends NoopRepositoryInit {
 
         protected static Populate self;
 

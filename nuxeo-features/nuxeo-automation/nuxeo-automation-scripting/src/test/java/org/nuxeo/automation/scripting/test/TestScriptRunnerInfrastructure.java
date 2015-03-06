@@ -59,7 +59,7 @@ import org.nuxeo.ecm.core.api.impl.DocumentModelImpl;
 import org.nuxeo.ecm.core.api.impl.DocumentModelListImpl;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.ecm.platform.test.PlatformFeature;
+import org.nuxeo.ecm.webengine.test.WebEngineFeatureCore;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
@@ -70,12 +70,12 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  * @since 7.2
  */
 @RunWith(FeaturesRunner.class)
-@Features(PlatformFeature.class)
+@Features(WebEngineFeatureCore.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.features", "org.nuxeo.ecm.platform.query.api",
-        "org.nuxeo.ecm.automation.scripting", "org.nuxeo.ecm.platform.web.common" })
-@LocalDeploy({ "org.nuxeo.ecm.automation.scripting.tests:automation-scripting-contrib.xml",
-        "org.nuxeo.ecm.automation.scripting.tests:core-types-contrib.xml" })
+@Deploy({ "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.features", "org.nuxeo.ecm.automation.io", "org.nuxeo.ecm.automation.server",
+        "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.automation.scripting" })
+@LocalDeploy({ "org.nuxeo.ecm.automation.scripting:automation-scripting-contrib.xml",
+        "org.nuxeo.ecm.automation.scripting:core-types-contrib.xml" })
 public class TestScriptRunnerInfrastructure {
 
     protected static String[] attachments = { "att1", "att2", "att3" };

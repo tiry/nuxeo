@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-@XObject("extension")
+@XObject(value="extension", order="target")
 public class ExtensionImpl implements Extension {
 
     // used to generate the extension id if none was provided
@@ -122,7 +122,8 @@ public class ExtensionImpl implements Extension {
     public String getId() {
         if (id == null) {
             if (component != null) {
-                id = component.getName().getName() + '#' + extensionPoint + '.' + (cnt++);
+                id = component.getName().getName()
+                    + '#' + extensionPoint + '.' + (cnt++);
             } else {
                 id = "null#" + extensionPoint + '.' + (cnt++);
             }
@@ -163,7 +164,7 @@ public class ExtensionImpl implements Extension {
         }
     }
 
-    public static ExtensionImpl fromXML(RuntimeContext context, String xml) throws IOException {
+    public static ExtensionImpl fromXML(RuntimeContext context, String xml) throws Exception {
         return reader.read(context, new ByteArrayInputStream(xml.getBytes()));
     }
 

@@ -49,26 +49,23 @@ public class CanRollbackDatabaseTest {
     // don't use LocalDeploy, it fails on SQL Server (deploy is done on a connection with tx)
     @Test(expected = TransactionRuntimeException.class)
     public void testFatalRollback() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.core.management.jtajca.test", "ds-contrib-with-fatal.xml");
-        try {
+        try (AutoCloseable closeable = harness.deployTestContrib("org.nuxeo.ecm.core.management.jtajca",
+                "ds-contrib-with-fatal.xml")) {
             insertWrongReference();
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.core.management.jtajca.test", "ds-contrib-with-fatal.xml");
         }
     }
 
+    // don't use LocalDeploy, it fails on SQL Server (deploy is done on a connection with tx)
     @Test(expected = SQLException.class)
     public void testNoFatalRollback() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.core.management.jtajca.test", "ds-contrib.xml");
-        try {
+        try (AutoCloseable closeable = harness.deployTestContrib("org.nuxeo.ecm.core.management.jtajca",
+                "ds-contrib.xml")) {
             insertWrongReference();
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.core.management.jtajca.test", "ds-contrib.xml");
         }
     }
 
     private void insertWrongReference() throws NamingException, SQLException, AssertionFailedError {
-        DataSource ds = DataSourceHelper.getDataSource("jdbc/repository_test");
+        DataSource ds = DataSourceHelper.getDataSource("rollback");
         {
             try (Connection db = ds.getConnection()) {
                 try (Statement st = db.createStatement()) {

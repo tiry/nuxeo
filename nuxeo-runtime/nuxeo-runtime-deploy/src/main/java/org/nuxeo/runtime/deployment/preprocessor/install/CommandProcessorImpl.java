@@ -41,7 +41,7 @@ public class CommandProcessorImpl implements CommandProcessor {
         return commands;
     }
 
-    // TODO: I think this should throw an exception in case of failure.
+    // TODO: I think this zshould throw an exception in case of failure.
     @Override
     public void exec(CommandContext ctx) {
         try {

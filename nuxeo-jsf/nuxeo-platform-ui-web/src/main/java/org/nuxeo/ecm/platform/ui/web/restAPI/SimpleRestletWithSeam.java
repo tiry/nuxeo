@@ -21,9 +21,9 @@
 
 package org.nuxeo.ecm.platform.ui.web.restAPI;
 
-import java.io.Serializable;
-
 import static org.jboss.seam.ScopeType.EVENT;
+
+import java.io.Serializable;
 
 import org.jboss.seam.annotations.In;
 import org.jboss.seam.annotations.Name;

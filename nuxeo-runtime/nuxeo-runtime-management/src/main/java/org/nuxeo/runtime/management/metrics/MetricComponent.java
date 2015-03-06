@@ -19,6 +19,8 @@
 
 package org.nuxeo.runtime.management.metrics;
 
+import java.io.IOException;
+
 import org.javasimon.SimonManager;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.DefaultComponent;
@@ -81,7 +83,13 @@ public class MetricComponent extends DefaultComponent {
         if (SimonManager.callback() != null) {
             SimonManager.callback().removeCallback(registeringCB);
         }
-        register.unregisterAll();
+        try {
+            serializer.closeOutput();
+        } catch (IOException cause) {
+            throw new AssertionError("Cannot close serializer", cause);
+        } finally {
+            register.unregisterAll();
+        }
     }
 
 }

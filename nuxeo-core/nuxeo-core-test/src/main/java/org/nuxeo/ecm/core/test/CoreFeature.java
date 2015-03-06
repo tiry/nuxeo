@@ -19,7 +19,6 @@
  */
 package org.nuxeo.ecm.core.test;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
@@ -44,6 +43,7 @@ import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.core.test.annotations.RepositoryInit;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.jtajca.NuxeoContainer;
+import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.model.URLStreamRef;
 import org.nuxeo.runtime.test.runner.Defaults;
 import org.nuxeo.runtime.test.runner.Deploy;
@@ -51,7 +51,6 @@ import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.test.runner.RuntimeFeature;
-import org.nuxeo.runtime.test.runner.RuntimeHarness;
 import org.nuxeo.runtime.test.runner.ServiceProvider;
 import org.nuxeo.runtime.test.runner.SimpleFeature;
 import org.nuxeo.runtime.transaction.TransactionHelper;
@@ -63,18 +62,19 @@ import com.google.inject.Scope;
  * <p>
  * In addition, by injecting the feature itself, some helper methods are available to open new sessions.
  */
-@Deploy({ "org.nuxeo.runtime.management", //
+@Deploy({
         "org.nuxeo.ecm.core.schema", //
         "org.nuxeo.ecm.core.query", //
         "org.nuxeo.ecm.core.api", //
         "org.nuxeo.ecm.core.event", //
         "org.nuxeo.ecm.core", //
-        "org.nuxeo.ecm.core.test", //
+        "org.nuxeo.ecm.core.io", //
         "org.nuxeo.ecm.core.mimetype", //
         "org.nuxeo.ecm.core.convert", //
         "org.nuxeo.ecm.core.convert.plugins", //
         "org.nuxeo.ecm.core.storage", //
         "org.nuxeo.ecm.core.storage.sql", //
+        "org.nuxeo.ecm.core.storage.sql.extensions", //
         "org.nuxeo.ecm.core.storage.sql.test", //
         "org.nuxeo.ecm.core.storage.dbs", //
         "org.nuxeo.ecm.core.storage.mem", //
@@ -116,15 +116,14 @@ public class CoreFeature extends SimpleFeature {
     }
 
     public StorageConfiguration getStorageConfiguration() {
-        if (storageConfiguration == null) {
-            storageConfiguration = new StorageConfiguration();
-        }
         return storageConfiguration;
     }
 
     @Override
     public void initialize(FeaturesRunner runner) {
-        runner.getFeature(RuntimeFeature.class).addServiceProvider(new CoreSessionServiceProvider());
+        storageConfiguration = new StorageConfiguration(runner);
+        RuntimeFeature feature = runner.getFeature(RuntimeFeature.class);
+        feature.addServiceProvider(new CoreSessionServiceProvider());
         // init from RepositoryConfig annotations
         RepositoryConfig repositoryConfig = runner.getConfig(RepositoryConfig.class);
         if (repositoryConfig == null) {
@@ -145,15 +144,11 @@ public class CoreFeature extends SimpleFeature {
 
     @Override
     public void start(FeaturesRunner runner) {
-        try {
-            RuntimeHarness harness = runner.getFeature(RuntimeFeature.class).getHarness();
-            URL blobContribUrl = getStorageConfiguration().getBlobManagerContrib(runner);
-            harness.getContext().deploy(new URLStreamRef(blobContribUrl));
-            URL repoContribUrl = getStorageConfiguration().getRepositoryContrib(runner);
-            harness.getContext().deploy(new URLStreamRef(repoContribUrl));
-        } catch (IOException e) {
-            throw new NuxeoException(e);
-        }
+        RuntimeContext context = Framework.getRuntime().getContext("org.nuxeo.ecm.core.test");
+        URL blobContribUrl = getStorageConfiguration().getBlobManagerContrib(runner);
+        context.deploy(new URLStreamRef(blobContribUrl));
+        URL repoContribUrl = getStorageConfiguration().getRepositoryContrib(runner);
+        context.deploy(new URLStreamRef(repoContribUrl));
     }
 
     @Override
@@ -189,9 +184,9 @@ public class CoreFeature extends SimpleFeature {
         int finalOpenSessions = core.getNumberOfSessions();
         int leakedOpenSessions = finalOpenSessions - initialOpenSessions;
         if (leakedOpenSessions > 0) {
-            log.error(String.format("There are %s open session(s) at tear down; it seems "
-                    + "the test leaked %s session(s).", Integer.valueOf(finalOpenSessions),
-                    Integer.valueOf(leakedOpenSessions)));
+            log.error(String.format(
+                    "There are %s open session(s) at tear down; it seems " + "the test leaked %s session(s).",
+                    Integer.valueOf(finalOpenSessions), Integer.valueOf(leakedOpenSessions)));
         }
     }
 
@@ -232,6 +227,8 @@ public class CoreFeature extends SimpleFeature {
         if (TransactionHelper.isTransactionMarkedRollback()) { // ensure tx is
                                                                // active
             TransactionHelper.commitOrRollbackTransaction();
+        }
+        if (!TransactionHelper.isTransactionActive()) {
             TransactionHelper.startTransaction();
         }
         if (session == null) {
@@ -240,7 +237,8 @@ public class CoreFeature extends SimpleFeature {
         try {
             log.trace("remove everything except root");
             session.removeChildren(new PathRef("/"));
-            log.trace("remove orphan versions as OrphanVersionRemoverListener is not triggered by CoreSession#removeChildren");
+            log.trace(
+                    "remove orphan versions as OrphanVersionRemoverListener is not triggered by CoreSession#removeChildren");
             String rootDocumentId = session.getRootDocument().getId();
             IterableQueryResult results = session.queryAndFetch("SELECT ecm:uuid FROM Document, Relation", NXQL.NXQL);
             for (Map<String, Serializable> result : results) {

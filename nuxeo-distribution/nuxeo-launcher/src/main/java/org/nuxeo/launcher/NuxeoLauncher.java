@@ -75,10 +75,6 @@ import org.artofsolving.jodconverter.process.WindowsProcessManager;
 import org.artofsolving.jodconverter.util.PlatformUtils;
 import org.json.JSONException;
 import org.json.XML;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.codec.Crypto;
 import org.nuxeo.common.codec.CryptoProperties;
@@ -86,6 +82,7 @@ import org.nuxeo.connect.identity.LogicalInstanceIdentifier.NoCLID;
 import org.nuxeo.connect.update.LocalPackage;
 import org.nuxeo.connect.update.PackageException;
 import org.nuxeo.connect.update.Version;
+import org.nuxeo.launcher.commons.ThreadedStreamGobbler;
 import org.nuxeo.launcher.config.ConfigurationException;
 import org.nuxeo.launcher.config.ConfigurationGenerator;
 import org.nuxeo.launcher.connect.ConnectBroker;
@@ -100,8 +97,10 @@ import org.nuxeo.launcher.info.KeyValueInfo;
 import org.nuxeo.launcher.info.MessageInfo;
 import org.nuxeo.launcher.info.PackageInfo;
 import org.nuxeo.launcher.monitoring.StatusServletClient;
-import org.nuxeo.log4j.Log4JHelper;
-import org.nuxeo.log4j.ThreadedStreamGobbler;
+import org.nuxeo.runtime.logging.LoggingConfigurator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * @author jcarsique
@@ -2134,7 +2133,7 @@ public abstract class NuxeoLauncher {
      */
     protected static void setQuiet() {
         quiet = true;
-        Log4JHelper.setQuiet(Log4JHelper.CONSOLE_APPENDER_NAME);
+        LoggingConfigurator.SELF.setQuiet("CONSOLE");
     }
 
     /**
@@ -2146,7 +2145,7 @@ public abstract class NuxeoLauncher {
         if (categories == null) {
             categories = new String[] { defaultCategory };
         }
-        Log4JHelper.setDebug(categories, true, true, new String[] { Log4JHelper.CONSOLE_APPENDER_NAME, "FILE" });
+        LoggingConfigurator.SELF.setDebug(categories, true, true, new String[] { "CONSOLE", "FILE" });
     }
 
     /**
@@ -2164,8 +2163,8 @@ public abstract class NuxeoLauncher {
      */
     protected static void setDebug(String categories, boolean activateDebug) {
         debug = activateDebug;
-        Log4JHelper.setDebug(categories, activateDebug, true,
-                new String[] { Log4JHelper.CONSOLE_APPENDER_NAME, "FILE" });
+        LoggingConfigurator.SELF.setDebug(categories.split(","), activateDebug, true,
+                new String[] { "CONSOLE", "FILE" });
     }
 
     /**

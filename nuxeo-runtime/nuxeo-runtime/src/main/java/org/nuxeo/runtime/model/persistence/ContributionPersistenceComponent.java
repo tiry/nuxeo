@@ -18,7 +18,6 @@
  */
 package org.nuxeo.runtime.model.persistence;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.nuxeo.runtime.RuntimeServiceException;
@@ -47,7 +46,7 @@ public class ContributionPersistenceComponent extends DefaultComponent implement
     @Override
     public void activate(ComponentContext context) {
         super.activate(context);
-        this.ctx = context.getRuntimeContext();
+        ctx = context.getRuntimeContext();
         storage = new FileSystemStorage();
     }
 
@@ -104,28 +103,18 @@ public class ContributionPersistenceComponent extends DefaultComponent implement
     }
 
     @Override
-    public synchronized boolean installContribution(Contribution contrib) {
-        RegistrationInfo ri;
-        try {
-            ri = ctx.deploy(contrib);
-        } catch (IOException e) {
-            throw new RuntimeServiceException(e);
+    public  boolean installContribution(Contribution contrib) {
+        RegistrationInfo[] ris = ctx.deploy(contrib);
+        for (RegistrationInfo ri:ris) {
+            ri.setPersistent(true);
         }
-        if (ri == null) {
-            return false;
-        }
-        ri.setPersistent(true);
-        return true;
+        return ris.length > 0;
     }
 
     @Override
     public boolean uninstallContribution(Contribution contrib) {
         boolean ret = isInstalled(contrib);
-        try {
-            ctx.undeploy(contrib);
-        } catch (IOException e) {
-            throw new RuntimeServiceException(e);
-        }
+        ctx.undeploy(contrib);
         return ret;
     }
 

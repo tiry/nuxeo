@@ -21,6 +21,9 @@
 
 package org.nuxeo.ecm.platform.rendering.test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,13 +31,14 @@ import java.io.Reader;
 import java.io.StringWriter;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
-
+import org.junit.runner.RunWith;
 import org.nuxeo.ecm.platform.rendering.wiki.WikiSerializer;
 import org.nuxeo.ecm.platform.rendering.wiki.extensions.PatternFilter;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.wikimodel.wem.WikiParserException;
 
 /** @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a> */
+@RunWith(FeaturesRunner.class)
 public class TestWiki {
 
     @Test
@@ -50,9 +54,6 @@ public class TestWiki {
 
         StringWriter writer = new StringWriter();
         engine.serialize(reader, writer);
-
-        // System.out.println(writer.getBuffer());
-        // System.out.println(">>>>>>> " + ((System.currentTimeMillis() - s) / 1000));
     }
 
     @Test
@@ -68,7 +69,6 @@ public class TestWiki {
         StringWriter writer = new StringWriter();
         engine.serialize(reader, writer);
 
-        // System.out.println(writer.getBuffer());
     }
 
     @Test
@@ -89,7 +89,6 @@ public class TestWiki {
         assertTrue(out.contains("<img src="));
         assertFalse(out.contains("<script"));
 
-        System.out.println(out);
     }
 
 }

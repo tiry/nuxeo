@@ -236,6 +236,22 @@ public abstract class AbstractTransientStore implements TransientStore {
         return (int) getStorageSize() / (1024 * 1024);
     }
 
+    protected File getCachingDirectory() {
+        if (cacheDir == null) {
+            File data = new File(Environment.getDefault().getData(), config.getName());
+            if (data.exists()) {
+                try {
+                    FileUtils.deleteDirectory(data);
+                } catch (IOException cause) {
+                    throw new RuntimeException("Cannot create cache dir " + data, cause);
+                }
+            }
+            data.mkdirs();
+            return cacheDir = data.getAbsoluteFile();
+        }
+        return cacheDir;
+    }
+
     @Override
     public void doGC() {
         log.debug(String.format("Performing GC for TransientStore %s", config.getName()));

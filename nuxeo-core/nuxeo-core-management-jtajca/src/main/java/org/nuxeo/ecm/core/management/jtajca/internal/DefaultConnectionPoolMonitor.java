@@ -32,8 +32,6 @@ import org.apache.geronimo.connector.outbound.AbstractConnectionManager;
 import org.apache.geronimo.connector.outbound.AbstractConnectionManager.Interceptors;
 import org.apache.geronimo.connector.outbound.ConnectionInfo;
 import org.apache.geronimo.connector.outbound.ConnectionInterceptor;
-import org.apache.log4j.MDC;
-import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.management.jtajca.ConnectionPoolMonitor;
 import org.nuxeo.ecm.core.storage.sql.Mapper;
 import org.nuxeo.ecm.core.storage.sql.Mapper.Identification;
@@ -41,6 +39,7 @@ import org.nuxeo.ecm.core.storage.sql.SessionImpl;
 import org.nuxeo.ecm.core.storage.sql.SoftRefCachingMapper;
 import org.nuxeo.ecm.core.storage.sql.ra.ManagedConnectionImpl;
 import org.nuxeo.runtime.metrics.MetricsService;
+import org.slf4j.MDC;
 import org.tranql.connector.AbstractManagedConnection;
 
 import com.codahale.metrics.JmxAttributeGauge;
@@ -116,7 +115,8 @@ public class DefaultConnectionPoolMonitor implements ConnectionPoolMonitor {
             Field field = field(stack.getClass(), "next");
             ConnectionInterceptor next = fetch(field, stack);
             save(field, stack, enhanceStack(next));
-        } catch (RuntimeException e) {;
+        } catch (RuntimeException e) {
+            ;
         }
         return (ConnectionInterceptor) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                 new Class[] { ConnectionInterceptor.class }, new StackHandler(stack));
@@ -148,11 +148,13 @@ public class DefaultConnectionPoolMonitor implements ConnectionPoolMonitor {
                 if (args != null && args.length > 0) {
                     ConnectionInfo info = (ConnectionInfo) args[0];
                     ManagedConnection connection = info.getManagedConnectionInfo().getManagedConnection();
-                    IdProvider midProvider = guessProvider(connection);
-                    if (name.startsWith("get")) {
-                        MDC.put(midProvider.key(), midProvider.id(connection));
-                    } else if (name.startsWith("return")) {
-                        MDC.remove(midProvider.key());
+                    if (connection != null) {
+                        IdProvider midProvider = guessProvider(connection);
+                        if (name.startsWith("get")) {
+                            MDC.put(midProvider.key(), midProvider.id(connection).toString());
+                        } else if (name.startsWith("return")) {
+                            MDC.remove(midProvider.key());
+                        }
                     }
                 }
             }
@@ -214,12 +216,7 @@ public class DefaultConnectionPoolMonitor implements ConnectionPoolMonitor {
         if (mapper instanceof SoftRefCachingMapper) {
             mapper = fetch(WRAPPED_FIELD, mapper);
         }
-        try {
-            return mapper.getIdentification();
-        } catch (NuxeoException e) {
-            log.error("Cannot fetch mapper identification", e);
-            return null;
-        }
+        return mapper.getIdentification();
     }
 
     protected ObjectInstance self;

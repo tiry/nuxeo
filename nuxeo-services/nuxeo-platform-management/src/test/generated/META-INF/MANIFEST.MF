@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-management.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-management.te
+ sts
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-management
+Import-Package: javax.inject,javax.management,org.junit,org.junit.runner
+ ,org.nuxeo.ecm.core.management.api;version="[0.0,1)",org.nuxeo.ecm.core
+ .test,org.nuxeo.ecm.core.test.annotations,org.nuxeo.ecm.platform.manage
+ ment.adapters,org.nuxeo.ecm.platform.management.statuses,org.nuxeo.runt
+ ime.management;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,
+ 1)",org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.management.core.adapters,org.nux
+ eo.ecm.platform.management.core.probes
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

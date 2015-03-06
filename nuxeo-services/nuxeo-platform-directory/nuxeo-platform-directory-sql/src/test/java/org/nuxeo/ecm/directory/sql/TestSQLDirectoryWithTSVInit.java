@@ -39,8 +39,8 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-schema-override.xml",
-        "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-tsv-bundle.xml" })
+@LocalDeploy({
+        "org.nuxeo.ecm.directory.sql:test-sql-directories-tsv-bundle.xml" })
 public class TestSQLDirectoryWithTSVInit {
 
     private static final String SCHEMA = "user";
@@ -56,7 +56,7 @@ public class TestSQLDirectoryWithTSVInit {
             assertEquals("AdministratorTSV", dm.getProperty(SCHEMA, "username"));
             assertEquals("AdministratorTSV", dm.getProperty(SCHEMA, "password"));
             assertEquals(Long.valueOf(10), dm.getProperty(SCHEMA, "intField"));
-            TestSQLDirectory.assertCalendarEquals(TestSQLDirectory.getCalendar(1982, 3, 25, 16, 30, 47, 123),
+            SQLDirectoryTestSuite.assertCalendarEquals(SQLDirectoryTestSuite.getCalendar(1982, 3, 25, 16, 30, 47, 123),
                     (Calendar) dm.getProperty(SCHEMA, "dateField"));
         }
     }

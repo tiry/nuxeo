@@ -28,33 +28,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.nuxeo.ecm.platform.usermanager.UserManager.MatchType;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author Florent Guillaume
  */
-public class TestUserService extends NXRuntimeTestCase {
-
-    UserManager userManager;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployContrib("org.nuxeo.ecm.platform.usermanager", "OSGI-INF/UserService.xml");
-        deployContrib("org.nuxeo.ecm.platform.usermanager.tests", "test-userservice-config.xml");
-        userManager = Framework.getService(UserManager.class);
-    }
-
-    @Test
-    public void testGetUserManagerFromFramework() {
-        assertNotNull(userManager);
-    }
+@LocalDeploy({ //
+        "org.nuxeo.ecm.platform.usermanager:test-userservice-config.xml" //
+})
+public class TestUserService extends UserManagerTestCase {
 
     @Test
     public void testConfig() throws Exception {
@@ -64,28 +49,25 @@ public class TestUserService extends NXRuntimeTestCase {
         assertEquals(Arrays.asList("tehroot"), fum.defaultAdministratorIds);
         assertEquals(Collections.<String> emptyList(), fum.administratorsGroups);
         assertEquals("defgr", userManager.getDefaultGroup());
-        assertEquals("name", userManager.getUserSortField());
-        assertEquals("sn", fum.groupSortField);
-        assertEquals("somedir", fum.userDirectoryName);
-        assertEquals("mail", fum.userEmailField);
+        assertEquals("username", userManager.getUserSortField());
+        assertEquals("groupname", fum.groupSortField);
+        assertEquals("userDirectory", fum.userDirectoryName);
+        assertEquals("email", fum.userEmailField);
         // append mode:
-        assertEquals(new HashSet<String>(Arrays.asList("first", "last", "username", "firstName", "lastName", "email")),
+        assertEquals(new HashSet<String>(Arrays.asList("firstName", "lastName", "username")),
                 fum.getUserSearchFields());
         assertEquals(MatchType.SUBSTRING, fum.userSearchFields.get("username"));
         assertEquals(MatchType.SUBSTRING, fum.userSearchFields.get("firstName"));
         assertEquals(MatchType.SUBSTRING, fum.userSearchFields.get("lastName"));
-        assertEquals(MatchType.SUBSTRING, fum.userSearchFields.get("first"));
-        assertEquals(MatchType.EXACT, fum.userSearchFields.get("last"));
-        assertEquals(MatchType.SUBSTRING, fum.userSearchFields.get("email"));
-        assertEquals("somegroupdir", fum.groupDirectoryName);
+        assertEquals("groupDirectory", fum.groupDirectoryName);
         assertEquals("members", fum.groupMembersField);
-        assertEquals("subg", fum.groupSubGroupsField);
-        assertEquals("parentg", fum.groupParentGroupsField);
+        assertEquals("subGroups", fum.groupSubGroupsField);
+        assertEquals("parentGroups", fum.groupParentGroupsField);
 
         // anonymous user
         Map<String, Serializable> props = new HashMap<String, Serializable>();
-        props.put("first", "Anonymous");
-        props.put("last", "Coward");
+        props.put("firstName", "Anonymous");
+        props.put("lastName", "Coward");
         assertEquals("Guest", fum.getAnonymousUserId());
         assertEquals(props, fum.anonymousUser.getProperties());
 
@@ -97,12 +79,12 @@ public class TestUserService extends NXRuntimeTestCase {
         assertNotNull(customAdmin);
         assertEquals("MyCustomAdministrator", customAdmin.getId());
         assertEquals(1, customAdmin.getGroups().size());
-        assertTrue(customAdmin.getGroups().contains("administrators"));
+        assertTrue(customAdmin.getGroups().contains("myAdministrators"));
         assertEquals("secret", customAdmin.getPassword());
 
         props.clear();
-        props.put("first", "My Custom");
-        props.put("last", "Administrator");
+        props.put("firstName", "My Custom");
+        props.put("lastName", "Administrator");
         assertEquals(props, customAdmin.getProperties());
         // custom member
         assertTrue(fum.virtualUsers.containsKey("MyCustomMember"));
@@ -110,7 +92,6 @@ public class TestUserService extends NXRuntimeTestCase {
         VirtualUser customMember = fum.virtualUsers.get("MyCustomMember");
         assertNotNull(customMember);
         assertEquals("MyCustomMember", customMember.getId());
-        assertEquals(2, customMember.getGroups().size());
         assertTrue(customMember.getGroups().contains("members"));
         assertTrue(customMember.getGroups().contains("othergroup"));
         assertEquals("secret", customMember.getPassword());
@@ -122,18 +103,17 @@ public class TestUserService extends NXRuntimeTestCase {
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.usermanager:test-userservice-override-config.xml")
     public void testOverride() throws Exception {
-        deployContrib("org.nuxeo.ecm.platform.usermanager.tests", "test-userservice-override-config.xml");
-        userManager = Framework.getService(UserManager.class);
-        FakeUserManagerImpl fum = (FakeUserManagerImpl) userManager;
+        FakeUserManagerImpl fum = (FakeUserManagerImpl) Framework.getService(UserManager.class);
         assertEquals(Arrays.asList("tehroot", "bob", "bobette"), fum.defaultAdministratorIds);
         assertEquals(Arrays.asList("myAdministrators"), fum.administratorsGroups);
-        assertEquals("id", userManager.getUserSortField());
+        assertEquals("username", userManager.getUserSortField());
         // the rest should be unchanged
         assertEquals("search_only", userManager.getUserListingMode());
         assertEquals("search_oh_yeah", userManager.getGroupListingMode());
         assertEquals("defgr", userManager.getDefaultGroup());
-        assertEquals("sn", fum.groupSortField);
+        assertEquals("groupname", fum.groupSortField);
         // anonymous user removed
         assertNull(fum.anonymousUser);
 
@@ -160,9 +140,9 @@ public class TestUserService extends NXRuntimeTestCase {
     public void testValidatePassword() throws Exception {
         FakeUserManagerImpl fum = (FakeUserManagerImpl) userManager;
         assertTrue(fum.validatePassword(""));
-        deployContrib("org.nuxeo.ecm.platform.usermanager.tests", "test-userservice-override-config.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.usermanager", "test-userservice-override-config.xml");
         userManager = Framework.getService(UserManager.class);
-        fum = (FakeUserManagerImpl) userManager;
+        fum = (FakeUserManagerImpl) Framework.getService(UserManager.class);
         assertFalse(fum.validatePassword(""));
         assertFalse(fum.validatePassword("azerty"));
         assertFalse(fum.validatePassword("az\u00e9rtyyy"));

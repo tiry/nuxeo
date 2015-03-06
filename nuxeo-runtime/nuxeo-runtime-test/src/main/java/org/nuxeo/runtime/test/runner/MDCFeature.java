@@ -18,11 +18,12 @@
  */
 package org.nuxeo.runtime.test.runner;
 
-import org.apache.log4j.MDC;
 import org.junit.runners.model.FrameworkMethod;
+import org.slf4j.MDC;
 
 import com.google.inject.Binder;
 
+@Features(LoggingFeature.class)
 public class MDCFeature implements RunnerFeature {
 
     protected static final String F_TEST = "fTest";
@@ -30,6 +31,10 @@ public class MDCFeature implements RunnerFeature {
     protected static final String F_SUITE = "fSuite";
 
     protected static final String F_STATE = "fState";
+
+    public MDCFeature() {
+        super();
+    }
 
     @Override
     public void initialize(FeaturesRunner runner) throws Exception {
@@ -59,14 +64,12 @@ public class MDCFeature implements RunnerFeature {
     @Override
     public void testCreated(Object test) throws Exception {
         MDC.put(F_STATE, "testCreated");
-        MDC.put(F_SUITE, test.getClass());
+        MDC.put(F_SUITE, test.getClass().getName());
     }
 
     @Override
     public void stop(FeaturesRunner runner) throws Exception {
-        MDC.remove(F_STATE);
-        MDC.remove(F_SUITE);
-        MDC.remove(F_TEST);
+        MDC.clear();
     }
 
     @Override
@@ -89,6 +92,14 @@ public class MDCFeature implements RunnerFeature {
     public void afterMethodRun(FeaturesRunner runner, FrameworkMethod method, Object test) throws Exception {
         MDC.put(F_STATE, "afterMethodRun");
         MDC.remove(F_TEST);
+    }
+
+    public void put(String key, String value) {
+        MDC.put(key, value);
+    }
+
+    public void remove(String key) {
+        MDC.remove(key);
     }
 
 }

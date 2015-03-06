@@ -18,18 +18,24 @@
  */
 package org.nuxeo.ecm.core.management.jtajca;
 
-import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
+import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.work.api.WorkManager;
+import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.transaction.TransactionHelper;
 
 /**
  * @author matic
@@ -39,36 +45,49 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 public class CanMonitorConnectionPoolTest {
 
     @Inject
-    @Named("repository/test")
-    protected ConnectionPoolMonitor repo;
+    JtajcaManagementFeature feature;
 
     @Inject
-    @Named("jdbc/repository_test")
-    protected ConnectionPoolMonitor db;
+    WorkManager works;
 
     @Inject
-    CoreSession repository;
+    CoreSession repo;
 
-    @Test
-    public void areMonitorsInstalled() {
-        isMonitorInstalled(repo);
-        isMonitorInstalled(db);
+    ConnectionPoolMonitor dbMonitor;
+
+    ConnectionPoolMonitor repoMonitor;
+
+    @Before
+    public void lookupMonitors() {
+        repoMonitor = feature.lookup(ConnectionPoolMonitor.class,
+                Framework.expandVars("repository/${nuxeo.test.vcs.repository}"));
+        dbMonitor = feature.lookup(ConnectionPoolMonitor.class,
+                Framework.expandVars("jdbc/${nuxeo.test.vcs.database}"));
     }
 
     @Test
-    public void areConnectionsOpened() {
-        isConnectionOpened(repo);
-        isConnectionOpened(db);
+    public void areMonitorsInstalled() {
+        isMonitorInstalled(repoMonitor);
+        isMonitorInstalled(dbMonitor);
+    }
+
+    @Test
+    public void indexerWorkDoesNotLeak() throws InterruptedException {
+        int repoCount = repoMonitor.getConnectionCount();
+        int dbCount = dbMonitor.getConnectionCount();
+        DocumentModel doc = repo.createDocumentModel("/", "note", "Note");
+        repo.createDocument(doc);
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+        works.awaitCompletion(10, TimeUnit.SECONDS);
+        assertThat(repoCount, is(repoMonitor.getConnectionCount()));
+        assertThat(dbCount, is(dbMonitor.getConnectionCount()));
+
     }
 
     protected void isMonitorInstalled(ConnectionPoolMonitor monitor) {
         assertThat(monitor, notNullValue());
         monitor.getConnectionCount(); // throw exception is monitor not present
-    }
-
-    protected void isConnectionOpened(ConnectionPoolMonitor monitor) {
-        int count = monitor.getConnectionCount();
-        assertThat(count, greaterThan(0));
     }
 
 }

@@ -27,20 +27,20 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.io.FileDeleteStrategy;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.collections.ListenerList;
+import org.nuxeo.common.trycompanion.TryCompanion;
 import org.nuxeo.runtime.RuntimeService;
 import org.nuxeo.runtime.RuntimeServiceEvent;
 import org.nuxeo.runtime.RuntimeServiceException;
@@ -66,8 +66,6 @@ import org.nuxeo.runtime.trackers.files.FileEventTracker;
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
 public final class Framework {
-
-    private static final Log log = LogFactory.getLog(Framework.class);
 
     private static Boolean testModeSet;
 
@@ -100,7 +98,8 @@ public final class Framework {
      */
     private static RuntimeService runtime;
 
-    private static final ListenerList listeners = new ListenerList();
+    private static final ListenerList<RuntimeServiceListener> listeners = new ListenerList<>(
+            RuntimeServiceListener.class);
 
     /**
      * A class loader used to share resources between all bundles.
@@ -112,12 +111,6 @@ public final class Framework {
      * ${nuxeo_home}/data
      */
     protected static SharedResourceLoader resourceLoader;
-
-    /**
-     * Whether or not services should be exported as OSGI services. This is controlled by the ${ecr.osgi.services}
-     * property. The default is false.
-     */
-    protected static Boolean isOSGiServiceSupported;
 
     // Utility class.
     private Framework() {
@@ -141,7 +134,7 @@ public final class Framework {
         } catch (MalformedURLException e) {
             throw new RuntimeServiceException(e);
         }
-        resourceLoader = new SharedResourceLoader(new URL[] { url }, Framework.class.getClassLoader());
+        resourceLoader = new SharedResourceLoader(new URL[] { url }, null);
     }
 
     /**
@@ -183,11 +176,8 @@ public final class Framework {
     }
 
     public static void shutdown() {
-        if (runtime == null) {
-            throw new IllegalStateException("runtime not exist");
-        }
         try {
-            runtime.stop();
+            getRuntime().stop();
         } finally {
             runtime = null;
         }
@@ -198,7 +188,7 @@ public final class Framework {
      *
      * @return true if the runtime was initialized, false otherwise
      */
-    public static synchronized boolean isInitialized() {
+    public static boolean isInitialized() {
         return runtime != null;
     }
 
@@ -212,6 +202,7 @@ public final class Framework {
      * @return the runtime service instance
      */
     public static RuntimeService getRuntime() {
+        checkRuntimeInitialized();
         return runtime;
     }
 
@@ -223,9 +214,7 @@ public final class Framework {
         if (provider != null) {
             return provider.getService(serviceClass);
         }
-        checkRuntimeInitialized();
-        // TODO impl a runtime service provider
-        return runtime.getService(serviceClass);
+        return getRuntime().getService(serviceClass);
     }
 
     /**
@@ -249,8 +238,7 @@ public final class Framework {
      * @throws LoginException on login failure
      */
     public static LoginContext login() throws LoginException {
-        checkRuntimeInitialized();
-        LoginService loginService = runtime.getService(LoginService.class);
+        LoginService loginService = getRuntime().getService(LoginService.class);
         if (loginService != null) {
             return loginService.login();
         }
@@ -266,8 +254,7 @@ public final class Framework {
      * @throws LoginException on login failure
      */
     public static LoginContext loginAs(String username) throws LoginException {
-        checkRuntimeInitialized();
-        LoginService loginService = runtime.getService(LoginService.class);
+        LoginService loginService = getService(LoginService.class);
         if (loginService != null) {
             return loginService.loginAs(username);
         }
@@ -295,8 +282,7 @@ public final class Framework {
      * @throws LoginException if login failed
      */
     public static LoginContext login(String username, Object password) throws LoginException {
-        checkRuntimeInitialized();
-        LoginService loginService = runtime.getService(LoginService.class);
+        LoginService loginService = getService(LoginService.class);
         if (loginService != null) {
             return loginService.login(username, password);
         }
@@ -311,8 +297,7 @@ public final class Framework {
      * @throws LoginException
      */
     public static LoginContext login(CallbackHandler cbHandler) throws LoginException {
-        checkRuntimeInitialized();
-        LoginService loginService = runtime.getService(LoginService.class);
+        LoginService loginService = getService(LoginService.class);
         if (loginService != null) {
             return loginService.login(cbHandler);
         }
@@ -320,9 +305,14 @@ public final class Framework {
     }
 
     public static void sendEvent(RuntimeServiceEvent event) {
-        Object[] listenersArray = listeners.getListeners();
-        for (Object listener : listenersArray) {
-            ((RuntimeServiceListener) listener).handleEvent(event);
+        try {
+            TryCompanion.<Void> of(RuntimeException.class)
+                    .forEachAndCollect(
+                            Arrays.stream(listeners.getListeners()),
+                            listener -> listener.handleEvent(event))
+                    .orElseThrow(() -> new RuntimeServiceException("listener errors"));
+        } catch (RuntimeServiceException errors) {
+            LogFactory.getLog(Framework.class).error("Caught errors while handling " + event, errors);
         }
     }
 
@@ -372,8 +362,7 @@ public final class Framework {
      * @return the property value if any otherwise the default value
      */
     public static String getProperty(String key, String defValue) {
-        checkRuntimeInitialized();
-        return runtime.getProperty(key, defValue);
+        return getRuntime().getProperty(key, defValue);
     }
 
     /**
@@ -382,8 +371,7 @@ public final class Framework {
      * @return the framework properties map. Never returns null.
      */
     public static Properties getProperties() {
-        checkRuntimeInitialized();
-        return runtime.getProperties();
+        return getRuntime().getProperties();
     }
 
     /**
@@ -394,15 +382,7 @@ public final class Framework {
      * System properties are also expanded.
      */
     public static String expandVars(String expression) {
-        checkRuntimeInitialized();
-        return runtime.expandVars(expression);
-    }
-
-    public static boolean isOSGiServiceSupported() {
-        if (isOSGiServiceSupported == null) {
-            isOSGiServiceSupported = Boolean.valueOf(isBooleanPropertyTrue("ecr.osgi.services"));
-        }
-        return isOSGiServiceSupported.booleanValue();
+        return getRuntime().expandVars(expression);
     }
 
     /**
@@ -443,9 +423,6 @@ public final class Framework {
      */
     public static boolean isBooleanPropertyFalse(String propName) {
         String v = getProperty(propName);
-        if (v == null) {
-            v = System.getProperty(propName);
-        }
         if (StringUtils.isBlank(v)) {
             return false;
         }
@@ -454,48 +431,12 @@ public final class Framework {
 
     /**
      * Returns true if given property is true when compared to a boolean value.
-     * <p>
-     * Checks for the system properties if property is not found in the runtime properties.
      *
      * @since 5.6
      */
     public static boolean isBooleanPropertyTrue(String propName) {
         String v = getProperty(propName);
-        if (v == null) {
-            v = System.getProperty(propName);
-        }
         return Boolean.parseBoolean(v);
-    }
-
-    /**
-     * Since 5.6, this method stops the application if property {@link #NUXEO_STRICT_RUNTIME_SYSTEM_PROP} is set to
-     * true, and one of the following errors occurred during startup.
-     * <ul>
-     * <li>Component XML parse error.
-     * <li>Contribution to an unknown extension point.
-     * <li>Component with an unknown implementation class (the implementation entry exists in the XML descriptor but
-     * cannot be resolved to a class).
-     * <li>Uncatched exception on extension registration / unregistration (either in framework or user component code)
-     * <li>Uncatched exception on component activation / deactivation (either in framework or user component code)
-     * <li>Broken Nuxeo-Component MANIFEST entry. (i.e. the entry cannot be resolved to a resource)
-     * </ul>
-     * <p>
-     * Before 5.6, this method stopped the application if development mode was enabled (i.e. org.nuxeo.dev system
-     * property is set) but this is not the case anymore to handle a dev mode that does not stop the runtime framework
-     * when using hot reload.
-     *
-     * @param t the exception or null if none
-     */
-    public static void handleDevError(Throwable t) {
-        if (isBooleanPropertyTrue(NUXEO_STRICT_RUNTIME_SYSTEM_PROP)) {
-            System.err.println("Fatal error caught in strict " + "runtime mode => exiting.");
-            if (t != null) {
-                t.printStackTrace();
-            }
-            System.exit(1);
-        } else if (t != null) {
-            log.error(t, t);
-        }
     }
 
     /**
@@ -530,9 +471,6 @@ public final class Framework {
         if (runtime == null) {
             throw new IllegalStateException("Runtime not initialized");
         }
-    }
-
-    public static void main(String[] args) {
     }
 
     /**

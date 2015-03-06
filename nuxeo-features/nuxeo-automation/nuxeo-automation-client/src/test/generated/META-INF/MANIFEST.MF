@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.automation.nuxeo-automation-client-core.tests
+Bundle-SymbolicName: org.nuxeo.ecm.automation.nuxeo-automation-client-co
+ re.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.automation.nuxeo-automation-client-core
+Import-Package: com.sun.jersey.api.client;version="[1.18,2)",org.apache.
+ http,org.apache.http.client,org.apache.http.client.methods,org.apache.h
+ ttp.entity,org.apache.http.message,org.apache.http.protocol,org.junit,o
+ rg.mockito,org.mockito.stubbing,org.nuxeo.ecm.automation.client.adapter
+ s,org.nuxeo.ecm.automation.client.jaxrs.impl,org.nuxeo.ecm.automation.c
+ lient.jaxrs.spi,org.nuxeo.ecm.automation.client.jaxrs.spi.auth,org.nuxe
+ o.ecm.automation.client.model
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.automation.client,org.nuxeo.ecm.automatio
+ n.client.jaxrs.test,org.nuxeo.ecm.automation.client.rest.api
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

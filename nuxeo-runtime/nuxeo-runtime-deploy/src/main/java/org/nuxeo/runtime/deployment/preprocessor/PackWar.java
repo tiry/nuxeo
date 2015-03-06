@@ -174,11 +174,11 @@ public class PackWar {
     }
 
     protected void runTemplatePreprocessor() throws ConfigurationException {
-        if (System.getProperty(Environment.NUXEO_HOME) == null) {
-            System.setProperty(Environment.NUXEO_HOME, tomcat.getAbsolutePath());
+        if (Framework.getProperty(Environment.NUXEO_HOME) == null) {
+            Framework.getProperties().setProperty(Environment.NUXEO_HOME, tomcat.getAbsolutePath());
         }
-        if (System.getProperty(ConfigurationGenerator.NUXEO_CONF) == null) {
-            System.setProperty(ConfigurationGenerator.NUXEO_CONF, new File(tomcat, "bin/nuxeo.conf").getPath());
+        if (Framework.getProperty(ConfigurationGenerator.NUXEO_CONF) == null) {
+            Framework.getProperties().setProperty(ConfigurationGenerator.NUXEO_CONF, new File(tomcat, "bin/nuxeo.conf").getPath());
         }
         cg = new ConfigurationGenerator();
         cg.run();

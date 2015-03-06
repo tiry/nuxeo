@@ -25,15 +25,12 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-public class Environment {
-
-    private static Log logger = LogFactory.getLog(Environment.class);
+public class Environment implements LoaderConstants {
 
     /**
      * Constants that identifies possible hosts for the framework.
@@ -109,52 +106,6 @@ public class Environment {
      */
     public static final String NUXEO_CONTEXT_PATH = "org.nuxeo.ecm.contextPath";
 
-    /**
-     * The home directory.
-     *
-     * @deprecated never defined; use {@link #NUXEO_HOME_DIR}
-     */
-    @Deprecated
-    public static final String HOME_DIR = "org.nuxeo.app.home";
-
-    /**
-     * The web root.
-     *
-     * @deprecated never defined; use {@link #NUXEO_WEB_DIR}
-     */
-    @Deprecated
-    public static final String WEB_DIR = "org.nuxeo.app.web";
-
-    /**
-     * The config directory.
-     *
-     * @deprecated never defined; use {@link #NUXEO_CONFIG_DIR}
-     */
-    @Deprecated
-    public static final String CONFIG_DIR = "org.nuxeo.app.config";
-
-    /**
-     * The data directory.
-     *
-     * @deprecated never defined; use {@link #NUXEO_DATA_DIR}
-     */
-    @Deprecated
-    public static final String DATA_DIR = "org.nuxeo.app.data";
-
-    /**
-     * The log directory.
-     *
-     * @deprecated never defined; use {@link #NUXEO_LOG_DIR}
-     */
-    @Deprecated
-    public static final String LOG_DIR = "org.nuxeo.app.log";
-
-    /**
-     * The application layout (optional): directory containing nuxeo runtime osgi bundles.
-     */
-    public static final String BUNDLES_DIR = "nuxeo.osgi.app.bundles";
-
-    public static final String BUNDLES = "nuxeo.osgi.bundles";
 
     private static volatile Environment DEFAULT;
 
@@ -293,7 +244,7 @@ public class Environment {
      * @see #init()
      */
     public Environment(File home) {
-        this(home, null);
+        this(home, System.getProperties());
     }
 
     /**
@@ -622,11 +573,10 @@ public class Environment {
         if (homeDir != null && !homeDir.isEmpty()) {
             setServerHome(new File(homeDir));
         } else {
-            logger.warn(String.format("Could not set the server home from %s or %s system properties, will use %s",
+            LogFactory.getLog(Environment.class).warn(String.format("Could not set the server home from %s or %s system properties, will use %s",
                     NUXEO_HOME, NUXEO_HOME_DIR, home));
             setServerHome(home);
         }
-        logger.debug(this);
     }
 
     public void setConfigurationProvider(Iterable<URL> configProvider) {

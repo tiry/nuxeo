@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Keycloak Login Module extension
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-keycloa
+ k.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-login-keycloak
+Import-Package: javax.servlet.http;version="[3.0,4)",junit.framework,org
+ .apache.catalina,org.apache.catalina.connector,org.apache.catalina.core
+ ,org.apache.coyote,org.junit,org.junit.runner,org.keycloak.adapters;ver
+ sion="[1.3,2)",org.keycloak.representations;version="[1.3,2)",org.mocki
+ to,org.mockito.stubbing,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nu
+ xeo.ecm.platform.api.login;version="[0.0,1)",org.nuxeo.runtime.test.run
+ ner,org.nuxeo.usermapper.extension;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: WEB-INF,org.nuxeo.ecm.platform.ui.web.keycloak
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

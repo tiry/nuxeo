@@ -28,18 +28,16 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
+import org.nuxeo.ecm.core.CoreTestCase;
 import org.nuxeo.ecm.core.CoreUTConstants;
 import org.nuxeo.ecm.core.NXCore;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
 /**
  * Test the lifecycle service.
  *
  * @author <a href="mailto:ja@nuxeo.com">Julien Anguenot</a>
  */
-public class TestLifeCycleService extends NXRuntimeTestCase {
+public class TestLifeCycleService extends CoreTestCase {
 
     private LifeCycleService lifeCycleService;
 
@@ -47,7 +45,6 @@ public class TestLifeCycleService extends NXRuntimeTestCase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        deployContrib(CoreUTConstants.CORE_BUNDLE, "OSGI-INF/LifeCycleService.xml");
         deployContrib(CoreUTConstants.CORE_TESTS_BUNDLE, "LifeCycleManagerTestExtensions.xml");
 
         lifeCycleService = NXCore.getLifeCycleService();

@@ -1,0 +1,3 @@
+Nuxeo-Component: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blacklist
+Import-Package: *
+-exportcontents:  *

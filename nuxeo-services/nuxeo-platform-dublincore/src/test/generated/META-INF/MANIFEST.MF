@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-dublincore.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-dublincore.te
+ sts
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-dublincore
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",
+ org.nuxeo.ecm.core.api.security;version="[0.0,1)",org.nuxeo.ecm.core.ev
+ ent;version="[0.0,1)",org.nuxeo.ecm.core.event.impl;version="[0.0,1)",o
+ rg.nuxeo.ecm.core.test,org.nuxeo.ecm.platform.dublincore.service,org.nu
+ xeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.dublincore,schemas
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

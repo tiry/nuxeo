@@ -41,4 +41,10 @@ public class RuntimeServiceException extends RuntimeException {
         super(cause);
     }
 
+    public void throwOnError() throws RuntimeServiceException {
+        if(getSuppressed().length > 0) {
+            throw this;
+        }
+    }
+
 }

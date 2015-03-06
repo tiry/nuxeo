@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM task Automation
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-task-automati
+ on
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.automation.task;uses:="org.nuxeo.ecm.automation,org.nuxeo.ecm.auto
+ mation.core.annotations,org.nuxeo.ecm.automation.core.collectors,org.nu
+ xeo.ecm.automation.core.util,org.nuxeo.ecm.core.api,org.nuxeo.ecm.platf
+ orm.task,org.nuxeo.ecm.platform.url.api";version="0.0.0",org.nuxeo.ecm.
+ automation.task.event;uses:="org.nuxeo.ecm.core.event";version="0.0.0"
+Import-Package: net.sf.json,org.apache.commons.lang;version="[2.6,3)",or
+ g.apache.commons.logging;version="[1.2,2)",org.nuxeo.ecm.automation;ver
+ sion="[0.0,1)",org.nuxeo.ecm.automation.core.annotations;version="[0.0,
+ 1)",org.nuxeo.ecm.automation.core.collectors;version="[0.0,1)",org.nuxe
+ o.ecm.automation.core.util;version="[0.0,1)",org.nuxeo.ecm.automation.t
+ ask,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.event;v
+ ersion="[0.0,1)",org.nuxeo.ecm.core.event.impl;version="[0.0,1)",org.nu
+ xeo.ecm.platform.query.api;version="[0.0,1)",org.nuxeo.ecm.platform.tas
+ k;version="[0.0,1)",org.nuxeo.ecm.platform.task.dashboard;version="[0.0
+ ,1)",org.nuxeo.ecm.platform.url.api;version="[0.0,1)",org.nuxeo.runtime
+ .api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/operations-contrib.xml,OSGI-INF/pageproviders-
+ contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

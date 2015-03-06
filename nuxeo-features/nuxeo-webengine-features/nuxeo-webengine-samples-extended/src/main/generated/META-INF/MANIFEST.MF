@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.webengine.nuxeo-webengine-samples-extended
+Bundle-SymbolicName: org.nuxeo.ecm.webengine.nuxeo-webengine-samples-ext
+ ended
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.webengine.samples;version="0.0.0";uses:="javax.ws.rs,org.nuxeo.ecm
+ .webengine.model",skin.views.Document;version="0.0.0"
+Import-Package: javax.ws.rs;version="[1.1,2)",org.nuxeo.ecm.webengine.mo
+ del
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Nuxeo-WebModule: org.nuxeo.ecm.webengine.app.WebEngineModule;name=sample
+ s-extended;extends=samples;package=/org/nuxeo/ecm/webengine/samples
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

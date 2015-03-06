@@ -45,7 +45,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.directory.sql.tests:autoincrementid-contrib.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.directory.sql:autoincrementid-contrib.xml" })
 public class TestSQLDirectoryAutoIncrementId {
 
     private static final String SCHEMA = "intIdSchema";

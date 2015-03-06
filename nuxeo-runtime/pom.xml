@@ -4,18 +4,22 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-ecm</artifactId>
-    <version>8.1-SNAPSHOT</version>
+    <version>0.0-reload-SNAPSHOT</version>
   </parent>
 
   <groupId>org.nuxeo.runtime</groupId>
   <artifactId>nuxeo-runtime-parent</artifactId>
   <name>Nuxeo Runtime Parent</name>
-  <version>8.1-SNAPSHOT</version>
+  <version>0.0-reload-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>Nuxeo Runtime: Parent.</description>
 
   <modules>
     <module>nuxeo-runtime</module>
+    <module>nuxeo-runtime-logging</module>
+    <module>nuxeo-runtime-logging-jcl</module>
+    <module>nuxeo-runtime-logging-logback</module>
+    <module>nuxeo-runtime-logging-log4j</module>
     <module>nuxeo-runtime-deploy</module>
     <module>nuxeo-runtime-reload</module>
     <module>nuxeo-runtime-osgi</module>
@@ -28,6 +32,7 @@
     <module>nuxeo-runtime-datasource</module>
     <module>nuxeo-runtime-test</module>
     <module>nuxeo-launcher-commons</module>
+    <module>nuxeo-launcher-connect</module>
     <module>nuxeo-connect-standalone</module>
   </modules>
 

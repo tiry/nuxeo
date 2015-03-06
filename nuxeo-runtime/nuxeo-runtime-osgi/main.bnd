@@ -1,0 +1,3 @@
+Bundle-Activator: org.nuxeo.osgi.system.OSGiSystem$Activator
+Provide-Capability: osgi.extender;osgi.extender=nuxeo.osgi;version:Version="8.0.0"
+

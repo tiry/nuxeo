@@ -92,8 +92,8 @@ public class SchedulerServiceImpl extends DefaultComponent implements SchedulerS
         } else {
             // use default config (unit tests)
             Properties props = new Properties();
-            props.put("org.quartz.scheduler.instanceName", "Quartz");
-            props.put("org.quartz.scheduler.threadName", "Quartz_Scheduler");
+            props.put("org.quartz.scheduler.instanceName", Framework.getRuntime().getName()+"-quartz");
+            props.put("org.quartz.scheduler.threadName", Framework.getRuntime().getName()+"-quartz-scheduler");
             props.put("org.quartz.scheduler.instanceId", "NON_CLUSTERED");
             props.put("org.quartz.scheduler.makeSchedulerThreadDaemon", "true");
             props.put("org.quartz.scheduler.skipUpdateCheck", "true");
@@ -133,11 +133,6 @@ public class SchedulerServiceImpl extends DefaultComponent implements SchedulerS
         }
     }
 
-    @Override
-    public void deactivate(ComponentContext context) {
-        log.debug("Deactivate");
-        shutdownScheduler();
-    }
 
     @Override
     public void applicationStarted(ComponentContext context) {

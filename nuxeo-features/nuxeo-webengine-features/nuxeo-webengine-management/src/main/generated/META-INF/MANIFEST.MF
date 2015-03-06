@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: nuxeo webengine server management
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.webengine.nuxeo-webengine-management
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",i18n;vers
+ ion="0.0.0",org.nuxeo.ecm.webengine.management;uses:="javax.ws.rs,org.n
+ uxeo.ecm.webengine.model,org.nuxeo.ecm.webengine.model.impl";version="0
+ .0.0",org.nuxeo.ecm.webengine.management.statuses;uses:="javax.ws.rs,or
+ g.nuxeo.ecm.core.management.api,org.nuxeo.ecm.webengine.management,org.
+ nuxeo.ecm.webengine.model,org.nuxeo.ecm.webengine.model.impl";version="
+ 0.0.0",skin;version="0.0.0",skin.resources.css;version="0.0.0",skin.vie
+ ws.AdministrativeStatus;version="0.0.0",skin.views.Management;version="
+ 0.0.0",skin.views.Probe;version="0.0.0",skin.views.Probes;version="0.0.
+ 0",skin.views.Statuses;version="0.0.0"
+Import-Package: javax.ws.rs;version="[1.1,2)",javax.ws.rs.core;version="
+ [1.1,2)",org.apache.commons.logging;version="[1.2,2)",org.nuxeo.ecm.cor
+ e.management.api;version="[0.0,1)",org.nuxeo.ecm.webengine.forms,org.nu
+ xeo.ecm.webengine.management,org.nuxeo.ecm.webengine.management.statuse
+ s,org.nuxeo.ecm.webengine.model,org.nuxeo.ecm.webengine.model.exception
+ s,org.nuxeo.ecm.webengine.model.impl,org.nuxeo.runtime.api;version="[0.
+ 0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Nuxeo-WebModule: org.nuxeo.ecm.webengine.app.WebEngineModule
+Provide-Package: org.nuxeo.ecm.webengine.management,org.nuxeo.ecm.webeng
+ ine.management.statuses
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

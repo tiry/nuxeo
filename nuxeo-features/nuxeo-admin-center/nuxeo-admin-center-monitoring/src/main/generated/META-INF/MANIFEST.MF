@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Admin Center
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-admin-center-monitorin
+ g
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.admin.monitoring;uses:="org.apache.commons.logging,org.jboss.seam,
+ org.jboss.seam.annotations,org.jboss.seam.annotations.web,org.nuxeo.ecm
+ .core.api,org.nuxeo.ecm.core.management.api,org.nuxeo.ecm.core.manageme
+ nt.events";version="0.0.0"
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.jboss.s
+ eam,org.jboss.seam.annotations,org.jboss.seam.annotations.web,org.jboss
+ .seam.contexts,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.management.api;version="[0.0,1)",org.nuxeo.ecm.core.management.even
+ ts;version="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

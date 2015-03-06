@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-relations-jena-plugin
+ .tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-relations-jen
+ a-plugin.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-relations-jena-plug
+ in
+Import-Package: com.hp.hpl.jena.rdf.model,javax.inject,org.junit,org.jun
+ it.runner,org.nuxeo.common.utils;version="[0.0,1)",org.nuxeo.ecm.core.t
+ est,org.nuxeo.ecm.platform.relations;version="[0.0,1)",org.nuxeo.ecm.pl
+ atform.relations.api;version="[0.0,1)",org.nuxeo.ecm.platform.relations
+ .api.impl;version="[0.0,1)",org.nuxeo.ecm.platform.relations.descriptor
+ s;version="[0.0,1)",org.nuxeo.ecm.platform.relations.services;version="
+ [0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.mode
+ l;version="[0.0,1)",org.nuxeo.runtime.test,org.nuxeo.runtime.test.runne
+ r
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.relations.jena
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

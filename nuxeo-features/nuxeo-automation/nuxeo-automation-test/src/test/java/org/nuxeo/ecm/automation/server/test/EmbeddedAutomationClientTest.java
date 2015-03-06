@@ -42,11 +42,10 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Assert;
-
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hamcrest.number.IsCloseTo;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -109,7 +108,6 @@ import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.Jetty;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
@@ -117,13 +115,10 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
 @RunWith(FeaturesRunner.class)
-@Deploy({ "org.nuxeo.ecm.platform.url.api", "org.nuxeo.ecm.platform.url.core", "org.nuxeo.ecm.platform.types.api",
-        "org.nuxeo.ecm.platform.types.core",
-        "org.nuxeo.ecm.platform.notification.core:OSGI-INF/NotificationService.xml", "org.nuxeo.ecm.automation.test" })
+@Deploy({ "org.nuxeo.ecm.platform.notification.core" })
 @LocalDeploy({ "org.nuxeo.ecm.automation.test:test-bindings.xml", "org.nuxeo.ecm.automation.test:test-mvalues.xml",
         "org.nuxeo.ecm.automation.test:operation-contrib.xml" })
 @Features({ EmbeddedAutomationServerFeature.class, AuditFeature.class })
-@Jetty(port = 18080)
 @RepositoryConfig(cleanup = Granularity.METHOD)
 public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
 
@@ -140,9 +135,10 @@ public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
         // correctly Document Adapter Codec in Test scope (to take into account
         // of document adapters contributed into test) -> see execution order
         // here: org.nuxeo.runtime.test.runner.RuntimeFeature.start()
-        ComponentInstance componentInstance = Framework.getRuntime().getComponentInstance(
-                "org.nuxeo.ecm.automation.server.AutomationServer");
-        AutomationServerComponent automationServerComponent = (AutomationServerComponent) componentInstance.getInstance();
+        ComponentInstance componentInstance = Framework.getRuntime()
+                .getComponentInstance("org.nuxeo.ecm.automation.server.AutomationServer");
+        AutomationServerComponent automationServerComponent = (AutomationServerComponent) componentInstance
+                .getInstance();
         automationServerComponent.applicationStarted(componentInstance);
     }
 
@@ -554,8 +550,8 @@ public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
         Map<String, Object> map2 = mapper.readValue(obj2JSON, Map.class);
 
         // Expected result when passing obj1 and obj2 as input to the
-        POJOObject expectedObj12 = new POJOObject("Merged texts: [obj1 text][obj2 text]", Arrays.asList("1", "2", "2",
-                "3"));
+        POJOObject expectedObj12 = new POJOObject("Merged texts: [obj1 text][obj2 text]",
+                Arrays.asList("1", "2", "2", "3"));
 
         // The pojo and the map parameters can be passed as java objects
         // directly in the client call, the generic Jackson-based parser /
@@ -715,12 +711,12 @@ public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
         document.set("dc:description", "test");
         document.set("dc:subjects", "a,b,c\\,d");
         Document folder = (Document) session.newRequest(CreateDocument.ID)
-                                            .setHeader(Constants.HEADER_NX_SCHEMAS, "*")
-                                            .setInput(automationTestFolder)
-                                            .set("type", document.getType())
-                                            .set("name", document.getId())
-                                            .set("properties", document)
-                                            .execute();
+                .setHeader(Constants.HEADER_NX_SCHEMAS, "*")
+                .setInput(automationTestFolder)
+                .set("type", document.getType())
+                .set("name", document.getId())
+                .set("properties", document)
+                .execute();
 
         assertEquals("My Test Folder", folder.getString("dc:title"));
         assertEquals("test", folder.getString("dc:description"));
@@ -728,9 +724,9 @@ public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
         setupComplexDocuments();
 
         Document testDoc = (Document) session.newRequest(DocumentService.GetDocumentChild)
-                                             .setInput(new PathRef("/"))
-                                             .set("name", "testDoc")
-                                             .execute();
+                .setInput(new PathRef("/"))
+                .set("name", "testDoc")
+                .execute();
 
         // No need to use PropertyMap object anymore
         testDoc.set("ds:tableName", "newTableName");
@@ -897,7 +893,8 @@ public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
         logRequest.setInput(new PathRef("/"));
         logRequest.execute();
 
-        OperationRequest queryRequest = session.newRequest(AuditPageProviderOperation.ID, new HashMap<String, Object>());
+        OperationRequest queryRequest = session.newRequest(AuditPageProviderOperation.ID,
+                new HashMap<String, Object>());
 
         queryRequest.getParameters().put("providerName", "AUDIT_BROWSER");
         Object result = queryRequest.execute();
@@ -989,9 +986,9 @@ public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
     @Test
     public void shouldReadContentEnricher() throws IOException {
         Document root = (Document) super.session.newRequest(FetchDocument.ID)
-                                                .setHeader("X-NXenrichers.document", "breadcrumb")
-                                                .set("value", "/")
-                                                .execute();
+                .setHeader("X-NXenrichers.document", "breadcrumb")
+                .set("value", "/")
+                .execute();
         assertNotNull(root.getContextParameters());
         assertEquals(1, root.getContextParameters().size());
         assertEquals("documents", ((PropertyMap) root.getContextParameters().get("breadcrumb")).get("entity-type"));
@@ -1007,11 +1004,11 @@ public class EmbeddedAutomationClientTest extends AbstractAutomationClientTest {
         GregorianCalendar begin = new GregorianCalendar(2015, Calendar.JUNE, 20, 12, 34, 56);
         GregorianCalendar end = new GregorianCalendar(2015, Calendar.JULY, 14, 12, 34, 56);
         request.setInput(root)
-               .set("username", "members")
-               .set("permission", "Write")
-               .set("begin", begin)
-               .set("end", end)
-               .execute();
+                .set("username", "members")
+                .set("permission", "Write")
+                .set("begin", begin)
+                .set("end", end)
+                .execute();
         // TODO NXP-17232 to use context parameters in json payload response with automation and automation client.
         // Once NXP-17232 resolved: assertions possible to get related doc ACLs.
     }

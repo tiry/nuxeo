@@ -45,20 +45,11 @@ public interface RegistrationInfo extends Serializable {
 
     int REGISTERED = 1;
 
-    /**
-     * Component dependencies are resolved
-     */
     int RESOLVED = 2;
 
-    /**
-     * Component activation successful
-     */
-    int ACTIVATED = 3;
+    int ACTIVATING = 3;
 
-    /**
-     * Before component activation
-     */
-    int ACTIVATING = 4;
+    int ACTIVATED = 4;
 
     int DEACTIVATING = 5;
 
@@ -222,6 +213,15 @@ public interface RegistrationInfo extends Serializable {
 
     /**
      * Notify the component instance that the Nuxeo application started
+     *
+     * @throws Exception
      */
     void notifyApplicationStarted();
+
+    /**
+     * @return
+     * @since 5.7
+     */
+    void activate();
+
 }

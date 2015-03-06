@@ -19,18 +19,25 @@
 package org.nuxeo.ecm.platform.test;
 
 import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
+import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.directory.sql.SQLDirectoryFeature;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.test.runner.SimpleFeature;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-@Deploy({ "org.nuxeo.ecm.platform.api", "org.nuxeo.ecm.platform.content.template", "org.nuxeo.ecm.platform.dublincore",
-        "org.nuxeo.ecm.platform.usermanager.api", "org.nuxeo.ecm.platform.usermanager", "org.nuxeo.ecm.core.io",
-        "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.platform.test:test-usermanagerimpl/directory-config.xml" })
+@Deploy({ "org.nuxeo.ecm.core.cache", "org.nuxeo.ecm.core.io", "org.nuxeo.ecm.platform.types.api",
+        "org.nuxeo.ecm.platform.types.core", "org.nuxeo.ecm.platform.api", "org.nuxeo.ecm.platform.dublincore",
+        "org.nuxeo.ecm.directory.types.contrib", "org.nuxeo.ecm.platform.usermanager.api",
+        "org.nuxeo.ecm.platform.usermanager", "org.nuxeo.ecm.platform.url.api", "org.nuxeo.ecm.platform.url.core",
+        "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.actions" })
+@LocalDeploy("org.nuxeo.ecm.directory.sql:test-usermanagerimpl/directory-config.xml")
 @Features({ CoreFeature.class, SQLDirectoryFeature.class })
+@RepositoryConfig(init = DefaultRepositoryInit.class)
 public class PlatformFeature extends SimpleFeature {
 
 }

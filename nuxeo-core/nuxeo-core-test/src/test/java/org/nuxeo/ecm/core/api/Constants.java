@@ -26,7 +26,7 @@ package org.nuxeo.ecm.core.api;
  */
 public class Constants {
 
-    public static final String CORE_TEST_TESTS_BUNDLE = "org.nuxeo.ecm.core.test.tests";
+    public static final String CORE_TEST_TESTS_BUNDLE = "org.nuxeo.ecm.core.test";
 
     private Constants() {
     }

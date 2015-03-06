@@ -43,17 +43,12 @@ public class EventService extends DefaultComponent {
 
     private static final Log log = LogFactory.getLog(EventService.class);
 
-    private final Map<String, ListenerList> topics;
-
-    // private final Map<String, Collection<Event>> pendingEvents;
+    private final Map<String, ListenerList<EventListener>> topics;
 
     private final Map<String, Object[]> contributions;
 
-    // private Executor threadPool = Executors.newCachedThreadPool();
-
     public EventService() {
         topics = new HashMap<>();
-        // pendingEvents = new HashMap<String, Collection<Event>>();
         contributions = new Hashtable<>();
     }
 
@@ -70,37 +65,32 @@ public class EventService extends DefaultComponent {
             return;
         }
         String name = extension.getId();
-        synchronized (this) {
-            for (Object desc : descriptors) {
-                ListenerDescriptor lDesc = (ListenerDescriptor) desc;
-                for (String topic : lDesc.topics) {
-                    addListener(topic, lDesc.listener);
-                }
+        for (Object desc : descriptors) {
+            ListenerDescriptor lDesc = (ListenerDescriptor) desc;
+            for (String topic : lDesc.topics) {
+                addListener(topic, lDesc.listener);
             }
-            contributions.put(name, descriptors);
         }
+        contributions.put(name, descriptors);
     }
 
     @Override
     public void unregisterExtension(Extension extension) {
         String name = extension.getId();
-        synchronized (this) {
-            Object[] descriptors = contributions.remove(name);
-            if (descriptors != null) {
-                for (Object desc : descriptors) {
-                    ListenerDescriptor lDesc = (ListenerDescriptor) desc;
-                    for (String topic : lDesc.topics) {
-                        removeListener(topic, lDesc.listener);
-                    }
+        Object[] descriptors = contributions.remove(name);
+        if (descriptors != null) {
+            for (Object desc : descriptors) {
+                ListenerDescriptor lDesc = (ListenerDescriptor) desc;
+                for (String topic : lDesc.topics) {
+                    removeListener(topic, lDesc.listener);
                 }
             }
         }
     }
 
     public void sendEvent(Event event) {
-        ListenerList list = topics.get(event.getTopic());
+        ListenerList<EventListener> list = topics.get(event.getTopic());
         if (list == null) {
-            // enqeueEvent(event);
             if (log.isTraceEnabled()) {
                 log.trace("Event sent to topic " + event.getTopic() + ". Ingnoring");
             }
@@ -109,24 +99,17 @@ public class EventService extends DefaultComponent {
         }
     }
 
-    public synchronized void addListener(String topic, EventListener listener) {
-        ListenerList list = topics.get(topic);
+    public void addListener(String topic, EventListener listener) {
+        ListenerList<EventListener> list = topics.get(topic);
         if (list == null) {
-            list = new ListenerList();
+            list = new ListenerList<>(EventListener.class);
             topics.put(topic, list);
-            // check if any event is pending
-            // Collection<Event> events = pendingEvents.remove(topic);
-            // if (events != null) {
-            // for (Event event : events) {
-            // sendEvent(list, event);
-            // }
-            // }
         }
         list.add(listener);
     }
 
-    public synchronized void removeListener(String topic, EventListener listener) {
-        ListenerList list = topics.get(topic);
+    public void removeListener(String topic, EventListener listener) {
+        ListenerList<EventListener> list = topics.get(topic);
         if (list != null) {
             list.remove(listener);
             if (list.isEmpty()) {
@@ -135,31 +118,12 @@ public class EventService extends DefaultComponent {
         }
     }
 
-    private static void sendEvent(ListenerList list, Event event) {
+    private static void sendEvent(ListenerList<EventListener> list, Event event) {
         Object[] listeners = list.getListeners();
         for (Object listener : listeners) {
             ((EventListener) listener).handleEvent(event);
         }
     }
-
-    // private void enqeueEvent(Event event) {
-    // Collection<Event> events = pendingEvents.get(event.getTopic());
-    // if (events != null) {
-    // events.add(event);
-    // } else {
-    // events = new ArrayList<Event>();
-    // events.add(event);
-    // pendingEvents.put(event.getTopic(), events);
-    // }
-    // }
-
-    // public void sendAsync(final Event event) {
-    // threadPool.execute(new Runnable() {
-    // public void run() {
-    // sendEvent(event);
-    // }
-    // });
-    // }
 
     @Override
     @SuppressWarnings("unchecked")

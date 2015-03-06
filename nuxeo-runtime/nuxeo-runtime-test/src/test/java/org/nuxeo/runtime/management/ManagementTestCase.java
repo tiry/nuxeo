@@ -26,7 +26,6 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import org.junit.After;
 import org.junit.Before;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
@@ -47,21 +46,8 @@ public abstract class ManagementTestCase extends NXRuntimeTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        deployContrib(OSGI_BUNDLE_NAME, "OSGI-INF/management-server-locator-service.xml");
-        deployContrib(OSGI_BUNDLE_NAME, "OSGI-INF/management-resource-publisher-service.xml");
-        deployTestContrib(OSGI_BUNDLE_NAME, "isolated-server.xml");
-
-        fireFrameworkStarted();
-
         locatorService = (ServerLocatorService) Framework.getLocalService(ServerLocator.class);
         publisherService = (ResourcePublisherService) Framework.getLocalService(ResourcePublisher.class);
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        Framework.getRuntime().stop();
-        super.tearDown();
     }
 
     protected void doBindResources() throws InstanceNotFoundException, ReflectionException, MBeanException {

@@ -40,6 +40,9 @@ import org.nuxeo.ecm.core.api.security.ACP;
 import org.nuxeo.ecm.core.api.security.impl.ACLImpl;
 import org.nuxeo.ecm.core.api.security.impl.ACPImpl;
 import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.ecm.core.test.NoopRepositoryInit;
+import org.nuxeo.ecm.core.test.annotations.Granularity;
+import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.userworkspace.api.UserWorkspaceService;
 import org.nuxeo.ecm.platform.userworkspace.core.service.UserWorkspaceServiceImplComponent;
 import org.nuxeo.runtime.api.Framework;
@@ -50,7 +53,8 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
 
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.ecm.platform.content.template", //
+@Deploy({ "org.nuxeo.ecm.automation.core", //
+        "org.nuxeo.ecm.platform.content.template", //
         "org.nuxeo.ecm.platform.userworkspace.api", //
         "org.nuxeo.ecm.platform.dublincore", //
         "org.nuxeo.ecm.platform.userworkspace.types", //
@@ -59,6 +63,7 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
         "org.nuxeo.ecm.directory.sql", //
         "org.nuxeo.ecm.platform.userworkspace.core", //
 })
+@RepositoryConfig(init = NoopRepositoryInit.class, cleanup = Granularity.METHOD)
 public class TestUserWorkspace {
 
     @Inject
@@ -144,12 +149,11 @@ public class TestUserWorkspace {
     @Test
     // @LocalDeploy("org.nuxeo.ecm.platform.userworkspace.core:OSGI-INF/compatUserWorkspaceImpl.xml")
     public void testMultiDomainsCompat() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.platform.userworkspace.core", "OSGI-INF/compatUserWorkspaceImpl.xml");
-        uwm = Framework.getService(UserWorkspaceService.class); // re-compute
-        try {
+        try (AutoCloseable infos = harness.deployContrib("org.nuxeo.ecm.platform.userworkspace.core",
+                "OSGI-INF/compatUserWorkspaceImpl.xml")) {
+            uwm = Framework.getService(UserWorkspaceService.class); // re-compute
             doTestMultiDomainsCompat();
         } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.userworkspace.core", "OSGI-INF/compatUserWorkspaceImpl.xml");
             uwm = Framework.getService(UserWorkspaceService.class); // re-compute
         }
     }

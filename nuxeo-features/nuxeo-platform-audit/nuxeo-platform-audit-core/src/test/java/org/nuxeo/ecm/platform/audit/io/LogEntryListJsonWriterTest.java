@@ -19,13 +19,18 @@
 
 package org.nuxeo.ecm.platform.audit.io;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.reflect.TypeUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -33,16 +38,21 @@ import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.io.marshallers.json.AbstractJsonWriterTest;
 import org.nuxeo.ecm.core.io.marshallers.json.JsonAssert;
 import org.nuxeo.ecm.platform.audit.AuditFeature;
+import org.nuxeo.ecm.platform.audit.api.AuditLogger;
+import org.nuxeo.ecm.platform.audit.api.AuditReader;
 import org.nuxeo.ecm.platform.audit.api.LogEntry;
 import org.nuxeo.ecm.platform.audit.api.LogEntryList;
+import org.nuxeo.ecm.platform.audit.impl.LogEntryImpl;
 import org.nuxeo.ecm.platform.query.api.PageProvider;
 import org.nuxeo.ecm.platform.query.api.PageProviderService;
+import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @Features(AuditFeature.class)
-@LocalDeploy("org.nuxeo.ecm.platform.audit.tests:test-pageprovider-contrib.xml")
-public class LogEntryListJsonWriterTest extends AbstractJsonWriterTest.External<LogEntryListJsonWriter, List<LogEntry>> {
+@LocalDeploy("org.nuxeo.ecm.platform.audit:test-pageprovider-contrib.xml")
+public class LogEntryListJsonWriterTest
+        extends AbstractJsonWriterTest.External<LogEntryListJsonWriter, List<LogEntry>> {
 
     public LogEntryListJsonWriterTest() {
         super(LogEntryListJsonWriter.class, List.class, TypeUtils.parameterize(List.class, LogEntry.class));
@@ -53,6 +63,28 @@ public class LogEntryListJsonWriterTest extends AbstractJsonWriterTest.External<
 
     @Inject
     private CoreSession session;
+
+    @Before
+    public void createTestEntries() {
+
+        AuditReader reader = Framework.getLocalService(AuditReader.class);
+        assertNotNull(reader);
+
+        AuditLogger logger = Framework.getLocalService(AuditLogger.class);
+        assertNotNull(logger);
+        LogEntry entry = new LogEntryImpl();
+        entry.setRepositoryId("test");
+        entry.setCategory("category");
+        entry.setEventId("event");
+        entry.setPrincipalName("Administrator");
+        entry.setDocPath("/");
+        entry.setEventDate(Calendar.getInstance().getTime());
+        entry.setDocType("docType");
+        entry.setDocUUID(session.getRootDocument().getId());
+
+        logger.addLogEntries(Collections.singletonList(entry));
+
+    }
 
     @Test
     public void test() throws Exception {

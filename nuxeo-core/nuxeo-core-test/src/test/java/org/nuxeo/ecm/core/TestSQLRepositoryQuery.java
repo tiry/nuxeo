@@ -81,7 +81,6 @@ import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
@@ -89,13 +88,10 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
 @RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
+@Features(CoreFeature.class )
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.core.convert", //
-        "org.nuxeo.ecm.core.convert.plugins", //
-})
-@LocalDeploy({ "org.nuxeo.ecm.core.test.tests:OSGI-INF/testquery-core-types-contrib.xml",
-        "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-contrib-2.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.core.test:OSGI-INF/testquery-core-types-contrib.xml",
+        "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-contrib-2.xml" })
 public class TestSQLRepositoryQuery {
 
     @Inject
@@ -431,7 +427,7 @@ public class TestSQLRepositoryQuery {
         dml = session.query("SELECT * FROM File WHERE dc:subjects NOT LIKE '%oo%'");
         assertEquals(2, dml.size());
     }
-
+    
     @Test
     public void testQueryMultipleNew() throws Exception {
         DocumentModelList dml;
@@ -1335,14 +1331,14 @@ public class TestSQLRepositoryQuery {
 
     @Test
     // NoFileSecurityPolicy
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/security-policy-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/security-policy-contrib.xml")
     public void testSecurityManagerBasic() throws Exception {
         doTestSecurityManager();
     }
 
     @Test
     // NoFile2SecurityPolicy
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/security-policy2-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/security-policy2-contrib.xml")
     public void testSecurityManagerWithTransformer() throws Exception {
         doTestSecurityManager();
     }
@@ -2045,7 +2041,7 @@ public class TestSQLRepositoryQuery {
 
     @Test
     // NoFile2SecurityPolicy
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/security-policy2-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/security-policy2-contrib.xml")
     public void testQueryIterableWithTransformer() throws Exception {
         createDocs();
         IterableQueryResult res;

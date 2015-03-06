@@ -524,6 +524,7 @@ public class RepositoryDescriptor {
             xaDataSourceName = other.xaDataSourceName;
         }
         properties.putAll(other.properties);
+        pool.merge(other.pool);
     }
 
 }

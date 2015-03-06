@@ -21,10 +21,10 @@ package org.nuxeo.runtime.test.runner;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +35,8 @@ import javax.inject.Inject;
 import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
-
-import org.nuxeo.runtime.model.RuntimeContext;
-import org.nuxeo.runtime.osgi.OSGiRuntimeService;
-
+import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.model.ComponentManager;
 import org.osgi.framework.Bundle;
 
 import com.google.common.base.Supplier;
@@ -50,9 +48,9 @@ import com.google.common.collect.SetMultimap;
  */
 public class RuntimeDeployment {
 
-    Set<String> bundles = new HashSet<>();
+    final List<String> bundles = new LinkedList<String>();
 
-    Map<String, Collection<String>> mainContribs = new HashMap<>();
+    final Map<String, Collection<String>> mainContribs = new HashMap<>();
 
     SetMultimap<String, String> mainIndex = Multimaps.newSetMultimap(mainContribs, new Supplier<Set<String>>() {
         @Override
@@ -70,10 +68,7 @@ public class RuntimeDeployment {
         }
     });
 
-    protected LinkedList<RuntimeContext> contexts = new LinkedList<>();
-
-    protected void index(Class<?> clazz) {
-        AnnotationScanner scanner = FeaturesRunner.scanner;
+    protected void index(AnnotationScanner scanner, Class<?> clazz) {
         scanner.scan(clazz);
         List<? extends Annotation> annos = scanner.getAnnotations(clazz);
         if (annos == null) {
@@ -88,8 +83,8 @@ public class RuntimeDeployment {
         }
     }
 
-    protected void index(RunnerFeature feature) {
-        index(feature.getClass());
+    protected void index(AnnotationScanner scanner, RunnerFeature feature) {
+        index(scanner, feature.getClass());
     }
 
     protected void index(Method method) {
@@ -115,16 +110,18 @@ public class RuntimeDeployment {
         }
     }
 
-    protected void index(Features features) {
+    protected void index(AnnotationScanner scanner, Features features) {
         for (Class<?> each : features.value()) {
-            index(each);
+            index(scanner, each);
         }
     }
 
     protected void index(String directive, SetMultimap<String, String> contribs) {
         int sepIndex = directive.indexOf(':');
         if (sepIndex == -1) {
-            bundles.add(directive);
+            if (!bundles.contains(directive)) {
+                bundles.add(directive);
+            }
         } else {
             String bundle = directive.substring(0, sepIndex);
             String resource = directive.substring(sepIndex + 1);
@@ -133,22 +130,16 @@ public class RuntimeDeployment {
     }
 
     protected void deploy(FeaturesRunner runner, RuntimeHarness harness) {
+        harness.pushDeploymentScope();
         AssertionError errors = new AssertionError("deployment errors");
-        OSGiRuntimeService runtime = (OSGiRuntimeService) harness.getContext().getRuntime();
+        blacklistComponents(runner);
         for (String name : bundles) {
             Bundle bundle = harness.getOSGiAdapter().getBundle(name);
-            if (bundle == null) {
-                try {
-                    harness.deployBundle(name);
-                    bundle = harness.getOSGiAdapter().getBundle(name);
-                    if (bundle == null) {
-                        throw new UnsupportedOperationException("Should not occur");
-                    }
-                } catch (Exception error) {
-                    errors.addSuppressed(error);
-                    continue;
-                }
-                contexts.add(runtime.getContext(bundle));
+            try {
+                harness.deployBundle(name);
+            } catch (Exception error) {
+                errors.addSuppressed(error);
+                continue;
             }
             try {
                 // deploy bundle contribs
@@ -171,7 +162,7 @@ public class RuntimeDeployment {
                     if (url == null) {
                         throw new AssertionError("Cannot find " + resource + " in " + name);
                     }
-                    contexts.add(harness.deployTestContrib(name, url));
+                    harness.deployTestContrib(name, url);
                 }
             } catch (Exception error) {
                 errors.addSuppressed(error);
@@ -187,7 +178,7 @@ public class RuntimeDeployment {
         }
         for (Map.Entry<String, String> resource : localIndex.entries()) {
             try {
-                contexts.add(harness.deployTestContrib(resource.getKey(), resource.getValue()));
+                harness.deployTestContrib(resource.getKey(), resource.getValue());
             } catch (Exception error) {
                 errors.addSuppressed(error);
             }
@@ -196,33 +187,29 @@ public class RuntimeDeployment {
         if (errors.getSuppressed().length > 0) {
             throw errors;
         }
-
+        harness.fireFrameworkStarted();
     }
 
-    void undeploy() {
-        AssertionError errors = new AssertionError("deployment errors");
+    protected void undeploy(FeaturesRunner runner, RuntimeHarness harness) {
+        harness.popDeploymentScope();
+    }
 
-        Iterator<RuntimeContext> it = contexts.descendingIterator();
-        while (it.hasNext()) {
-            RuntimeContext each = it.next();
-            it.remove();
-            try {
-                each.destroy();
-            } catch (RuntimeException error) {
-                errors.addSuppressed(error);
-            }
+    protected void blacklistComponents(FeaturesRunner aRunner) {
+        BlacklistComponent config = aRunner.getConfig(BlacklistComponent.class);
+        if (config.value().length == 0) {
+            return;
         }
-
-        if (errors.getSuppressed().length > 0) {
-            throw errors;
-        }
+        final ComponentManager manager = Framework.getRuntime().getComponentManager();
+        Set<String> blacklist = new HashSet<>(manager.getBlacklist());
+        blacklist.addAll(Arrays.asList(config.value()));
+        manager.setBlacklist(blacklist);
     }
 
     public static RuntimeDeployment onTest(FeaturesRunner runner) {
         RuntimeDeployment deployment = new RuntimeDeployment();
-        deployment.index(runner.getDescription().getTestClass());
+        deployment.index(runner.scanner, runner.getTargetTestClass());
         for (RunnerFeature each : runner.getFeatures()) {
-            deployment.index(each);
+            deployment.index(runner.scanner, each);
         }
         return deployment;
     }
@@ -269,7 +256,7 @@ public class RuntimeDeployment {
             try {
                 base.evaluate();
             } finally {
-                undeploy();
+                undeploy(runner, harness);
             }
         }
 

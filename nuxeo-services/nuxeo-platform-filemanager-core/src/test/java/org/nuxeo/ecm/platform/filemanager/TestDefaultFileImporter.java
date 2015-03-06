@@ -48,7 +48,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @Features(CoreFeature.class)
 @RepositoryConfig(init = RepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy({ "org.nuxeo.ecm.platform.types.api", "org.nuxeo.ecm.platform.types.core",
-        "org.nuxeo.ecm.platform.filemanager.core" })
+    "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.platform.filemanager.core" })
 @LocalDeploy("org.nuxeo.ecm.platform.filemanager.core:test-ui-types-local-configuration.xml")
 public class TestDefaultFileImporter {
 

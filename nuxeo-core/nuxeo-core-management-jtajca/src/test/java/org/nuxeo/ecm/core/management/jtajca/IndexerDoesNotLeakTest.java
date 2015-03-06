@@ -24,8 +24,7 @@ import static org.junit.Assert.assertThat;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
@@ -33,6 +32,7 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.core.work.api.WorkManager;
+import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.transaction.TransactionHelper;
@@ -48,13 +48,20 @@ public class IndexerDoesNotLeakTest {
     @Inject
     WorkManager works;
 
-    @Inject
-    @Named("repository/test")
     ConnectionPoolMonitor repoMonitor;
 
-    @Inject
-    @Named("jdbc/repository_test")
     ConnectionPoolMonitor dbMonitor;
+
+    @Inject
+    JtajcaManagementFeature feature;
+
+    @Before
+    public void lookupPoolMonitors() {
+        repoMonitor = feature.lookup(ConnectionPoolMonitor.class,
+                Framework.expandVars("repository/${nuxeo.test.vcs.repository}"));
+        dbMonitor = feature.lookup(ConnectionPoolMonitor.class,
+                Framework.expandVars("jdbc/${nuxeo.test.vcs.database}"));
+    }
 
     @Test
     public void indexerWorkDoesNotLeak() throws InterruptedException {

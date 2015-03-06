@@ -59,10 +59,13 @@ import org.nuxeo.runtime.test.NXRuntimeTestCase;
  */
 public class TestHelpers extends NXRuntimeTestCase {
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        deployContrib("org.nuxeo.ecm.platform.forms.layout.client.tests", "layouts-test-schemas.xml");
+        deployBundle("org.nuxeo.ecm.platform.forms.layout.core");
+        deployBundle("org.nuxeo.ecm.platform.forms.layout.client");
+        deployTestContrib("org.nuxeo.ecm.platform.forms.layout.client", "layouts-test-schemas.xml");
     }
 
     @Test

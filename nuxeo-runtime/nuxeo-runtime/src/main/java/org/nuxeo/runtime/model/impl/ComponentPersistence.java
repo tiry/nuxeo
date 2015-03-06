@@ -22,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,23 +32,23 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.utils.FileUtils;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.model.RegistrationInfo;
 import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.osgi.OSGiRuntimeService;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 /**
- * Manage persistent components. Persistent components are located in ${nxserver_data_dir}/components directory, and can
- * be dynamically removed or registered. After framework startup (after the application was completely started) the
- * persistent components are deployed. The layout of the components directory is the following:
- *
+ * Manage persistent components.
+ * Persistent components are located in ${nxserver_data_dir}/components directory, and can be dynamically removed
+ * or registered. After framework startup (after the application was completely started) the persistent components
+ * are deployed.
+ * The layout of the components directory is the following:
  * <pre>
  * components/
  *     component1.xml
@@ -61,37 +63,35 @@ import org.xml.sax.SAXException;
  *     ...
  * </pre>
  *
- * If components are put directly under the root then they will be deployed in the runtime bundle context. If they are
- * put in a directory having as name the symbolicName of a bundle in the system, then the component will be deployed in
- * that bundle context.
+ * If components are put directly under the root then they will be deployed in the runtime bundle context.
+ * If they are put in a directory having as name the symbolicName of a bundle in the system,
+ * then the component will be deployed in that bundle context.
  * <p>
- * Any files not ending with .xml are ignored. Any directory that doesn't match a bundle symbolic name will be ignored
- * too.
+ * Any files not ending with .xml are ignored.
+ * Any directory that doesn't match a bundle symbolic name will be ignored too.
  * <p>
  * Dynamic components must use the following name convention: (it is not mandatory but it is recommended)
  * <ul>
- * <li>Components deployed in root directory must use as name the file name without the .xml extension.
- * <li>Components deployed in a bundle directory must use the relative file path without the .xml extensions.
+ * <li> Components deployed in root directory must use as name the file name without the .xml extension.
+ * <li> Components deployed in a bundle directory must use the relative file path without the .xml extensions.
  * </ul>
- * Examples: Given the following component files: <code>components/mycomp1.xml</code> and
- * <code>components/mybundle/mycomp2.xml</code> the name for <code>mycomp1</code> must be: <code>comp1</code> and for
- * <code>mycomp2</code> must be <code>mybundle/mycomp2</code>
+ * Examples:
+ * Given the following component files: <code>components/mycomp1.xml</code> and <code>components/mybundle/mycomp2.xml</code>
+ * the name for <code>mycomp1</code> must be: <code>comp1</code> and for <code>mycomp2</code> must be <code>mybundle/mycomp2</code>
  * <p>
  * This service is working only with {@link OSGiRuntimeService}
  *
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ *
  */
 public class ComponentPersistence {
 
     protected final File root; // a directory to keep exploded extensions
-
     protected final RuntimeContext sysrc;
-
     protected final OSGiRuntimeService runtime;
-
     protected final ReadWriteLock fileLock;
-
     protected final Set<RegistrationInfo> persistedComponents;
+
 
     public ComponentPersistence(OSGiRuntimeService runtime) {
         this.runtime = runtime;
@@ -105,23 +105,30 @@ public class ComponentPersistence {
         return root;
     }
 
-    public final RuntimeContext getContext(String symbolicName) {
+    public final RuntimeContext getContext(String symbolicName) throws RuntimeServiceException {
         if (symbolicName == null) {
             return sysrc;
         }
         Bundle bundle = runtime.getBundle(symbolicName);
         if (bundle == null) {
-            return null;
+            throw new RuntimeServiceException(this + " : cannot find " + symbolicName);
         }
-        return runtime.createContext(bundle);
+        return runtime.getOrCreateContext(bundle);
     }
 
-    protected void deploy(RuntimeContext rc, File file) throws IOException {
-        RegistrationInfoImpl ri = (RegistrationInfoImpl) rc.deploy(file.toURI().toURL());
-        ri.isPersistent = true;
+    protected void deploy(RuntimeContext rc, File file) throws RuntimeServiceException {
+        URL url;
+        try {
+            url = file.toURI().toURL();
+        } catch (MalformedURLException e) {
+            throw new RuntimeServiceException(this + " : cannot locate " + file);
+        }
+        for (RegistrationInfo ri:rc.deploy(url)) {
+            ((RegistrationInfoImpl)ri).isPersistent = true;
+        }
     }
 
-    public void loadPersistedComponents() throws IOException {
+    public void loadPersistedComponents() throws RuntimeServiceException {
         File[] files = root.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -137,7 +144,7 @@ public class ComponentPersistence {
         }
     }
 
-    public void loadPersistedComponents(RuntimeContext rc, File root) throws IOException {
+    public void loadPersistedComponents(RuntimeContext rc, File root) throws RuntimeServiceException {
         File[] files = root.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -148,7 +155,7 @@ public class ComponentPersistence {
         }
     }
 
-    public void loadPersistedComponent(File file) throws IOException {
+    public void loadPersistedComponent(File file) throws Exception {
         file = file.getCanonicalFile();
         if (file.isFile() && file.getName().endsWith(".xml")) {
             File parent = file.getParentFile();
@@ -170,41 +177,37 @@ public class ComponentPersistence {
         throw new IllegalArgumentException("Invalid component file location or bundle not found");
     }
 
-    public Document loadXml(File file) throws IOException {
+    public Document loadXml(File file) throws Exception {
         byte[] bytes = safeReadFile(file);
         return loadXml(new ByteArrayInputStream(bytes));
     }
 
-    public static Document loadXml(InputStream in) {
+    public static Document loadXml(InputStream in) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
-        try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            return builder.parse(in);
-        } catch (SAXException | IOException | ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.parse(in);
     }
 
-    public void createComponent(byte[] bytes) throws IOException {
+    public void createComponent(byte[] bytes) throws Exception {
         createComponent(bytes, true);
     }
 
-    public synchronized void createComponent(byte[] bytes, boolean isPersistent) throws IOException {
+    public  void createComponent(byte[] bytes, boolean isPersistent) throws Exception {
         Document doc = loadXml(new ByteArrayInputStream(bytes));
         Element root = doc.getDocumentElement();
         String name = root.getAttribute("name");
         int p = name.indexOf(':');
         if (p > -1) {
-            name = name.substring(p + 1);
+            name = name.substring(p+1);
         }
         p = name.indexOf('/');
         String owner = null;
         if (p > -1) {
             owner = name.substring(0, p);
         }
-        DefaultRuntimeContext rc = (DefaultRuntimeContext) getContext(owner);
-        File file = new File(this.root, name + ".xml");
+        AbstractRuntimeContext rc = (AbstractRuntimeContext)getContext(owner);
+        File file = new File(this.root, name+".xml");
         if (!isPersistent) {
             file.deleteOnExit();
         }
@@ -213,8 +216,8 @@ public class ComponentPersistence {
         rc.deploy(file.toURI().toURL());
     }
 
-    public synchronized boolean removeComponent(String compName) throws IOException {
-        String path = compName + ".xml";
+    public  boolean removeComponent(String compName) throws Exception {
+        String path = compName +".xml";
         File file = new File(root, path);
         if (!file.isFile()) {
             return false;
@@ -224,11 +227,12 @@ public class ComponentPersistence {
         if (p > -1) {
             owner = compName.substring(0, p);
         }
-        DefaultRuntimeContext rc = (DefaultRuntimeContext) getContext(owner);
+        AbstractRuntimeContext rc = (AbstractRuntimeContext)getContext(owner);
         rc.undeploy(file.toURI().toURL());
         file.delete();
         return true;
     }
+
 
     protected void safeWriteFile(byte[] bytes, File file) throws IOException {
         fileLock.writeLock().lock();

@@ -22,11 +22,14 @@
 package org.nuxeo.ecm.core.api.adapter;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
+
 import static org.junit.Assert.assertEquals;
 
+@RunWith(FeaturesRunner.class)
 public class TestAdapter {
 
-    @SuppressWarnings({ "InterfaceNeverImplemented" })
     private interface AnInterface {
     }
 

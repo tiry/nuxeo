@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Web Test Framework Fragment
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-ui-web-test
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.ui.web.jsf;uses:="javax.el,javax.faces,javax.faces.applic
+ ation,javax.faces.component,javax.faces.context,javax.faces.convert,jav
+ ax.faces.el,javax.faces.event,javax.faces.render,javax.faces.validator,
+ org.nuxeo.ecm.platform.audit,org.nuxeo.ecm.platform.test,org.nuxeo.runt
+ ime.test.runner";version="0.0.0"
+Import-Package: javax.el;version="[2.1,3)",javax.faces;version="[2.2,3)"
+ ,javax.faces.application;version="[2.2,3)",javax.faces.component;versio
+ n="[2.2,3)",javax.faces.context;version="[2.2,3)",javax.faces.convert;v
+ ersion="[2.2,3)",javax.faces.el;version="[2.2,3)",javax.faces.event;ver
+ sion="[2.2,3)",javax.faces.render;version="[2.2,3)",javax.faces.validat
+ or;version="[2.2,3)",org.jboss.el,org.nuxeo.ecm.platform.audit,org.nuxe
+ o.ecm.platform.el;version="[0.0,1)",org.nuxeo.ecm.platform.test;version
+ ="[1.0,2)",org.nuxeo.runtime.test.runner;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

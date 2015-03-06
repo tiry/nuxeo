@@ -37,6 +37,7 @@ import org.nuxeo.runtime.model.DefaultComponent;
 
 public class ContentTemplateServiceImpl extends DefaultComponent implements ContentTemplateService {
 
+
     public static final String NAME = "org.nuxeo.ecm.platform.content.template.service.TemplateService";
 
     public static final String FACTORY_DECLARATION_EP = "factory";
@@ -156,6 +157,7 @@ public class ContentTemplateServiceImpl extends DefaultComponent implements Cont
         return newOne;
     }
 
+    @Override
     public ContentFactory getFactoryForType(String documentType) {
         return factoryInstancesByType.get(documentType);
     }
@@ -164,7 +166,12 @@ public class ContentTemplateServiceImpl extends DefaultComponent implements Cont
         return factoryInstancesByFacet.get(facet);
     }
 
+    @Override
     public void executeFactoryForType(DocumentModel createdDocument) {
+        String disabled = (String) createdDocument.getContextData().get(DISABLED_CONTEXT_KEY);
+        if (disabled != null && Boolean.parseBoolean(disabled)) {
+            return;
+        }
         ContentFactory factory = getFactoryForType(createdDocument.getType());
         if (factory != null) {
             factory.createContentStructure(createdDocument);

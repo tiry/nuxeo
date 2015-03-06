@@ -40,7 +40,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy("org.nuxeo.ecm.directory.sql.tests:intIdDirectory-contrib.xml")
+@LocalDeploy("org.nuxeo.ecm.directory.sql:intIdDirectory-contrib.xml")
 public class TestIntIdField {
 
     @Inject

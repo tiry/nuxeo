@@ -24,7 +24,6 @@ import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.nuxeo.ecm.automation.AutomationService;
 import org.nuxeo.ecm.automation.OperationChain;
 import org.nuxeo.ecm.automation.OperationContext;
@@ -36,21 +35,16 @@ import org.nuxeo.ecm.automation.core.operations.services.GetRelations;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.features", "org.nuxeo.ecm.relations.api",
+@Deploy({ "org.nuxeo.ecm.relations.api",
         "org.nuxeo.ecm.relations", "org.nuxeo.ecm.relations.jena" })
 @LocalDeploy("org.nuxeo.ecm.automation.core:test-relation-jena-contrib.xml")
-public class RelationOperationsTest {
+public class RelationOperationsTest extends AutomationFeaturesTestCase {
 
     protected static final String conformsTo = "http://purl.org/dc/terms/ConformsTo";
 

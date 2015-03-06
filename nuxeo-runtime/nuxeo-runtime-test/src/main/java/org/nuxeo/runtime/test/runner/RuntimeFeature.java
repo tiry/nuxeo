@@ -18,29 +18,33 @@
  */
 package org.nuxeo.runtime.test.runner;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.lang.annotation.Annotation;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Rule;
 import org.junit.rules.MethodRule;
-import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.Statement;
-import org.nuxeo.common.utils.URLStreamHandlerFactoryInstaller;
-import org.nuxeo.runtime.RuntimeServiceEvent;
-import org.nuxeo.runtime.RuntimeServiceListener;
+import org.nuxeo.common.Environment;
+import org.nuxeo.runtime.RuntimeService;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.model.ComponentManager;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.model.RegistrationInfo;
+import org.nuxeo.runtime.model.RuntimeContext;
 
 import com.google.inject.Binder;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-@Features({ MDCFeature.class, ConditionalIgnoreRule.Feature.class, RandomBug.Feature.class })
+@Deploy({ "org.nuxeo.runtime","org.nuxeo.runtime.management", "org.nuxeo.runtime.metrics", "org.nuxeo.runtime.test" })
+@LocalDeploy("org.nuxeo.runtime.management:isolated-server.xml")
+@Features({ LoggingFeature.class, JustintimeLoggingFeature.class, MDCFeature.class, ConditionalIgnoreRule.Feature.class,
+        RandomBug.Feature.class })
 public class RuntimeFeature extends SimpleFeature {
 
     protected RuntimeHarness harness;
@@ -66,70 +70,123 @@ public class RuntimeFeature extends SimpleFeature {
 
     @Override
     public void initialize(FeaturesRunner runner) throws Exception {
-        harness = new NXRuntimeTestCase(runner.getTargetTestClass());
+        harness = new DefaultRuntimeHarness(runner);
         deployment = RuntimeDeployment.onTest(runner);
+        setupRuntimeEnvironment();
+        harness.start();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void configure(FeaturesRunner runner, Binder binder) {
         binder.bind(RuntimeHarness.class).toInstance(getHarness());
-        for (String svc : Framework.getRuntime().getComponentManager().getServices()) {
-            try {
-                Class clazz = Thread.currentThread().getContextClassLoader().loadClass(svc);
-                ServiceProvider<?> provider = serviceProviders.get(clazz);
-                if (provider == null) {
-                    provider = new ServiceProvider(clazz);
+        binder.bind(RuntimeService.class).toInstance(Framework.getRuntime());
+        for (RegistrationInfo info : Framework.getRuntime().getComponentManager().getRegistrations()) {
+            if (!info.isActivated()) {
+                continue;
+            }
+            RuntimeContext context = info.getContext();
+            for (String name : info.getProvidedServiceNames()) {
+                try {
+                    Class clazz = context.loadClass(name);
+                    ServiceProvider<?> provider = serviceProviders.get(clazz);
+                    if (provider == null) {
+                        serviceProviders.put(clazz, new ServiceProvider(clazz));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to bind service: " + name, e);
                 }
-                binder.bind(clazz).toProvider(provider).in(provider.getScope());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to bind service: " + svc, e);
             }
         }
+        for (ServiceProvider<?> provider : serviceProviders.values()) {
+            Class<?> type = provider.getServiceClass();
+            binder.bind((Class) type).toProvider(provider).in(provider.getScope());
+        }
+    }
+
+    private void setupRuntimeEnvironment() {
+        Environment.getDefault().setConfigurationProvider(new Iterable<URL>() {
+
+            @Override
+            public Iterator<URL> iterator() {
+                File config = Environment.getDefault().getConfig();
+                File[] properties = config.listFiles(new FilenameFilter() {
+
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".properties");
+                    }
+                });
+                if (properties == null) {
+                    return new Iterator<URL>() {
+
+                        @Override
+                        public boolean hasNext() {
+                            return false;
+                        }
+
+                        @Override
+                        public URL next() {
+                            throw new UnsupportedOperationException();
+                        }
+                    };
+                }
+                Iterator<File> files = Arrays.asList(properties).iterator();
+                return new Iterator<URL>() {
+
+                    @Override
+                    public boolean hasNext() {
+                        return files.hasNext();
+                    }
+
+                    @Override
+                    public URL next() {
+                        File file = files.next();
+                        try {
+                            return file.toURI().toURL();
+                        } catch (MalformedURLException cause) {
+                            throw new AssertionError("Cannot get url of " + file, cause);
+                        }
+                    }
+
+                };
+            }
+
+        });
     }
 
     @Override
     public void start(final FeaturesRunner runner) throws Exception {
-        Framework.addListener(new RuntimeServiceListener() {
-
-            @Override
-            public void handleEvent(RuntimeServiceEvent event) {
-                if (event.id != RuntimeServiceEvent.RUNTIME_ABOUT_TO_START) {
-                    return;
-                }
-                Framework.removeListener(this);
-                blacklistComponents(runner);
-            }
-        });
-
-        harness.start();
         deployment.deploy(runner, harness);
+        harness.pushDeploymentScope();
     }
 
     @Override
     public void stop(FeaturesRunner runner) throws Exception {
-        harness.stop();
-    }
-
-    @Rule
-    public MethodRule onCleanupURLStreamHandlers() {
-        return new MethodRule() {
-
-            @Override
-            public Statement apply(final Statement base, FrameworkMethod method, Object target) {
-                return new Statement() {
-                    @Override
-                    public void evaluate() throws Throwable {
-                        try {
-                            base.evaluate();
-                        } finally {
-                            URLStreamHandlerFactoryInstaller.resetURLStreamHandlers();
-                        }
-                    }
-                };
+        AssertionError errors = new AssertionError("Stopping");
+        try {
+            try {
+                harness.popDeploymentScope();
+            } catch (RuntimeException cause) {
+                errors.addSuppressed(cause);
+            } finally {
+                try {
+                    deployment.undeploy(runner, harness);
+                } catch (RuntimeException cause) {
+                    errors.addSuppressed(cause);
+                }
             }
-
-        };
+        } finally {
+            try {
+                harness.stop();
+            } catch (RuntimeException cause) {
+                errors.addSuppressed(cause);
+                ;
+            }
+        }
+        if (errors.getSuppressed().length > 0) {
+            throw errors;
+        }
     }
 
     @Rule
@@ -137,20 +194,28 @@ public class RuntimeFeature extends SimpleFeature {
         return RuntimeDeployment.onMethod();
     }
 
-    protected void blacklistComponents(FeaturesRunner aRunner) {
-        BlacklistComponent config = aRunner.getConfig(BlacklistComponent.class);
-        if (config.value().length == 0) {
-            return;
-        }
-        final ComponentManager manager = Framework.getRuntime().getComponentManager();
-        Set<String> blacklist = new HashSet<>(manager.getBlacklist());
-        blacklist.addAll(Arrays.asList(config.value()));
-        manager.setBlacklist(blacklist);
+    @Override
+    public void beforeRun(FeaturesRunner runner) throws Exception {
+        harness.pushDeploymentScope();
     }
 
     @Override
-    public void beforeRun(FeaturesRunner runner) throws Exception {
-        harness.fireFrameworkStarted();
+    public void afterRun(FeaturesRunner runner) throws Exception {
+        harness.popDeploymentScope();
     }
 
+    public void deploy(String[] deployments) {
+        deployment.index(new Deploy() {
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String[] value() {
+                return deployments;
+            }
+        });
+    }
 }

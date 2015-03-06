@@ -20,8 +20,6 @@ package org.nuxeo.ecm.directory.sql;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +40,9 @@ import org.nuxeo.runtime.test.runner.LogCaptureFeature;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature.NoLogCaptureFilterException;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
 @RunWith(FeaturesRunner.class)
 @Features({ LogCaptureFeature.class, CoreFeature.class })
 @Deploy({ "org.nuxeo.ecm.core.schema", "org.nuxeo.ecm.core.api", "org.nuxeo.ecm.core", "org.nuxeo.ecm.directory",
@@ -55,8 +56,8 @@ public class TestSessionsAreClosedAutomatically {
     public static class CloseSessionFilter implements LogCaptureFeature.Filter {
 
         @Override
-        public boolean accept(LoggingEvent event) {
-            if (!SQLDirectory.class.getName().equals(event.getLogger().getName())) {
+        public boolean accept(ILoggingEvent event) {
+            if (!SQLDirectory.class.getName().equals(event.getLoggerName())) {
                 return false;
             }
             if (!Level.WARN.equals(event.getLevel())) {
@@ -106,7 +107,7 @@ public class TestSessionsAreClosedAutomatically {
     public void hasWarnsOnCommit() throws DirectoryException, NoLogCaptureFilterException {
         boolean started = TransactionHelper.startTransaction();
         try {
-            Session session = userDirectory.getSession();
+            userDirectory.getSession();
         } finally {
             if (started) {
                 TransactionHelper.commitOrRollbackTransaction();
@@ -119,7 +120,7 @@ public class TestSessionsAreClosedAutomatically {
     public void hasWarnsOnRollback() throws DirectoryException, NoLogCaptureFilterException {
         boolean started = TransactionHelper.startTransaction();
         try {
-            Session session = userDirectory.getSession();
+            userDirectory.getSession();
         } finally {
             if (started) {
                 TransactionHelper.setTransactionRollbackOnly();

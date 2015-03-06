@@ -20,11 +20,6 @@
 
 package org.nuxeo.ecm.platform.usermanager.local.configuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,13 +50,14 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  * @author Benjamin JALON
  */
 @Deploy("org.nuxeo.ecm.directory.multi")
-@LocalDeploy("org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl-multitenant/directory-for-context-config.xml")
+@LocalDeploy("org.nuxeo.ecm.platform.usermanager:test-usermanagerimpl-multitenant/directory-for-context-config.xml")
 public class TestUserManagerWithContext extends UserManagerTestCase {
 
     protected Mockery mockery = new JUnit4Mockery();
 
     MultiTenantUserManager mtum;
 
+    @Override
     @Before
     public void setUp()  {
         UserMultiTenantManagement umtm = new DefaultUserMultiTenantManagementMock();

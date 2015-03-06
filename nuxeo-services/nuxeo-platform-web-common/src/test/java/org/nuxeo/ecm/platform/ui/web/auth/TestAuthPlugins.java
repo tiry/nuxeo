@@ -21,30 +21,18 @@
 
 package org.nuxeo.ecm.platform.ui.web.auth;
 
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.nuxeo.ecm.platform.ui.web.auth.service.AuthenticationPluginDescriptor;
 import org.nuxeo.ecm.platform.ui.web.auth.service.PluggableAuthenticationService;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
+@Deploy("org.nuxeo.ecm.platform.web.common")
 public class TestAuthPlugins extends NXRuntimeTestCase {
 
-    private static final String WEB_BUNDLE = "org.nuxeo.ecm.platform.web.common";
-
-    private static final String WEB_BUNDLE_TEST = "org.nuxeo.ecm.platform.web.common.test";
-
     private PluggableAuthenticationService authService;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        deployContrib(WEB_BUNDLE, "OSGI-INF/authentication-framework.xml");
-        deployContrib(WEB_BUNDLE, "OSGI-INF/authentication-contrib.xml");
-    }
 
     private PluggableAuthenticationService getAuthService() {
         if (authService == null) {
@@ -73,8 +61,8 @@ public class TestAuthPlugins extends NXRuntimeTestCase {
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.web.common:OSGI-INF/test-override-plugin.xml")
     public void testDescriptorMerge() throws Exception {
-        deployBundle(WEB_BUNDLE_TEST);
         PluggableAuthenticationService service = getAuthService();
         AuthenticationPluginDescriptor plugin = service.getDescriptor("ANONYMOUS_AUTH");
 

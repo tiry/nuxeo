@@ -2,7 +2,6 @@
   name="org.nuxeo.ecm.platform.management.adapters">
 
   <require>org.nuxeo.runtime.management.ResourcePublisher</require>
-  <require>org.nuxeo.ecm.platform.audit.service.NXAuditEventsService</require>
   
   <extension target="org.nuxeo.runtime.management.ResourcePublisher"
     point="factories">
@@ -12,9 +11,6 @@
 
     <factory name="inventory"
       class="org.nuxeo.ecm.platform.management.adapters.RuntimeInventoryFactory" />
-
-    <factory name="auditMetric"
-      class="org.nuxeo.ecm.platform.audit.service.management.AuditEventMetricFactory"/>
 
   </extension>
 

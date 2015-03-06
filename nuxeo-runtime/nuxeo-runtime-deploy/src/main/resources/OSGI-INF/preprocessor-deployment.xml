@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.runtime.deployment.preprocessor">
+  <implementation class="org.nuxeo.runtime.deployment.preprocessor.DeploymentComponent" />
+</component>

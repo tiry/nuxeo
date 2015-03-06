@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.work.AbstractWork;
@@ -36,6 +35,9 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature.NoLogCaptureFilterException;
 import org.nuxeo.runtime.test.runner.RuntimeFeature;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.ThrowableProxy;
 
 @RunWith(FeaturesRunner.class)
 @Features({ RuntimeFeature.class, LogCaptureFeature.class })
@@ -84,8 +86,8 @@ public class WorkErrorsAreTracableTest {
     public static class ChainFilter implements LogCaptureFeature.Filter {
 
         @Override
-        public boolean accept(LoggingEvent event) {
-            String category = event.getLogger().getName();
+        public boolean accept(ILoggingEvent event) {
+            String category = event.getLoggerName();
             return WorkSchedulePath.class.getName().equals(category);
         }
 
@@ -120,8 +122,8 @@ public class WorkErrorsAreTracableTest {
         boolean completed = manager.awaitCompletion(1000, TimeUnit.MILLISECONDS);
         assertTrue(completed);
         result.assertHasEvent();
-        LoggingEvent loggingEvent = result.getCaughtEvents().get(0);
-        WorkSchedulePath.Trace trace = (WorkSchedulePath.Trace) loggingEvent.getThrowableInformation().getThrowable();
+        ILoggingEvent loggingEvent = result.getCaughtEvents().get(0);
+        WorkSchedulePath.Trace trace = (WorkSchedulePath.Trace) ((ThrowableProxy)loggingEvent.getThrowableProxy()).getThrowable();
         assertIsRootWork(work, trace);
         return trace;
     }

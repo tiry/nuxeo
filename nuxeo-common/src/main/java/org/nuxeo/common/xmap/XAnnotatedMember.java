@@ -35,7 +35,7 @@ public class XAnnotatedMember {
     protected boolean trim;
 
     /** The Java type of the described element. */
-    protected Class type;
+    protected Class<?> type;
 
     /** Not null if the described object is an xannotated object. */
     protected XAnnotatedObject xao;
@@ -44,15 +44,17 @@ public class XAnnotatedMember {
      * The value factory used to transform strings in objects compatible with this member type. In the case of
      * collection types this factory is used for collection components.
      */
+    @SuppressWarnings("rawtypes")
     protected XValueFactory valueFactory;
 
-    private final XMap xmap;
+    protected final XMap xmap;
 
     protected XAnnotatedMember(XMap xmap, XAccessor accessor) {
         this.xmap = xmap;
         this.accessor = accessor;
     }
 
+    @SuppressWarnings("rawtypes")
     public XAnnotatedMember(XMap xmap, XAccessor setter, XNode anno) {
         this.xmap = xmap;
         accessor = setter;
@@ -61,16 +63,21 @@ public class XAnnotatedMember {
         type = setter.getType();
         valueFactory = xmap.getValueFactory(type);
         if (valueFactory == null && type.isEnum()) {
-            valueFactory = new XValueFactory() {
+            valueFactory = new XValueFactory<Enum>() {
                 @Override
-                public String serialize(Context arg0, Object arg1) {
-                    return ((Enum<?>) arg1).name();
+                public String serialize(Context arg0, Enum arg1) {
+                    return ((Enum) arg1).name();
                 }
 
                 @SuppressWarnings("unchecked")
                 @Override
-                public Object deserialize(Context arg0, String arg1) {
-                    return Enum.valueOf(type, arg1);
+                public Enum<?> deserialize(Context arg0, String arg1) {
+                    return (Enum) Enum.valueOf((Class<? extends Enum>) type, arg1);
+                }
+
+                @Override
+                public Class<Enum> getType() {
+                    return Enum.class;
                 }
             };
             xmap.setValueFactory(type, valueFactory);
@@ -92,9 +99,9 @@ public class XAnnotatedMember {
         Object v = accessor.getValue(instance);
         if (xao == null) {
             if (v != null && valueFactory != null) {
+                @SuppressWarnings("unchecked")
                 String value = valueFactory.serialize(null, v);
                 if (value != null) {
-
                     XMLBuilder.fillField(e, value, path.attribute);
                 }
             }
@@ -135,6 +142,13 @@ public class XAnnotatedMember {
             return valueFactory.deserialize(ctx, val);
         }
         return null;
+    }
+
+    /**
+     * @since 5.7
+     */
+    public Class<?> getType() {
+        return accessor.getMemberType();
     }
 
 }

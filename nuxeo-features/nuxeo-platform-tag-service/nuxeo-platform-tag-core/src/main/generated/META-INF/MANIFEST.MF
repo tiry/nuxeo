@@ -1,0 +1,45 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: core,stateful
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Tag Core
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-tag-core
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: false
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.tag;version="0.0.0";uses:="org.nuxeo.ecm.core.api,org.nux
+ eo.ecm.core.event,org.nuxeo.ecm.core.query,org.nuxeo.ecm.core.storage.s
+ ql,org.nuxeo.ecm.core.storage.sql.jdbc,org.nuxeo.ecm.core.storage.sql.j
+ dbc.db,org.nuxeo.runtime.model",org.nuxeo.ecm.platform.tag.operations;u
+ ses:="org.nuxeo.ecm.automation.core.annotations,org.nuxeo.ecm.automatio
+ n.core.collectors,org.nuxeo.ecm.automation.core.util,org.nuxeo.ecm.core
+ .api,org.nuxeo.ecm.platform.tag";version="0.0.0",org.nuxeo.ecm.platform
+ .tag.ws;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.api.ws,org
+ .nuxeo.ecm.platform.api.ws.session";version="0.0.0",schemas;version="0.
+ 0.0"
+Import-Package: org.nuxeo.ecm.automation.core.annotations;version="[0.0,
+ 1)",org.nuxeo.ecm.automation.core.collectors;version="[0.0,1)",org.nuxe
+ o.ecm.automation.core.util;version="[0.0,1)",org.nuxeo.ecm.core.api;ver
+ sion="[0.0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",org.nuxeo.ecm
+ .core.event.impl;version="[0.0,1)",org.nuxeo.ecm.core.query;version="[0
+ .0,1)",org.nuxeo.ecm.core.storage.sql;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.storage.sql.jdbc;version="[0.0,1)",org.nuxeo.ecm.core.storage.sql.j
+ dbc.db;version="[0.0,1)",org.nuxeo.ecm.core.storage.sql.jdbc.dialect;ve
+ rsion="[0.0,1)",org.nuxeo.ecm.platform.api.ws;version="[0.0,1)",org.nux
+ eo.ecm.platform.api.ws.session;version="[0.0,1)",org.nuxeo.ecm.platform
+ .query.api;version="[0.0,1)",org.nuxeo.ecm.platform.tag;version="[0.0,1
+ )",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.model;vers
+ ion="[0.0,1)"
+Nuxeo-Component: OSGI-INF/TagService.xml, OSGI-INF/tag-service-core-type
+ s.xml, OSGI-INF/tag-querymaker-contrib.xml, OSGI-INF/tag-listener-contr
+ ib.xml, OSGI-INF/ws-tag-loader-contrib.xml, OSGI-INF/tag-pageprovider-c
+ ontrib.xml, OSGI-INF/tag-operations-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Bundle: org.nuxeo.ecm.platform.tag.api;visibility:=reexport
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -72,8 +72,8 @@ public class TestAnonymousTokenAuthenticator {
 
         // Mock token authentication callback and acquire token for anonymous user directly from token authentication
         // service
-        TokenAuthenticationCallback cb = new TokenAuthenticationCallback("Guest", "myFavoriteApp",
-                "Ubuntu box 64 bits", "This is my personal Linux box", "rw");
+        TokenAuthenticationCallback cb = new TokenAuthenticationCallback("Guest", "myFavoriteApp", "Ubuntu box 64 bits",
+                "This is my personal Linux box", "rw");
         String token = cb.getRemoteToken(cb.getTokenParams());
         assertNotNull(token);
 
@@ -86,14 +86,12 @@ public class TestAnonymousTokenAuthenticator {
         }
 
         // Check automation call with anonymous user allowed
-        harness.deployContrib("org.nuxeo.ecm.platform.login.token.test",
-                "OSGI-INF/test-token-authentication-allow-anonymous-token-contrib.xml");
+        try (AutoCloseable context = harness.deployContrib("org.nuxeo.ecm.platform.login.token.test",
+                "OSGI-INF/test-token-authentication-allow-anonymous-token-contrib.xml")) {
 
-        Session clientSession = automationClient.getSession(token);
-        assertEquals("Guest", clientSession.getLogin().getUsername());
-
-        harness.undeployContrib("org.nuxeo.ecm.platform.login.token.test",
-                "OSGI-INF/test-token-authentication-allow-anonymous-token-contrib.xml");
+            Session clientSession = automationClient.getSession(token);
+            assertEquals("Guest", clientSession.getLogin().getUsername());
+        }
     }
 
     protected void setPermission(DocumentModel doc, ACE ace) {

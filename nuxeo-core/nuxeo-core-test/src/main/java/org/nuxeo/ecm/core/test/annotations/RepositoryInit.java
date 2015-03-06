@@ -19,6 +19,7 @@
 package org.nuxeo.ecm.core.test.annotations;
 
 import org.nuxeo.ecm.core.api.CoreSession;
+import org.nuxeo.runtime.test.runner.RuntimeHarness;
 
 /**
  * Implement this class to provide an initializer for the {@link RepositoryInitializer} annotation in tests.
@@ -32,4 +33,11 @@ public interface RepositoryInit {
      */
     void populate(CoreSession session);
 
+    default void onDatabaseSetup(RuntimeHarness harness) {
+        ;
+    }
+
+    default void onDatabaseTeardown(RuntimeHarness harness) {
+        ;
+    }
 }

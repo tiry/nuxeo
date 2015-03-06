@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-forms-layout-core.tes
+ ts
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-forms-layout-
+ core.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-forms-layout-core
+Import-Package: org.junit,org.nuxeo.ecm.platform.forms.layout.api;versio
+ n="[0.0,1)",org.nuxeo.ecm.platform.forms.layout.api.service;version="[0
+ .0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.model;
+ version="[0.0,1)",org.nuxeo.runtime.test
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.layout.core.tests
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

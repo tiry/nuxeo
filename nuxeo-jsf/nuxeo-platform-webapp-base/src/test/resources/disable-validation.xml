@@ -1,0 +1,8 @@
+<component name="org.nuxeo.ecm.webapp-base.validation-disabled">
+	<extension target="org.nuxeo.ecm.core.api.DocumentValidationService"
+		point="activations">
+        <validation context="createDocument" activated="false" />
+		<validation context="saveDocument" activated="false" />
+		<validation context="importDocument" activated="false" />
+	</extension>
+</component>

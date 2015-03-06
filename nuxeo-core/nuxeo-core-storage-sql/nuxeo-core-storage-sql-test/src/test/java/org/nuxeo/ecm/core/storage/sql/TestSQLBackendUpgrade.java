@@ -18,11 +18,6 @@
  */
 package org.nuxeo.ecm.core.storage.sql;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import java.util.Arrays;
@@ -51,6 +46,7 @@ public class TestSQLBackendUpgrade extends SQLBackendTestCase {
         super.setUp();
         deployContrib("org.nuxeo.ecm.core.storage.sql.test.tests", "OSGI-INF/test-backend-core-types-contrib.xml");
         JDBCMapper.testProps.put(JDBCMapper.TEST_UPGRADE, Boolean.TRUE);
+        fireFrameworkStarted();
     }
 
     @Override

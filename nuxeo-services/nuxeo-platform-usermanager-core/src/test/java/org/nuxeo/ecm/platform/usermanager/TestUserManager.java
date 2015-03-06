@@ -21,13 +21,6 @@
 
 package org.nuxeo.ecm.platform.usermanager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,10 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -55,19 +44,13 @@ import org.nuxeo.ecm.directory.DirectoryException;
 import org.nuxeo.ecm.platform.usermanager.exceptions.GroupAlreadyExistsException;
 import org.nuxeo.ecm.platform.usermanager.exceptions.UserAlreadyExistsException;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.runner.LocalDeploy;
-import org.nuxeo.runtime.test.runner.RuntimeHarness;
 
 /**
  * @author George Lefter
  * @author Florent Guillaume
  * @author Anahide Tchertchian
  */
-@LocalDeploy("org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/directory-config.xml")
 public class TestUserManager extends UserManagerTestCase {
-
-    @Inject
-    protected RuntimeHarness harness;
 
     @Test
     public void testExistingSetup() throws Exception {
@@ -114,15 +97,12 @@ public class TestUserManager extends UserManagerTestCase {
 
     @Test
     public void testGetAdministratorOverride() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.platform.usermanager.tests",
-                "test-usermanagerimpl/userservice-override-config.xml");
-        // user manager is recomputed after deployment => refetch it
-        userManager = Framework.getService(UserManager.class);
-        try {
+        try (AutoCloseable infos = harness.deployTestContrib("org.nuxeo.ecm.platform.usermanager",
+                "test-usermanagerimpl/userservice-override-config.xml")) {
+            // user manager is recomputed after deployment => refetch it
+            userManager = Framework.getService(UserManager.class);
             doTestGetAdministratorOverride();
         } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.usermanager.tests",
-                    "test-usermanagerimpl/userservice-override-config.xml");
             // user manager is recomputed after undeployment => refetch it
             userManager = Framework.getService(UserManager.class);
         }
@@ -186,15 +166,12 @@ public class TestUserManager extends UserManagerTestCase {
 
     @Test
     public void testGetVirtualUsersOverride() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.platform.usermanager.tests",
-                "test-usermanagerimpl/userservice-override-config.xml");
-        // user manager is recomputed after deployment => refetch it
-        userManager = Framework.getService(UserManager.class);
-        try {
+        try (AutoCloseable infos = harness.deployTestContrib("org.nuxeo.ecm.platform.usermanager",
+                "test-usermanagerimpl/userservice-override-config.xml")) {
+            // user manager is recomputed after deployment => refetch it
+            userManager = Framework.getService(UserManager.class);
             doTestGetVirtualUsersOverride();
         } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.usermanager.tests",
-                    "test-usermanagerimpl/userservice-override-config.xml");
             // user manager is recomputed after undeployment => refetch it
             userManager = Framework.getService(UserManager.class);
         }
@@ -246,15 +223,12 @@ public class TestUserManager extends UserManagerTestCase {
 
     @Test
     public void testGetAdministratorGroupsOverride() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.platform.usermanager.tests",
-                "test-usermanagerimpl/userservice-override-config.xml");
-        // user manager is recomputed after deployment => refetch it
-        userManager = Framework.getService(UserManager.class);
-        try {
+        try (AutoCloseable infos = harness.deployTestContrib("org.nuxeo.ecm.platform.usermanager",
+                "test-usermanagerimpl/userservice-override-config.xml")) {
+            // user manager is recomputed after deployment => refetch it
+            userManager = Framework.getService(UserManager.class);
             doTestGetAdministratorGroupsOverride();
         } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.usermanager.tests",
-                    "test-usermanagerimpl/userservice-override-config.xml");
             // user manager is recomputed after undeployment => refetch it
             userManager = Framework.getService(UserManager.class);
         }
@@ -678,7 +652,7 @@ public class TestUserManager extends UserManagerTestCase {
 
         DocumentModel doc = getUser("test");
         userManager.createUser(doc);
-        doc = getUser("test_2");
+        doc = getUser("test_u2");
         userManager.createUser(doc);
         assertEquals(2, userManager.searchUsers("test").size());
 
@@ -687,19 +661,17 @@ public class TestUserManager extends UserManagerTestCase {
         userManager.createUser(doc);
         assertEquals(3, userManager.searchUsers("test").size());
 
-        doc = getGroup("group");
+        doc = getGroup("test_g0");
         userManager.createGroup(doc);
-        doc = getGroup("group_1");
+        doc = getGroup("test_g1");
         userManager.createGroup(doc);
 
-        Map<String, Serializable> filters = new HashMap<String, Serializable>();
-        filters.put(userManager.getGroupIdField(), "group");
-        assertEquals(2, userManager.searchGroups("group").size());
+        assertEquals(2, userManager.searchGroups("test_").size());
 
         doc = getGroup("else");
-        doc.setProperty("group", "grouplabel", "group");
+        doc.setProperty("group", "grouplabel", "test_g3");
         userManager.createGroup(doc);
-        assertEquals(3, userManager.searchGroups("group").size());
+        assertEquals(3, userManager.searchGroups("test_").size());
     }
 
     @Test

@@ -20,11 +20,15 @@
 package org.nuxeo.ecm.core.transientstore;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.nuxeo.ecm.core.transientstore.api.TransientStore;
 import org.nuxeo.ecm.core.transientstore.api.TransientStoreConfig;
 import org.nuxeo.ecm.core.transientstore.api.TransientStoreService;
+import org.nuxeo.runtime.RuntimeServiceEvent;
+import org.nuxeo.runtime.RuntimeServiceListener;
+import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.DefaultComponent;
@@ -69,6 +73,7 @@ public class TransientStorageComponent extends DefaultComponent implements Trans
         }
     }
 
+    @Override
     public void doGC() {
         stores.values().forEach(TransientStore::doGC);
     }
@@ -86,13 +91,29 @@ public class TransientStorageComponent extends DefaultComponent implements Trans
     public void unregisterContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
         if (EP_STORE.equals(extensionPoint)) {
             TransientStoreConfig config = (TransientStoreConfig) contribution;
-            TransientStore store = stores.get(config.getName());
+            TransientStore store = stores.remove(config.getName());
             store.shutdown();
         }
     }
 
     @Override
     public void applicationStarted(ComponentContext context) {
+        Framework.addListener(new RuntimeServiceListener() {
+
+            @Override
+            public void handleEvent(RuntimeServiceEvent event) {
+                if (event.id != RuntimeServiceEvent.RUNTIME_ABOUT_TO_STOP) {
+                    return;
+                }
+                Framework.removeListener(this);
+                Iterator<TransientStore> it = stores.values().iterator();
+                while (it.hasNext()) {
+                    TransientStore store = it.next();
+                    it.remove();
+                    store.shutdown();
+                }
+            }
+        });
         for (TransientStoreConfig config : configs.values()) {
             registerStore(config);
         }
@@ -104,11 +125,6 @@ public class TransientStorageComponent extends DefaultComponent implements Trans
         return store;
     }
 
-    @Override
-    public void deactivate(ComponentContext context) {
-        stores.values().forEach(TransientStore::shutdown);
-        super.deactivate(context);
-    }
 
     public void cleanUpStores() {
         stores.values().forEach(TransientStore::removeAll);

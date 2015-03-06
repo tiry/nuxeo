@@ -2,6 +2,10 @@
 <component name="org.nuxeo.ecm.automation.jsf.contrib"
   version="1.0">
 
+  <require>org.nuxeo.ecm.platform.userworkspace.operationsContrib</require>
+  <require>org.nuxeo.ecm.core.automation.coreContrib</require>
+  <require>org.nuxeo.ecm.core.automation.featuresContrib</require>
+  
   <documentation>@author Thierry Delprat</documentation>
 
   <extension target="org.nuxeo.ecm.core.operation.OperationServiceComponent"

@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo token authentication plugin
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-token
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: directoryschema;version="0.0.0",doc;version="0.0.0",doc-
+ parent;version="0.0.0",org.nuxeo.ecm.platform.ui.web.auth.token;uses:="
+ javax.servlet.http,org.nuxeo.ecm.platform.api.login,org.nuxeo.ecm.platf
+ orm.ui.web.auth.interfaces";version="0.0.0",org.nuxeo.ecm.tokenauth;use
+ s:="org.nuxeo.ecm.core.api";version="0.0.0",org.nuxeo.ecm.tokenauth.ser
+ vice;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.directory.api,org.nuxe
+ o.ecm.tokenauth";version="0.0.0",org.nuxeo.ecm.tokenauth.servlet;uses:=
+ "javax.servlet,javax.servlet.http";version="0.0.0",org.nuxeo.ecm.tokena
+ uth.webapp;uses:="org.jboss.seam,org.jboss.seam.annotations,org.jboss.s
+ eam.faces,org.nuxeo.ecm.core.api";version="0.0.0"
+Import-Package: javax.security.auth.login,javax.servlet;version="[3.0,4)
+ ",javax.servlet.http;version="[3.0,4)",org.apache.commons.httpclient.ut
+ il,org.apache.commons.lang;version="[2.6,3)",org.apache.commons.logging
+ ;version="[1.2,2)",org.jboss.seam,org.jboss.seam.annotations,org.jboss.
+ seam.faces,org.jboss.seam.international,org.nuxeo.ecm.core.api;version=
+ "[0.0,1)",org.nuxeo.ecm.directory;version="[0.0,1)",org.nuxeo.ecm.direc
+ tory.api;version="[0.0,1)",org.nuxeo.ecm.platform.api.login;version="[0
+ .0,1)",org.nuxeo.ecm.platform.ui.web.auth.interfaces;version="[0.0,1)",
+ org.nuxeo.ecm.platform.ui.web.auth.service;version="[0.0,1)",org.nuxeo.
+ ecm.platform.usermanager;version="[0.0,1)",org.nuxeo.ecm.platform.web.c
+ ommon;version="[0.0,1)",org.nuxeo.ecm.tokenauth,org.nuxeo.ecm.tokenauth
+ .service,org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runtime.api;vers
+ ion="[0.0,1)"
+Nuxeo-Component: OSGI-INF/token-authentication-framework.xml,OSGI-INF/to
+ ken-authentication-directory-types.xml,OSGI-INF/token-authentication-di
+ rectory-contrib.xml,OSGI-INF/token-authentication-contrib.xml,OSGI-INF/
+ token-authentication-layouts-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.login
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

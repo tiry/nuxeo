@@ -28,6 +28,6 @@ package org.nuxeo.runtime;
  */
 public interface ComponentListener {
 
-    void handleEvent(ComponentEvent event);
+    void handleEvent(ComponentEvent event) throws RuntimeServiceException;
 
 }

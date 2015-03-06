@@ -56,6 +56,7 @@ import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.test.runner.RuntimeHarness;
 import org.nuxeo.transientstore.test.TransientStoreFeature;
 
@@ -103,9 +104,8 @@ public class BatchManagerFixture {
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.automation:test-batchmanager-client-generated-id-allowed-contrib.xml")
     public void testBatchInitClientGeneratedIdAllowed() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.automation.test.test",
-                "test-batchmanager-client-generated-id-allowed-contrib.xml");
         BatchManager bm = Framework.getService(BatchManager.class);
         String batchId = ((BatchManagerComponent) bm).initBatchInternal("testBatchId").getKey();
         assertEquals("testBatchId", batchId);
@@ -113,8 +113,6 @@ public class BatchManagerFixture {
         Batch batch = ((BatchManagerComponent) bm).getBatch("testBatchId");
         assertNotNull(batch);
         assertEquals("testBatchId", batch.getKey());
-        harness.undeployContrib("org.nuxeo.ecm.automation.test.test",
-                "test-batchmanager-client-generated-id-allowed-contrib.xml");
     }
 
     @Test
@@ -394,9 +392,7 @@ public class BatchManagerFixture {
                 @Override
                 public void run() {
                     try {
-                        bm.addStream(
-                                batchId,
-                                fileIndex,
+                        bm.addStream(batchId, fileIndex,
                                 new ByteArrayInputStream(("SomeContent_" + fileIndex).getBytes(StandardCharsets.UTF_8)),
                                 fileIndex + ".txt", "text/plain");
                     } catch (IOException e) {
@@ -450,9 +446,7 @@ public class BatchManagerFixture {
                 @Override
                 public void run() {
                     try {
-                        bm.addStream(
-                                batchId,
-                                "0",
+                        bm.addStream(batchId, "0",
                                 new ByteArrayInputStream(
                                         ("SomeChunkContent_" + chunkIndex + " ").getBytes(StandardCharsets.UTF_8)),
                                 nbChunks, chunkIndex, "MyChunkedFile.txt", "text/plain", 0);

@@ -30,7 +30,6 @@ import java.sql.Statement;
 import org.hamcrest.core.StringContains;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.integration.junit4.JMock;
 import org.jmock.integration.junit4.JUnit4Mockery;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,8 +38,9 @@ import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer.FulltextQuery;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer.Op;
 import org.nuxeo.ecm.core.storage.sql.RepositoryDescriptor;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
-@RunWith(JMock.class)
+@RunWith(FeaturesRunner.class)
 public class TestDialectQuerySyntax {
 
     Mockery jmcontext = new JUnit4Mockery();

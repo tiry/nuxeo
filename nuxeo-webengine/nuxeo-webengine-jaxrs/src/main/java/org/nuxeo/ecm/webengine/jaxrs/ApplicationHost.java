@@ -30,6 +30,7 @@ import javax.ws.rs.core.Application;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.platform.rendering.api.RenderingEngine;
 import org.nuxeo.ecm.webengine.jaxrs.servlet.config.ResourceExtension;
 import org.nuxeo.ecm.webengine.jaxrs.views.BundleResource;
@@ -175,6 +176,7 @@ public class ApplicationHost extends Application {
 
     @Override
     public synchronized Set<Class<?>> getClasses() {
+        NuxeoException errors = new NuxeoException("Loading webengine application classes");
         HashSet<Class<?>> result = new HashSet<Class<?>>();
         for (ApplicationFragment app : getApplications()) {
             try {
@@ -184,9 +186,12 @@ public class ApplicationHost extends Application {
                     }
                     result.add(clazz);
                 }
-            } catch (java.lang.LinkageError e) {
-                log.error(e);
+            } catch (java.lang.LinkageError cause) {
+                errors.addSuppressed(cause);
             }
+        }
+        if (errors.getSuppressed().length > 0) {
+            throw errors;
         }
         return result;
     }

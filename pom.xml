@@ -1,8 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nuxeo</groupId>
   <artifactId>nuxeo-ecm</artifactId>
-  <version>8.1-SNAPSHOT</version>
+  <version>0.0-reload-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Nuxeo ECM Projects</name>
   <description>Nuxeo ECM Platform and related components.</description>
@@ -119,15 +120,16 @@
     <!-- <license.useMissingFile>true</license.useMissingFile> -->
     <!-- <license.missingFile>src/main/license/THIRD-PARTY.properties</license.missingFile> -->
 
-    <nuxeo.common.version>8.1-SNAPSHOT</nuxeo.common.version>
-    <nuxeo.runtime.version>8.1-SNAPSHOT</nuxeo.runtime.version>
-    <nuxeo.core.version>8.1-SNAPSHOT</nuxeo.core.version>
-    <nuxeo.services.version>8.1-SNAPSHOT</nuxeo.services.version>
-    <nuxeo.theme.version>8.1-SNAPSHOT</nuxeo.theme.version>
-    <nuxeo.jsf.version>8.1-SNAPSHOT</nuxeo.jsf.version>
-    <nuxeo.dm.version>8.1-SNAPSHOT</nuxeo.dm.version>
-    <nuxeo.webengine.version>8.1-SNAPSHOT</nuxeo.webengine.version>
-    <nuxeo.features.version>8.1-SNAPSHOT</nuxeo.features.version>
+    <nuxeo.common.version>0.0-reload-SNAPSHOT</nuxeo.common.version>
+    <nuxeo.runtime.version>0.0-reload-SNAPSHOT</nuxeo.runtime.version>
+    <nuxeo.core.version>0.0-reload-SNAPSHOT</nuxeo.core.version>
+    <nuxeo.services.version>0.0-reload-SNAPSHOT</nuxeo.services.version>
+    <nuxeo.theme.version>0.0-reload-SNAPSHOT</nuxeo.theme.version>
+    <nuxeo.jsf.version>0.0-reload-SNAPSHOT</nuxeo.jsf.version>
+    <nuxeo.dm.version>0.0-reload-SNAPSHOT</nuxeo.dm.version>
+    <nuxeo.webengine.version>0.0-reload-SNAPSHOT</nuxeo.webengine.version>
+    <nuxeo.platform.version>0.0-reload-SNAPSHOT</nuxeo.platform.version>
+    <nuxeo.features.version>0.0-reload-SNAPSHOT</nuxeo.features.version>
 
     <nuxeo.connect.client.version>1.4.24</nuxeo.connect.client.version>
     <!-- nuxeo-distribution-tools is still used as a dependency -->
@@ -152,7 +154,7 @@
     <apacheds.version>1.5.1</apacheds.version>
     <apachedshared.version>0.9.7</apachedshared.version>
     <gwt.version>2.7.0-NX1</gwt.version>
-    <guice.version>3.0</guice.version>
+    <guice.version>4.0-beta5</guice.version>
     <jersey.version>1.18.3</jersey.version>
     <jetty.mortbay.version>6.1.26</jetty.mortbay.version>
     <shindig.version>1.1-BETA5-incubating-nx2</shindig.version>
@@ -193,7 +195,6 @@
     <!-- deprecated property since removal of maven-nuxeo-plugin execution -->
     <eclipseVersion>${project.version}</eclipseVersion>
     <!-- Convenient property; prefer use of the right property (runtime/core/...) -->
-    <nuxeo.platform.version>8.1-SNAPSHOT</nuxeo.platform.version>
     <org.ops4j.pax.version>4.4.0</org.ops4j.pax.version>
     <org.slf4j.version>1.7.7</org.slf4j.version>
     <ch.qos.logback.version>1.0.11</ch.qos.logback.version>
@@ -223,10 +224,28 @@
         <groupId>org.nuxeo.runtime</groupId>
         <artifactId>nuxeo-launcher-commons</artifactId>
         <version>${nuxeo.runtime.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
         <artifactId>nuxeo-launcher-commons</artifactId>
+        <version>${nuxeo.runtime.version}</version>
+        <type>test-jar</type>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.runtime</groupId>
+        <artifactId>nuxeo-launcher-connect</artifactId>
+        <version>${nuxeo.runtime.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.runtime</groupId>
+        <artifactId>nuxeo-launcher-connect</artifactId>
         <version>${nuxeo.runtime.version}</version>
         <type>test-jar</type>
         <scope>test</scope>
@@ -308,6 +327,31 @@
         <version>${nuxeo.runtime.version}</version>
         <type>test-jar</type>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.runtime</groupId>
+        <artifactId>nuxeo-runtime-logging</artifactId>
+        <version>${nuxeo.runtime.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.runtime</groupId>
+        <artifactId>nuxeo-runtime-logging-transient</artifactId>
+        <version>${nuxeo.runtime.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.runtime</groupId>
+        <artifactId>nuxeo-runtime-logging-jcl</artifactId>
+        <version>${nuxeo.runtime.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.runtime</groupId>
+        <artifactId>nuxeo-runtime-logging-logback</artifactId>
+        <version>${nuxeo.runtime.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.runtime</groupId>
+        <artifactId>nuxeo-runtime-logging-log4j</artifactId>
+        <version>${nuxeo.runtime.version}</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
@@ -488,13 +532,6 @@
         <artifactId>nuxeo-core-cache</artifactId>
         <version>${nuxeo.core.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.nuxeo.ecm.core</groupId>
-        <artifactId>nuxeo-core-cache</artifactId>
-        <type>test-jar</type>
-        <scope>test</scope>
-        <version>${nuxeo.core.version}</version>
-      </dependency>
 
       <!-- Nuxeo Services -->
       <dependency>
@@ -531,6 +568,13 @@
       <dependency>
         <groupId>org.nuxeo.ecm.platform</groupId>
         <artifactId>nuxeo-platform-convert</artifactId>
+        <version>${nuxeo.services.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.ecm.platform</groupId>
+        <artifactId>nuxeo-platform-convert</artifactId>
+        <type>test-jar</type>
+        <scope>test</scope>
         <version>${nuxeo.services.version}</version>
       </dependency>
       <dependency>
@@ -901,6 +945,13 @@
         <artifactId>nuxeo-platform-webapp-base</artifactId>
         <version>${nuxeo.jsf.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.nuxeo.ecm.platform</groupId>
+        <artifactId>nuxeo-platform-webapp-base</artifactId>
+        <version>${nuxeo.jsf.version}</version>
+        <scope>test</scope>
+        <type>test-jar</type>
+      </dependency>
 
       <!-- Nuxeo DM -->
       <dependency>
@@ -993,6 +1044,11 @@
       <dependency>
         <groupId>org.nuxeo.ecm.automation</groupId>
         <artifactId>nuxeo-automation-client</artifactId>
+        <version>${nuxeo.features.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.ecm.automation</groupId>
+        <artifactId>nuxeo-automation-client-core</artifactId>
         <version>${nuxeo.features.version}</version>
       </dependency>
       <dependency>
@@ -1604,6 +1660,12 @@
         <groupId>org.nuxeo.connect</groupId>
         <artifactId>nuxeo-connect-client</artifactId>
         <version>${nuxeo.connect.client.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.connect</groupId>
@@ -1622,6 +1684,10 @@
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.equinox.p2.cudf</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -1629,6 +1695,12 @@
         <artifactId>nuxeo-connect-client</artifactId>
         <version>${nuxeo.connect.client.version}</version>
         <classifier>standalone</classifier>
+        <exclusions>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
 
       <dependency>
@@ -1770,6 +1842,12 @@
         <version>1.1</version>
       </dependency>
 
+      <dependency>
+        <groupId>com.diffplug.durian</groupId>
+        <artifactId>durian</artifactId>
+        <version>2.0</version>
+      </dependency>
+
       <!-- commons -->
       <dependency>
         <groupId>commons-collections</groupId>
@@ -1819,7 +1897,7 @@
       <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
-        <version>1.1</version>
+        <version>1.2</version>
         <exclusions>
           <exclusion>
             <groupId>javax.servlet</groupId>
@@ -2089,6 +2167,10 @@
           <exclusion>
             <groupId>xml-apis</groupId>
             <artifactId>xmlParserAPIs</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -2473,6 +2555,11 @@
             <groupId>org.hibernate</groupId>
             <artifactId>ejb3-persistence</artifactId>
           </exclusion>
+          <!-- use org.javassist:javassist instead -->
+          <exclusion>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -2483,11 +2570,6 @@
           <exclusion>
             <groupId>org.hibernate</groupId>
             <artifactId>ejb3-persistence</artifactId>
-          </exclusion>
-          <!-- use org.javassist:javassist instead -->
-          <exclusion>
-            <groupId>javassist</groupId>
-            <artifactId>javassist</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -2512,22 +2594,22 @@
       <dependency>
         <groupId>org.openoffice</groupId>
         <artifactId>juh</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.1</version>
       </dependency>
       <dependency>
         <groupId>org.openoffice</groupId>
         <artifactId>jurt</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.1</version>
       </dependency>
       <dependency>
         <groupId>org.openoffice</groupId>
         <artifactId>ridl</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.1</version>
       </dependency>
       <dependency>
         <groupId>org.openoffice</groupId>
         <artifactId>unoil</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.1</version>
       </dependency>
       <dependency>
         <groupId>org.artofsolving.jodconverter</groupId>
@@ -2708,7 +2790,7 @@
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>1.6.1</version>
+        <version>3.2.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -2741,6 +2823,11 @@
         <version>${org.slf4j.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>sl4j-simple</artifactId>
+        <version>${org.slf4j.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -2806,16 +2893,64 @@
         <version>1.5.6</version>
       </dependency>
       <dependency>
-        <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.core</artifactId>
-        <version>4.2.0</version>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.util.promise</artifactId>
+	<version>1.0.0</version>
       </dependency>
-      <!-- OSGI compendium - do not change to org.osgi group since it is
-        not containing all needed classes -->
       <dependency>
         <groupId>org.osgi</groupId>
-        <artifactId>org.osgi.compendium</artifactId>
-        <version>4.2.0</version>
+        <artifactId>org.osgi.core</artifactId>
+        <version>6.0.0</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.namespace.extender</artifactId>
+	<version>1.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi.enterprise</artifactId>
+        <version>6.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>org.osgi</groupId>
+        <artifactId>osgi.residential</artifactId>
+        <version>6.0.0</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.service.cm</artifactId>
+	<version>1.5.0</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.service.repository</artifactId>
+	<version>1.1.0</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.service.resolver</artifactId>
+	<version>1.0.1</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.service.wireadmin</artifactId>
+	<version>1.0.1</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.service.log</artifactId>
+	<version>1.3.0</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.service.http</artifactId>
+	<version>1.2.1</version>
+      </dependency>
+      <dependency>
+	<groupId>org.osgi</groupId>
+	<artifactId>org.osgi.service.jdbc</artifactId>
+	<version>1.0.0</version>
       </dependency>
       <dependency>
         <groupId>oro</groupId>
@@ -2955,7 +3090,7 @@
       <dependency>
         <groupId>org.codehaus.groovy</groupId>
         <artifactId>groovy-all</artifactId>
-        <version>2.4.0</version>
+        <version>2.4.1</version>
       </dependency>
       <dependency>
         <groupId>org.mvel</groupId>
@@ -3398,6 +3533,10 @@
             <groupId>javax.resource</groupId>
             <artifactId>connector</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -3409,6 +3548,11 @@
         <groupId>org.eclipse.jdt</groupId>
         <artifactId>core</artifactId>
         <version>3.1.1-NXP-4284</version>
+      </dependency>
+      <dependency>
+	<groupId>org.eclipse.jdt</groupId>
+	<artifactId>org.eclipse.jdt.annotation</artifactId>
+	<version>2.0.0</version>
       </dependency>
       <dependency>
         <groupId>rhino</groupId>
@@ -3917,7 +4061,7 @@
       <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-core</artifactId>
-        <version>1.9.5</version>
+        <version>1.10.19</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -4651,27 +4795,43 @@
     </dependencies>
   </dependencyManagement>
 
-  <dependencies>
-    <dependency>
-      <groupId>commons-logging</groupId>
-      <artifactId>commons-logging</artifactId>
-    </dependency>
-
-    <!-- test scope -->
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
   <build>
     <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>generate-main-manifest</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>bnd-process</goal>
+            </goals>
+            <configuration>
+              <bndFileName>main.bnd</bndFileName>
+              <manifestPath>target/generated-resources/nuxeo/META-INF/nuxeo.mf</manifestPath>
+              <sourceDir>src/main/java</sourceDir>
+              <classesDir>target/classes</classesDir> 
+              <replaceSnapshot>false</replaceSnapshot>
+           </configuration>
+          </execution>
+          <execution>
+            <id>generate-test-manifest</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>bnd-process</goal>
+            </goals>
+            <configuration>
+              <bndFileName>test.bnd</bndFileName>
+              <manifestPath>target/generated-test-resources/nuxeo/META-INF/nuxeo.mf</manifestPath>
+              <sourceDir>src/test/java</sourceDir>
+              <classesDir>target/test-classes</classesDir>
+              <replaceSnapshot>false</replaceSnapshot>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+<!--
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -4682,7 +4842,8 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+        </plugin>
+         -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -4694,6 +4855,34 @@
             </goals>
             <configuration>
               <removeAll>false</removeAll>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-source</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>add-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>target/generated-resources/nuxeo</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-test-resources</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>add-test-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>target/generated-test-resources/nuxeo</directory>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>
@@ -4735,6 +4924,13 @@
             <exclude>**/*Test*$*.java</exclude>
           </excludes>
           <trimStackTrace>false</trimStackTrace>
+          <forkCount>1</forkCount>
+          <reuseForks>true</reuseForks>
+          <parallel>classes</parallel>
+          <perCoreThreadCount>false</perCoreThreadCount>
+          <threadCount>10</threadCount>
+          <argLine>-Xms512m -Xmx512m -XX:SoftRefLRUPolicyMSPerMB=1 -Djava.awt.headless=true -XX:MaxMetaspaceSize=256M -Dfile.encoding=UTF-8 ${it.failsafe.argLine}</argLine>
+          <!---XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:FlightRecorderOptions=defaultrecording=true,settings=/tank/nuxeo/.jmc/advanced.jfc,dumponexit=true,dumponexitpath=target/test-gc.jfr</argLine>-->
         </configuration>
       </plugin>
       <plugin>
@@ -4859,6 +5055,36 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-nuxeo-resources</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>target/generated-resources/nuxeo</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-nuxeo-test-resources</id>
+            <phase>process-test-classes</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>target/generated-test-resources/nuxeo</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -4885,6 +5111,11 @@
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>biz.aQute.bnd</groupId>
+          <artifactId>bnd-maven-plugin</artifactId>
+          <version>3.0.0-NX1</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
           <version>2.4.2</version>
@@ -4896,15 +5127,8 @@
           <configuration>
             <ejbVersion>3.0</ejbVersion>
             <archive>
-              <manifestFile>
-                src/main/resources/META-INF/MANIFEST.MF
-              </manifestFile>
-              <manifestEntries>
-                <Bundle-Version>
-                  ${project.version}-t${buildNumber}
-                </Bundle-Version>
-                <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
-              </manifestEntries>
+              <index>true</index>
+              <manifestFile>target/classes/META-INF/MANIFEST.MF</manifestFile>
             </archive>
           </configuration>
         </plugin>
@@ -4915,11 +5139,8 @@
           <version>2.3.1</version>
           <configuration>
             <archive>
-              <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
-              <manifestEntries>
-                <Bundle-Version>${project.version}-t${buildNumber}</Bundle-Version>
-                <Bundle-ManifestVersion>2</Bundle-ManifestVersion>
-              </manifestEntries>
+              <index>true</index>
+              <manifestFile>target/classes/META-INF/MANIFEST.MF</manifestFile>
             </archive>
           </configuration>
         </plugin>
@@ -4973,7 +5194,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-eclipse-plugin</artifactId>
-          <version>2.9</version>
+          <version>2.10</version>
         </plugin>
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
@@ -5535,23 +5756,40 @@
   <profiles>
     <profile>
       <id>jdt</id>
+      <dependencies>
+	<dependency>
+	  <groupId>org.eclipse.jdt</groupId>
+	  <artifactId>org.eclipse.jdt.annotation</artifactId>
+	  <scope>compile</scope>
+	</dependency>
+      </dependencies>
       <build>
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
-              <compilerId>jdt</compilerId>
+              <compilerId>eclipse</compilerId>
               <source>1.8</source>
               <target>1.8</target>
             </configuration>
+	    <dependencies>
+	      <dependency>
+		<groupId>org.codehaus.plexus</groupId>
+		<artifactId>plexus-compiler-eclipse</artifactId>
+		<version>2.6</version>
+		<scope>runtime</scope>
+	      </dependency>
+	    </dependencies>
+<!--
             <dependencies>
               <dependency>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-compiler-jdt</artifactId>
-                <version>0.23.0</version>
+                <version>0.24.0</version>
               </dependency>
-            </dependencies>
+              </dependencies>
+-->
           </plugin>
         </plugins>
       </build>

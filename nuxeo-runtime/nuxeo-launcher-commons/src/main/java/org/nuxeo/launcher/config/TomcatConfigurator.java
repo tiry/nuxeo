@@ -98,11 +98,6 @@ public class TomcatConfigurator extends ServerConfigurator {
     }
 
     @Override
-    public File getLogConfFile() {
-        return new File(getServerLibDir(), "log4j.xml");
-    }
-
-    @Override
     public File getConfigDir() {
         return new File(getRuntimeHome(), Environment.DEFAULT_CONFIG_DIR);
     }

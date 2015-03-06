@@ -22,21 +22,22 @@ package org.nuxeo.runtime.model.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.collections.ListenerList;
+import org.nuxeo.common.trycompanion.TryCompanion;
 import org.nuxeo.runtime.ComponentEvent;
 import org.nuxeo.runtime.ComponentListener;
 import org.nuxeo.runtime.RuntimeService;
-import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.ComponentManager;
 import org.nuxeo.runtime.model.ComponentName;
@@ -49,79 +50,72 @@ import org.nuxeo.runtime.model.RegistrationInfo;
  */
 public class ComponentManagerImpl implements ComponentManager {
 
-    private static final Log log = LogFactory.getLog(ComponentManagerImpl.class);
+    private final Log log = LogFactory.getLog(ComponentManagerImpl.class);
 
     // must use an ordered Set to avoid loosing the order of the pending
     // extensions
-    protected final Map<ComponentName, Set<Extension>> pendingExtensions;
+    protected final Map<ComponentName, Set<Extension>> extensionPendingsByComponent;
 
-    private ListenerList listeners;
+    private ListenerList<ComponentListener> listeners;
 
     private final Map<String, RegistrationInfoImpl> services;
 
-    protected Set<String> blacklist;
+    protected Set<String> blacklist = new HashSet<>();
 
     protected ComponentRegistry reg;
 
     public ComponentManagerImpl(RuntimeService runtime) {
-        reg = new ComponentRegistry();
-        pendingExtensions = new HashMap<ComponentName, Set<Extension>>();
-        listeners = new ListenerList();
+        reg = new ComponentRegistry(this);
+        extensionPendingsByComponent = new HashMap<ComponentName, Set<Extension>>();
+        listeners = new ListenerList<>(ComponentListener.class);
         services = new ConcurrentHashMap<String, RegistrationInfoImpl>();
         blacklist = new HashSet<String>();
     }
 
     @Override
-    public synchronized Collection<RegistrationInfo> getRegistrations() {
+    public Collection<RegistrationInfo> getRegistrations() {
         return new ArrayList<RegistrationInfo>(reg.getComponents());
     }
 
     @Override
-    public synchronized Map<ComponentName, Set<ComponentName>> getPendingRegistrations() {
-        // TODO the set value is not cloned
-        return new HashMap<ComponentName, Set<ComponentName>>(reg.getPendingComponents());
-    }
-
-    public synchronized Collection<ComponentName> getNeededRegistrations() {
-        return pendingExtensions.keySet();
-    }
-
-    public synchronized Collection<Extension> getPendingExtensions(ComponentName name) {
-        return pendingExtensions.get(name);
+    public Map<ComponentName, Set<RegistrationInfo>> getPendingRegistrations() {
+        return reg.requiredPendings.map;
     }
 
     @Override
-    public synchronized RegistrationInfo getRegistrationInfo(ComponentName name) {
+    public RegistrationInfoImpl getRegistrationInfo(ComponentName name) {
         return reg.getComponent(name);
     }
 
     @Override
-    public synchronized boolean isRegistered(ComponentName name) {
+    public boolean isRegistered(ComponentName name) {
         return reg.contains(name);
     }
 
     @Override
-    public synchronized int size() {
+    public int size() {
         return reg.size();
     }
 
     @Override
-    public synchronized ComponentInstance getComponent(ComponentName name) {
-        RegistrationInfo ri = reg.getComponent(name);
+    public ComponentInstanceImpl getComponent(ComponentName name) {
+        RegistrationInfoImpl ri = reg.getComponent(name);
         return ri != null ? ri.getComponent() : null;
     }
 
     @Override
-    public synchronized void shutdown() {
-        ShutdownTask.shutdown(this);
-        listeners = null;
-        reg.destroy();
-        reg = null;
+    public void shutdown() {
+        TryCompanion.<Void> of(RuntimeException.class)
+                .run(() -> reg.shutdown())
+                .run(() -> listeners = null)
+                .run(() -> reg.destroy())
+                .run(() -> reg = null)
+                .orElseThrow(() -> new RuntimeServiceException("shutdown component manager"));
     }
 
     @Override
     public Set<String> getBlacklist() {
-        return Collections.unmodifiableSet(blacklist);
+        return blacklist;
     }
 
     @Override
@@ -130,59 +124,52 @@ public class ComponentManagerImpl implements ComponentManager {
     }
 
     @Override
-    public synchronized void register(RegistrationInfo regInfo) {
+    public void register(RegistrationInfo regInfo) throws RuntimeServiceException {
         RegistrationInfoImpl ri = (RegistrationInfoImpl) regInfo;
         ComponentName name = ri.getName();
+
         if (blacklist.contains(name.getName())) {
             log.warn("Component " + name.getName() + " was blacklisted. Ignoring.");
+            ri.context.handleComponentBlacklisted(ri);
+            sendEvent(new ComponentEvent(ComponentEvent.COMPONENT_BLACKLISTED, regInfo));
             return;
         }
         if (reg.contains(name)) {
-            if (name.getName().startsWith("org.nuxeo.runtime.")) {
-                // XXX we hide the fact that nuxeo-runtime bundles are
-                // registered twice
-                // TODO fix the root cause and remove this
-                return;
-            }
-            handleError("Duplicate component name: " + name, null);
-            return;
+            throw new RuntimeServiceException(this + " : Duplicate component name " + name);
         }
-        for (ComponentName n : ri.getAliases()) {
-            if (reg.contains(n)) {
-                handleError("Duplicate component name: " + n + " (alias for " + name + ")", null);
-                return;
+        Set<Extension> pendings = extensionPendingsByComponent.get(ri.name);
+        if (pendings == null) {
+            pendings = new LinkedHashSet<Extension>();
+            extensionPendingsByComponent.put(ri.name, pendings);
+        }
+        for (ComponentName alias : ri.getAliases()) {
+            if (reg.contains(alias)) {
+                throw new RuntimeServiceException(
+                        this + " : Duplicate component name " + alias + " (alias for " + name + ")");
+            }
+            Set<Extension> aliasPendings = extensionPendingsByComponent.remove(alias);
+            if (aliasPendings != null) {
+                pendings.addAll(aliasPendings);
             }
         }
-
         ri.attach(this);
-
-        try {
-            log.info("Registering component: " + name);
-            if (!reg.addComponent(ri)) {
-                log.info("Registration delayed for component: " + name + ". Waiting for: "
-                        + reg.getMissingDependencies(ri.getName()));
-            }
-        } catch (RuntimeException e) {
-            // don't raise this exception,
-            // we want to isolate component errors from other components
-            handleError("Failed to register component: " + name + " (" + e.toString() + ')', e);
-            return;
+        if (!reg.addComponent(ri)) {
+            log.trace("Registration delayed for component: " + name + ". Waiting for: "
+                    + reg.getMissingDependencies(ri.getName()));
+        } else {
+            log.info("Registered component: " + name);
         }
     }
 
     @Override
-    public synchronized void unregister(RegistrationInfo regInfo) {
+    public void unregister(RegistrationInfo regInfo) {
         unregister(regInfo.getName());
     }
 
     @Override
-    public synchronized void unregister(ComponentName name) {
-        try {
-            log.info("Unregistering component: " + name);
-            reg.removeComponent(name);
-        } catch (RuntimeException e) {
-            log.error("Failed to unregister component: " + name, e);
-        }
+    public void unregister(ComponentName name) {
+        reg.removeComponent(name);
+        log.trace("Unregistered component: " + name);
     }
 
     @Override
@@ -201,15 +188,7 @@ public class ComponentManagerImpl implements ComponentManager {
         if (ri == null) {
             return null;
         }
-        if (ri.isResolved()) {
-            // activate it first
-            ri.activate();
-        }
-        if (ri.isActivated()) {
-            return ri.getComponent();
-        }
-        log.debug("The component exposing the service " + serviceClass + " is not resolved or not started");
-        return null;
+        return ri.getComponent();
     }
 
     @Override
@@ -220,37 +199,29 @@ public class ComponentManagerImpl implements ComponentManager {
 
     @Override
     public Collection<ComponentName> getActivatingRegistrations() {
-        return getRegistrations(RegistrationInfo.ACTIVATING);
-    }
-
-    @Override
-    public Collection<ComponentName> getStartFailureRegistrations() {
-        return getRegistrations(RegistrationInfo.START_FAILURE);
-    }
-
-    protected Collection<ComponentName> getRegistrations(int state) {
         RegistrationInfo[] comps = null;
-        synchronized (this) {
-            comps = reg.getComponentsArray();
-        }
-        Collection<ComponentName> ret = new ArrayList<ComponentName>();
+        comps = reg.getComponentsArray();
+        Collection<ComponentName> activating = new ArrayList<ComponentName>();
         for (RegistrationInfo ri : comps) {
-            if (ri.getState() == state) {
-                ret.add(ri.getName());
+            if (ri.getState() == RegistrationInfo.ACTIVATING) {
+                activating.add(ri.getName());
             }
         }
-        return ret;
+        return activating;
     }
 
-    void sendEvent(ComponentEvent event) {
-        log.debug("Dispatching event: " + event);
-        Object[] listeners = this.listeners.getListeners();
-        for (Object listener : listeners) {
-            ((ComponentListener) listener).handleEvent(event);
+    void sendEvent(ComponentEvent event) throws RuntimeServiceException {
+        if (log.isDebugEnabled()) {
+            log.debug("Dispatching event: " + event);
         }
+        TryCompanion.<Void> of(RuntimeException.class)
+                .forEachAndCollect(
+                        Stream.of(listeners.getListeners()),
+                        handler -> handler.handleEvent(event))
+                .orElseThrow(() -> new RuntimeServiceException("firing " + event));
     }
 
-    public synchronized void registerExtension(Extension extension) {
+    public void registerExtension(Extension extension) throws RuntimeServiceException {
         ComponentName name = extension.getTargetComponent();
         RegistrationInfoImpl ri = reg.getComponent(name);
         if (ri != null && ri.component != null) {
@@ -258,20 +229,24 @@ public class ComponentManagerImpl implements ComponentManager {
                 log.debug("Register contributed extension: " + extension);
             }
             loadContributions(ri, extension);
-            ri.component.registerExtension(extension);
+            try {
+                ri.component.registerExtension(extension);
+            } catch (Exception e) {
+                throw new RuntimeServiceException(ri + " : cannot register " + extension, e);
+            }
             sendEvent(new ComponentEvent(ComponentEvent.EXTENSION_REGISTERED,
                     ((ComponentInstanceImpl) extension.getComponent()).ri, extension));
         } else { // put the extension in the pending queue
             if (log.isDebugEnabled()) {
                 log.debug("Enqueue contributed extension to pending queue: " + extension);
             }
-            Set<Extension> extensions = pendingExtensions.get(name);
+            Set<Extension> extensions = extensionPendingsByComponent.get(name);
             if (extensions == null) {
                 extensions = new LinkedHashSet<Extension>(); // must keep order
                                                              // in which
                                                              // extensions are
                                                              // contributed
-                pendingExtensions.put(name, extensions);
+                extensionPendingsByComponent.put(name, extensions);
             }
             extensions.add(extension);
             sendEvent(new ComponentEvent(ComponentEvent.EXTENSION_PENDING,
@@ -279,7 +254,19 @@ public class ComponentManagerImpl implements ComponentManager {
         }
     }
 
-    public synchronized void unregisterExtension(Extension extension) {
+    void loadContributions(RegistrationInfoImpl ri, Extension xt) {
+        ExtensionPointImpl xp = ri.getExtensionPoint(xt.getExtensionPoint());
+        if (xp == null) {
+            throw new IllegalStateException("Cannot load contributions, extension point not registered (" + xt + ")");
+        }
+        try {
+            xp.loadContributions(ri, xt);
+        } catch (Exception e) {
+            throw new RuntimeServiceException("Failed to create contribution objects", e);
+        }
+    }
+
+    public void unregisterExtension(Extension extension) throws RuntimeServiceException {
         // TODO check if framework is shutting down and in that case do nothing
         if (log.isDebugEnabled()) {
             log.debug("Unregister contributed extension: " + extension);
@@ -289,15 +276,21 @@ public class ComponentManagerImpl implements ComponentManager {
         if (ri != null) {
             ComponentInstance co = ri.getComponent();
             if (co != null) {
-                co.unregisterExtension(extension);
+                try {
+                    co.unregisterExtension(extension);
+                } catch (Exception e) {
+                    throw new RuntimeServiceException(ri + " : cannot unregister " + extension, e);
+                } finally {
+                    extension.setContributions(null);
+                }
             }
         } else { // maybe it's pending
-            Set<Extension> extensions = pendingExtensions.get(name);
+            Set<Extension> extensions = extensionPendingsByComponent.get(name);
             if (extensions != null) {
                 // FIXME: extensions is a set of Extensions, not ComponentNames.
                 extensions.remove(name);
                 if (extensions.isEmpty()) {
-                    pendingExtensions.remove(name);
+                    extensionPendingsByComponent.remove(name);
                 }
             }
         }
@@ -305,19 +298,7 @@ public class ComponentManagerImpl implements ComponentManager {
                 ((ComponentInstanceImpl) extension.getComponent()).ri, extension));
     }
 
-    public static void loadContributions(RegistrationInfoImpl ri, Extension xt) {
-        ExtensionPointImpl xp = ri.getExtensionPoint(xt.getExtensionPoint());
-        if (xp != null && xp.contributions != null) {
-            try {
-                Object[] contribs = xp.loadContributions(ri, xt);
-                xt.setContributions(contribs);
-            } catch (RuntimeException e) {
-                handleError("Failed to load contributions for component " + xt.getComponent().getName(), e);
-            }
-        }
-    }
-
-    public synchronized void registerServices(RegistrationInfoImpl ri) {
+    void registerServices(RegistrationInfoImpl ri) {
         if (ri.serviceDescriptor == null) {
             return;
         }
@@ -328,7 +309,7 @@ public class ComponentManagerImpl implements ComponentManager {
         }
     }
 
-    public synchronized void unregisterServices(RegistrationInfoImpl ri) {
+    void unregisterServices(RegistrationInfoImpl ri) {
         if (ri.serviceDescriptor == null) {
             return;
         }
@@ -339,13 +320,8 @@ public class ComponentManagerImpl implements ComponentManager {
     }
 
     @Override
-    public synchronized String[] getServices() {
+    public String[] getServices() {
         return services.keySet().toArray(new String[services.size()]);
-    }
-
-    protected static void handleError(String message, Exception e) {
-        log.error(message, e);
-        Framework.getRuntime().getWarnings().add(message);
     }
 
 }

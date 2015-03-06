@@ -40,7 +40,7 @@ import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @Deploy({ "org.nuxeo.ecm.directory", "org.nuxeo.ecm.directory.sql" })
-@LocalDeploy("org.nuxeo.ecm.directory.resolver.test:test-directory-resolver-contrib.xml")
+@LocalDeploy("org.nuxeo.ecm.directory:test-directory-resolver-contrib.xml")
 public class DirectoryEntryListJsonWriterTest extends
         AbstractJsonWriterTest.External<DirectoryEntryListJsonWriter, List<DirectoryEntry>> {
 

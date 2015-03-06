@@ -28,6 +28,7 @@ public class NoopRepositoryInit implements RepositoryInit {
 
     @Override
     public void populate(CoreSession session) {
+
     }
 
 }

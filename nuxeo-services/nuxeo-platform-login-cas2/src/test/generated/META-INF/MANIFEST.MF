@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo CAS2 extension
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-cas2.te
+ sts
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-login-cas2
+Import-Package: edu.yale.its.tp.cas.client,javax.security.auth,javax.sec
+ urity.auth.callback,javax.security.auth.login,javax.servlet;version="[3
+ .0,4)",javax.servlet.http;version="[3.0,4)",javax.xml.parsers,org.jboss
+ .seam.mock,org.jboss.seam.util,org.junit,org.nuxeo.common.utils;version
+ ="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",org.nuxeo.ecm.
+ core.event;version="[0.0,1)",org.nuxeo.ecm.platform.login;version="[0.0
+ ,1)",org.nuxeo.ecm.platform.ui.web.auth;version="[0.0,1)",org.nuxeo.ecm
+ .platform.ui.web.auth.service;version="[0.0,1)",org.nuxeo.ecm.platform.
+ usermanager,org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runtime.api;v
+ ersion="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.nuxeo.ru
+ ntime.test,org.xml.sax
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: WEB-INF,org.nuxeo.ecm.platform.login.mockedServices,org
+ .nuxeo.ecm.platform.ui.web.auth.cas2,org.nuxeo.ecm.platform.ui.web.auth
+ .simple
+Require-Bundle: org.nuxeo.ecm.platform.login
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

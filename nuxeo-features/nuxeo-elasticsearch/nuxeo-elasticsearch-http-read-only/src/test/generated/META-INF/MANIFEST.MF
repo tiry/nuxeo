@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.elasticsearch.nuxeo-elasticsearch-http-read-only.
+ tests
+Bundle-SymbolicName: org.nuxeo.elasticsearch.nuxeo-elasticsearch-http-re
+ ad-only.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.elasticsearch.nuxeo-elasticsearch-http-read-onl
+ y
+Import-Package: com.google.inject;version="[1.4,2)",org.json,org.junit,o
+ rg.junit.rules,org.junit.runner,org.nuxeo.ecm.core.api;version="[0.0,1)
+ ",org.nuxeo.ecm.core.api.local;version="[0.0,1)",org.nuxeo.elasticsearc
+ h.api;version="[0.0,1)",org.nuxeo.elasticsearch.http.readonly.filter,or
+ g.nuxeo.elasticsearch.test,org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.elasticsearch.http.readonly
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

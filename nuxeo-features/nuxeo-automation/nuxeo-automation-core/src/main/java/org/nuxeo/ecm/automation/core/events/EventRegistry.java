@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.runtime.model.ContributionFragmentRegistry;
 
 /**
@@ -37,8 +38,10 @@ public class EventRegistry extends ContributionFragmentRegistry<EventHandler> {
 
     @Override
     public String getContributionId(EventHandler contrib) {
-        // useless, never used
-        return contrib.getChainId();
+        if (contrib.chainId == null) {
+            throw new NuxeoException("chain has no id ");
+        }
+        return contrib.chainId;
     }
 
     @Override

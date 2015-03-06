@@ -29,42 +29,21 @@ import static org.junit.Assert.fail;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
-import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.ecm.core.test.annotations.Granularity;
-import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.content.template.service.ContentFactory;
 import org.nuxeo.ecm.platform.content.template.service.ContentFactoryDescriptor;
-import org.nuxeo.ecm.platform.content.template.service.ContentTemplateService;
 import org.nuxeo.ecm.platform.content.template.service.ContentTemplateServiceImpl;
 import org.nuxeo.ecm.platform.content.template.service.FactoryBindingDescriptor;
 import org.nuxeo.ecm.platform.content.template.service.NotificationDescriptor;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.platform.content.template.tests:test-content-template-framework.xml",
-        "org.nuxeo.ecm.platform.content.template.tests:test-content-template-contrib.xml",
-        "org.nuxeo.ecm.platform.content.template.tests:test-content-template-listener.xml" })
-public class TestContentTemplateFactory {
-
-    @Inject
-    protected ContentTemplateService service;
-
-    @Inject
-    protected CoreSession session;
+@LocalDeploy({"org.nuxeo.ecm.platform.content.template:test-content-template-contrib.xml"})
+public class TestContentTemplateFactory extends ImportContentTemplateFactoryTestCase {
 
     @Before
     public void setUp() throws Exception {
@@ -78,7 +57,6 @@ public class TestContentTemplateFactory {
         Map<String, ContentFactoryDescriptor> factories = serviceImpl.getFactories();
         assertTrue(factories.containsKey("SimpleTemplateFactory"));
         assertTrue(factories.containsKey("ImportFactory"));
-        assertEquals(2, factories.size());
     }
 
     @Test
@@ -86,12 +64,10 @@ public class TestContentTemplateFactory {
         ContentTemplateServiceImpl serviceImpl = (ContentTemplateServiceImpl) service;
         assertNotNull(serviceImpl);
         Map<String, FactoryBindingDescriptor> factoryBindings = serviceImpl.getFactoryBindings();
-        assertEquals(4, factoryBindings.size());
         assertTrue(factoryBindings.containsKey("Root"));
         assertTrue(factoryBindings.containsKey("Domain"));
 
-        assertEquals(4, factoryBindings.get("Domain").getTemplate().size());
-        assertEquals("Workspaces", factoryBindings.get("Domain").getTemplate().get(0).getId());
+        assertEquals("workspaces", factoryBindings.get("Domain").getTemplate().get(0).getId());
     }
 
     @Test
@@ -164,7 +140,6 @@ public class TestContentTemplateFactory {
         assertNotNull(serviceImpl);
 
         Map<String, ContentFactory> factoryInstances = serviceImpl.getFactoryInstancesByType();
-        assertEquals(3, factoryInstances.size());
         assertTrue(factoryInstances.containsKey("Root"));
         assertTrue(factoryInstances.containsKey("Domain"));
     }
@@ -177,31 +152,24 @@ public class TestContentTemplateFactory {
 
         // check root ACL
         assertTrue(session.getACP(root.getRef()).getAccess("Administrator", "Everything").toBoolean());
-        assertTrue(session.getACP(root.getRef()).getAccess("Danny", "Dream").toBoolean());
+        assertTrue(session.getACP(root.getRef()).getAccess("members", "Read").toBoolean());
 
         // check that default domain has been created
         DocumentModelList children = session.getChildren(root.getRef());
-        assertEquals(1, children.size());
 
         children = session.getChildren(root.getRef(), "Domain");
         DocumentModel domain = children.get(0);
-        assertEquals(1, children.size());
-        assertEquals("defaut domain", domain.getTitle());
+        assertEquals("Domain", domain.getTitle());
 
         // check that the default domain has the template layout
-        children = session.getChildren(domain.getRef());
-        assertEquals(3, children.size());
         children = session.getChildren(domain.getRef(), "WorkspaceRoot");
-        assertEquals(1, children.size());
         assertEquals("Workspaces", children.get(0).getTitle());
 
         // check that Section is created under sectionRoot
         children = session.getChildren(domain.getRef(), "SectionRoot");
-        assertEquals(1, children.size());
         DocumentModel sectionRoot = children.get(0);
         assertEquals("Sections", sectionRoot.getTitle());
         children = session.getChildren(sectionRoot.getRef(), "Section");
-        assertEquals(1, children.size());
         assertEquals("Section", children.get(0).getTitle());
     }
 
@@ -227,7 +195,7 @@ public class TestContentTemplateFactory {
         DocumentModel root = session.getRootDocument();
         service.executeFactoryForType(root);
 
-        DocumentModel firstDomain = session.getChildren(root.getRef()).get(0);
+        DocumentModel firstDomain = session.getChildren(root.getRef(), "Domain").get(0);
         DocumentModel wsRoot = session.getChildren(firstDomain.getRef(), "WorkspaceRoot").get(0);
 
         // create new WS
@@ -273,19 +241,13 @@ public class TestContentTemplateFactory {
         // reach first available WSRoot
         DocumentModel root = session.getRootDocument();
         service.executeFactoryForType(root);
-        DocumentModel firstDomain = session.getChildren(root.getRef()).get(0);
+        DocumentModel firstDomain = session.getChildren(root.getRef(), "Domain").get(0);
 
-        // Check if every superspaces have FacetFolder Document
-        DocumentModel wsRoot = session.getChildren(firstDomain.getRef(), "WorkspaceRoot").get(0);
-        DocumentModel facetFolder = session.getChild(wsRoot.getRef(), "FacetFolder");
-        assertNotNull(facetFolder);
+        DocumentModel facetDoc = session.createDocumentModel(firstDomain.getPathAsString(), "test doc", "Folder");
+        facetDoc.addFacet("TestTemplateFacet");
+        facetDoc = session.createDocument(facetDoc);
 
-        DocumentModel templateRoot = session.getChildren(firstDomain.getRef(), "TemplateRoot").get(0);
-        facetFolder = session.getChild(templateRoot.getRef(), "FacetFolder");
-        assertNotNull(facetFolder);
-
-        DocumentModel sectionRoot = session.getChildren(firstDomain.getRef(), "SectionRoot").get(0);
-        facetFolder = session.getChild(sectionRoot.getRef(), "FacetFolder");
+        DocumentModel facetFolder = session.getChild(facetDoc.getRef(), "FacetFolder");
         assertNotNull(facetFolder);
     }
 

@@ -18,8 +18,6 @@
  */
 package org.nuxeo.ecm.core.blob;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -34,21 +32,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.nuxeo.ecm.core.CoreTestCase;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.repository.RepositoryManager;
 import org.nuxeo.ecm.core.blob.BlobManager.BlobInfo;
 import org.nuxeo.ecm.core.model.Document;
-import org.nuxeo.runtime.mockito.MockitoFeature;
-import org.nuxeo.runtime.mockito.RuntimeService;
+import org.nuxeo.runtime.test.mockito.MockitoFeature;
+import org.nuxeo.runtime.test.mockito.RuntimeService;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
-@Features({ BlobManagerFeature.class, MockitoFeature.class })
+@Features(MockitoFeature.class)
 @LocalDeploy("org.nuxeo.ecm.core:OSGI-INF/dummy-blob-provider.xml")
-public class TestBlobManager {
+public class TestBlobManager extends CoreTestCase {
 
     private static final String DUMMY = "dummy";
 

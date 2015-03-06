@@ -34,13 +34,10 @@ import javax.inject.Inject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.admin.setup.TestSetupWizardActionBean.CustomLogFilter;
@@ -49,6 +46,9 @@ import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature;
 import org.nuxeo.runtime.test.runner.RuntimeFeature;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
  * @author jcarsique
@@ -71,7 +71,7 @@ public class TestSetupWizardActionBean {
 
     public static class CustomLogFilter implements LogCaptureFeature.Filter {
         @Override
-        public boolean accept(LoggingEvent event) {
+        public boolean accept(ILoggingEvent event) {
             return Level.ERROR.equals(event.getLevel()) || Level.WARN.equals(event.getLevel());
         }
     }

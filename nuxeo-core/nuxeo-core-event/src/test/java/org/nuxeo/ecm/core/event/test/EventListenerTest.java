@@ -18,17 +18,13 @@
  */
 package org.nuxeo.ecm.core.event.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.URL;
 import java.rmi.dgc.VMID;
+
+import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,8 +33,6 @@ import org.nuxeo.ecm.core.event.EventService;
 import org.nuxeo.ecm.core.event.impl.EventContextImpl;
 import org.nuxeo.ecm.core.event.impl.EventImpl;
 import org.nuxeo.ecm.core.event.impl.EventServiceImpl;
-import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 import org.nuxeo.runtime.test.runner.ConditionalIgnoreRule;
 
@@ -149,30 +143,31 @@ public class EventListenerTest extends NXRuntimeTestCase {
      */
     public static int SCRIPT_CNT = 0;
 
+    @Inject
+    EventService service;
+
     @Test
     @ConditionalIgnoreRule.Ignore(condition = ConditionalIgnoreRule.IgnoreIsolated.class)
     public void testScripts() throws Exception {
-        URL url = EventListenerTest.class.getClassLoader().getResource("test-listeners.xml");
-        RuntimeContext rc = deployTestContrib("org.nuxeo.ecm.core.event", url);
-        assertEquals(0, SCRIPT_CNT);
+        try (AutoCloseable context = deployTestContrib("org.nuxeo.ecm.core.event", "test-listeners.xml")) {
+            assertEquals(0, SCRIPT_CNT);
+            service.fireEvent("test", new EventContextImpl(null, null));
+            assertEquals(1, SCRIPT_CNT);
 
-        EventService service = Framework.getService(EventService.class);
-        service.fireEvent("test", new EventContextImpl(null, null));
-        assertEquals(1, SCRIPT_CNT);
-
-        rc.undeploy(url);
+        }
         assertEquals(1, SCRIPT_CNT);
 
         service.fireEvent("test", new EventContextImpl(null, null));
         assertEquals(1, SCRIPT_CNT);
 
-        rc = deployTestContrib("org.nuxeo.ecm.core.event", url);
-        service.fireEvent("test1", new EventContextImpl(null, null));
-        assertEquals(2, SCRIPT_CNT);
+        try (AutoCloseable context = deployTestContrib("org.nuxeo.ecm.core.event", "test-listeners.xml")) {
+            service.fireEvent("test1", new EventContextImpl(null, null));
+            assertEquals(2, SCRIPT_CNT);
 
-        // test not accepted event
-        service.fireEvent("some-event", new EventContextImpl(null, null));
-        assertEquals(2, SCRIPT_CNT);
+            // test not accepted event
+            service.fireEvent("some-event", new EventContextImpl(null, null));
+            assertEquals(2, SCRIPT_CNT);
+        }
     }
 
     @Test

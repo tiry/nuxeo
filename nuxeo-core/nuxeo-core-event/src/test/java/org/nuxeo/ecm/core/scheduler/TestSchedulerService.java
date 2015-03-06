@@ -18,9 +18,6 @@
  */
 package org.nuxeo.ecm.core.scheduler;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -79,7 +76,6 @@ public class TestSchedulerService extends NXRuntimeTestCase {
         service.registerSchedule(schedule);
         waitUntilDummyEventListenerIsCalled(10); // so that job is called at least once
 
-        long count = DummyEventListener.getCount();
         boolean unregistered = service.unregisterSchedule(schedule.id);
         // schedule can happen again, it hasn't been unregistered after first
         // launch.

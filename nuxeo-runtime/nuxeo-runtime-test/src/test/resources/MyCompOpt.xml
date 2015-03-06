@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<component name="my.comp.opt" optional="true">
+
+  <extension target="my.comp2" point="xp1">
+    <printer>
+      <message>I may say hello</message>
+    </printer>
+  </extension>
+
+</component>

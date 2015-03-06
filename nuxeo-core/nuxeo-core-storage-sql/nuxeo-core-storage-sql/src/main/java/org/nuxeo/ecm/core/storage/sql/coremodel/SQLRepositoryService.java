@@ -86,6 +86,11 @@ public class SQLRepositoryService extends DefaultComponent {
         public List<String> getRepositoryIds() {
             return new ArrayList<>(currentContribs.keySet());
         }
+
+        @Override
+        public void contributionUpdated(String id, RepositoryDescriptor contrib, RepositoryDescriptor newOrigContrib) {
+            super.contributionUpdated(id, contrib, newOrigContrib);
+        }
     }
 
     @Override

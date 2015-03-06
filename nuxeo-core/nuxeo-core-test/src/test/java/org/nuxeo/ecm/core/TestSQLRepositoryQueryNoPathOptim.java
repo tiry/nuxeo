@@ -27,7 +27,6 @@ import java.util.Calendar;
 
 import javax.inject.Inject;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,19 +81,13 @@ public class TestSQLRepositoryQueryNoPathOptim {
     public void setUp() throws Exception {
         // cannot be done through @LocalDeploy, because the framework variables
         // about repository configuration aren't ready yet
-        runtimeHarness.deployContrib("org.nuxeo.ecm.core.test.tests",
+        runtimeHarness.deployTestContrib("org.nuxeo.ecm.core.test",
                 "OSGI-INF/test-repo-no-pathoptimizations-contrib.xml");
         // assume after deploy so that tearDown can undeploy
         assumeTrue(coreFeature.getStorageConfiguration().isVCS());
         newRepository(); // fully reread repo
         RepositoryDescriptor desc = sqlRepositoryService.getRepositoryDescriptor(session.getRepositoryName());
         assertFalse("Path optim should be disabled", desc.getPathOptimizationsEnabled());
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        runtimeHarness.undeployContrib("org.nuxeo.ecm.core.test.tests",
-                "OSGI-INF/test-repo-no-pathoptimizations-contrib.xml");
     }
 
     protected void newRepository() {
@@ -293,14 +286,14 @@ public class TestSQLRepositoryQueryNoPathOptim {
                 session.getDocument(new PathRef("/testfolder1")).getId()));
         assertEquals(4, dml.size());
 
-        dml = session.query(String.format(
-                "SELECT * FROM document WHERE dc:title='testfile1_Title' AND ecm:ancestorId = '%s'",
-                session.getRootDocument().getId()));
+        dml = session.query(
+                String.format("SELECT * FROM document WHERE dc:title='testfile1_Title' AND ecm:ancestorId = '%s'",
+                        session.getRootDocument().getId()));
         assertEquals(1, dml.size());
 
-        dml = session.query(String.format(
-                "SELECT * FROM document WHERE dc:title LIKE 'testfile%%' AND ecm:ancestorId = '%s'",
-                session.getRootDocument().getId()));
+        dml = session.query(
+                String.format("SELECT * FROM document WHERE dc:title LIKE 'testfile%%' AND ecm:ancestorId = '%s'",
+                        session.getRootDocument().getId()));
         assertEquals(4, dml.size());
     }
 

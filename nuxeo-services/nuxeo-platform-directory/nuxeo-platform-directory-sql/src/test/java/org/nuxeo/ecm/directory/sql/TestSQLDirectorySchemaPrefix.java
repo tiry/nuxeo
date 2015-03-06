@@ -40,9 +40,9 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-schema-override.xml",
-        "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-bundle.xml",
-        "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-schema-prefix.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.directory.sql:test-sql-directories-schema-override.xml",
+        "org.nuxeo.ecm.directory.sql:test-sql-directories-bundle.xml",
+        "org.nuxeo.ecm.directory.sql:test-sql-directories-schema-prefix.xml" })
 public class TestSQLDirectorySchemaPrefix {
 
     private static final String USER_DIR = "userDirectory";

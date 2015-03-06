@@ -2,6 +2,8 @@
 <component
     name="org.nuxeo.ecm.platform.content.template.service.ContentTemplateService.test.mockType">
 
+  <require>org.nuxeo.ecm.platform.content.template.service.ContentTemplateService.defaultContrib</require>
+  
   <extension target="org.nuxeo.ecm.platform.types.TypeService" point="types">
     <type id="Root">
       <label>Server Root</label>

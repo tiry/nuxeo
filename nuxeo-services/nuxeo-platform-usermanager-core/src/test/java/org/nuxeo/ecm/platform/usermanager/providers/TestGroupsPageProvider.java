@@ -31,38 +31,18 @@ import javax.inject.Inject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.platform.query.api.PageProvider;
 import org.nuxeo.ecm.platform.query.api.PageProviderService;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
-import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.ecm.platform.usermanager.UserManagerTestCase;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author <a href="mailto:troger@nuxeo.com">Thomas Roger</a>
  */
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class) // to init properties for SQL datasources
-@Deploy({ "org.nuxeo.ecm.core.schema", //
-        "org.nuxeo.ecm.core.api", //
-        "org.nuxeo.ecm.core", //
-        "org.nuxeo.ecm.core.event", //
-        "org.nuxeo.ecm.platform.usermanager.api", //
-        "org.nuxeo.ecm.platform.usermanager", //
-        "org.nuxeo.ecm.directory.api", //
-        "org.nuxeo.ecm.directory.types.contrib", //
-        "org.nuxeo.ecm.directory", //
-        "org.nuxeo.ecm.directory.sql", //
-        "org.nuxeo.ecm.platform.query.api", //
-})
-@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager.tests:computedgroups-contrib.xml", //
-        "org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/directory-config.xml", //
-})
-public class TestGroupsPageProvider {
+@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager:computedgroups-contrib.xml" })
+public class TestGroupsPageProvider extends UserManagerTestCase {
 
     protected static final String PROVIDER_NAME = "groups_listing";
 
@@ -95,8 +75,8 @@ public class TestGroupsPageProvider {
     public void testGroupsPageProviderAllMode() {
         Map<String, Serializable> properties = new HashMap<String, Serializable>();
         properties.put(AbstractGroupsPageProvider.GROUPS_LISTING_MODE_PROPERTY, AbstractGroupsPageProvider.ALL_MODE);
-        PageProvider<DocumentModel> groupsProvider = (PageProvider<DocumentModel>) ppService.getPageProvider(
-                PROVIDER_NAME, null, null, null, properties, "");
+        PageProvider<DocumentModel> groupsProvider = (PageProvider<DocumentModel>) ppService
+                .getPageProvider(PROVIDER_NAME, null, null, null, properties, "");
         List<DocumentModel> groups = groupsProvider.getCurrentPage();
         assertNotNull(groups);
         assertEquals(5, groups.size());
@@ -119,8 +99,8 @@ public class TestGroupsPageProvider {
         Map<String, Serializable> properties = new HashMap<String, Serializable>();
         properties.put(AbstractGroupsPageProvider.GROUPS_LISTING_MODE_PROPERTY,
                 AbstractGroupsPageProvider.SEARCH_ONLY_MODE);
-        PageProvider<DocumentModel> groupsProvider = (PageProvider<DocumentModel>) ppService.getPageProvider(
-                PROVIDER_NAME, null, null, null, properties, "gr");
+        PageProvider<DocumentModel> groupsProvider = (PageProvider<DocumentModel>) ppService
+                .getPageProvider(PROVIDER_NAME, null, null, null, properties, "gr");
         List<DocumentModel> groups = groupsProvider.getCurrentPage();
         assertNotNull(groups);
         assertEquals(2, groups.size());

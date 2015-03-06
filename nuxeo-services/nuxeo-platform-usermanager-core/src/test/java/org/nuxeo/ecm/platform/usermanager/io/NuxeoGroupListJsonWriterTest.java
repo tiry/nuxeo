@@ -29,13 +29,14 @@ import org.junit.Test;
 import org.nuxeo.ecm.core.api.NuxeoGroup;
 import org.nuxeo.ecm.core.io.marshallers.json.AbstractJsonWriterTest;
 import org.nuxeo.ecm.core.io.marshallers.json.JsonAssert;
+import org.nuxeo.ecm.directory.sql.SQLDirectoryFeature;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
 import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.LocalDeploy;
+import org.nuxeo.runtime.test.runner.Features;
 
-@Deploy({ "org.nuxeo.ecm.directory", "org.nuxeo.ecm.directory.sql", "org.nuxeo.ecm.core.cache",
-        "org.nuxeo.ecm.directory.types.contrib", "org.nuxeo.ecm.platform.usermanager" })
-@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/directory-config.xml" })
+@Features(SQLDirectoryFeature.class)
+@Deploy({ "org.nuxeo.ecm.core.cache", "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.platform.usermanager.api",
+        "org.nuxeo.ecm.platform.usermanager" })
 public class NuxeoGroupListJsonWriterTest extends
         AbstractJsonWriterTest.External<NuxeoGroupListJsonWriter, List<NuxeoGroup>> {
 

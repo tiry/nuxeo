@@ -21,6 +21,9 @@
 
 package org.nuxeo.ecm.webapp.clipboard;
 
+import static org.jboss.seam.ScopeType.EVENT;
+import static org.jboss.seam.ScopeType.SESSION;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -73,9 +76,6 @@ import org.nuxeo.ecm.webapp.documentsLists.DocumentsListsManager;
 import org.nuxeo.ecm.webapp.helpers.EventManager;
 import org.nuxeo.ecm.webapp.helpers.EventNames;
 import org.nuxeo.runtime.api.Framework;
-
-import static org.jboss.seam.ScopeType.EVENT;
-import static org.jboss.seam.ScopeType.SESSION;
 
 /**
  * This is the action listener behind the copy/paste template that knows how to copy/paste the selected user data to the

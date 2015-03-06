@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-scim-server.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-scim-server.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-scim-server
+Import-Package: com.google.inject;version="[1.4,2)",com.unboundid.scim.d
+ ata,com.unboundid.scim.sdk,info.simplecloud.core,info.simplecloud.scimp
+ roxy.compliance,javax.ws.rs.core;version="[1.1,2)",org.apache.http,org.
+ apache.http.auth,org.apache.http.client,org.apache.http.conn,org.apache
+ .http.conn.scheme,org.apache.http.impl.client,org.apache.http.impl.conn
+ ,org.apache.http.params,org.apache.wink.client,org.apache.wink.client.h
+ ttpclient,org.junit,org.junit.runner,org.junit.runners.model,org.nuxeo.
+ common.utils;version="[0.0,1)",org.nuxeo.ecm.automation.test,org.nuxeo.
+ ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.co
+ re.test.annotations,org.nuxeo.ecm.platform.usermanager;version="[0.0,1)
+ ",org.nuxeo.ecm.platform.usermanager.exceptions;version="[0.0,1)",org.n
+ uxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: info.simplecloud.scimproxy.compliance.enteties,info.sim
+ plecloud.scimproxy.compliance.test,org.nuxeo.scim.server.tests,org.nuxe
+ o.scim.server.tests.compliance
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -54,7 +54,7 @@
 
   <extension target="org.nuxeo.runtime.management.ResourcePublisher"
     point="services">
-    <service name="managementResourcePublisher" class="org.nuxeo.runtime.management.ResourcePublisher" ifaceClass="prg.nuxeo.runtime.management.ResourcePublisherService"/>
+    <service name="managementResourcePublisher" class="org.nuxeo.runtime.management.ResourcePublisher" ifaceClass="org.nuxeo.runtime.management.ResourcePublisherService"/>
   </extension>
 
 </component>

@@ -59,7 +59,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features({ SQLDirectoryFeature.class, CoreFeature.class })
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy("org.nuxeo.ecm.directory.sql.tests:test-directory-resolver-contrib.xml")
+@LocalDeploy("org.nuxeo.ecm.directory.sql:test-directory-resolver-contrib.xml")
 public class TestDirectoryEntryResolver {
 
     private static final String REFERENCED_DIRECTORY2 = "referencedDirectory2";

@@ -20,7 +20,6 @@
 
 package org.nuxeo.runtime.model.impl;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.nuxeo.common.xmap.Context;
@@ -31,7 +30,8 @@ import org.nuxeo.runtime.model.ComponentName;
 import org.nuxeo.runtime.model.RuntimeContext;
 
 /**
- * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ * @author  <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ *
  */
 public class ExtensionDescriptorReader {
 
@@ -39,39 +39,41 @@ public class ExtensionDescriptorReader {
 
     public ExtensionDescriptorReader() {
         xmap = new XMap();
-        xmap.setValueFactory(ComponentName.class, new XValueFactory() {
+        xmap.setValueFactory(new XValueFactory<ComponentName>() {
             @Override
-            public Object deserialize(Context context, String value) {
+            public ComponentName deserialize(Context context, String value) {
                 return new ComponentName(value);
             }
 
             @Override
-            public String serialize(Context context, Object value) {
-                if (value != null) {
+            public String serialize(Context context, ComponentName value) {
+                if ( value != null ) {
                     return value.toString();
                 }
                 return null;
             }
+
         });
-        xmap.setValueFactory(Version.class, new XValueFactory() {
+        xmap.setValueFactory(new XValueFactory<Version>() {
 
             @Override
-            public Object deserialize(Context context, String value) {
+            public Version deserialize(Context context, String value) {
                 return Version.parseString(value);
             }
 
             @Override
-            public String serialize(Context context, Object value) {
-                if (value != null) {
+            public String serialize(Context context, Version value) {
+                if ( value != null ) {
                     return value.toString();
                 }
                 return null;
             }
+
         });
         xmap.register(ExtensionImpl.class);
     }
 
-    public ExtensionImpl read(RuntimeContext ctx, InputStream in) throws IOException {
+    public ExtensionImpl read(RuntimeContext ctx, InputStream in) throws Exception {
         Object[] result = xmap.loadAll(new XMapContext(ctx), in);
         if (result.length > 0) {
             return (ExtensionImpl) result[0];

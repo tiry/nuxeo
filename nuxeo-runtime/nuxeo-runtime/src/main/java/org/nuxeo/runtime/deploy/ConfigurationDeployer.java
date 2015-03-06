@@ -29,9 +29,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.collections.ListenerList;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.model.RuntimeContext;
 
 /**
@@ -39,13 +38,12 @@ import org.nuxeo.runtime.model.RuntimeContext;
  */
 public class ConfigurationDeployer implements FileChangeListener {
 
-    private static final Log log = LogFactory.getLog(ConfigurationDeployer.class);
-
     protected final Map<String, Entry> urls;
 
     protected final FileChangeNotifier notifier;
 
-    protected final ListenerList listeners = new ListenerList();
+    protected final ListenerList<ConfigurationChangedListener> listeners = new ListenerList<>(
+            ConfigurationChangedListener.class);
 
     public ConfigurationDeployer() {
         this(null);
@@ -75,9 +73,8 @@ public class ConfigurationDeployer implements FileChangeListener {
                     }
                     watchFile = new File(new URI(str));
                 }
-            } catch (URISyntaxException e) {
-                log.error(e);
-                watchFile = null;
+            } catch (URISyntaxException cause) {
+                throw new RuntimeServiceException("Cannot deploy " + url, cause);
             }
         }
         _deploy(ctx, url, watchFile, trackChanges);
@@ -90,7 +87,7 @@ public class ConfigurationDeployer implements FileChangeListener {
         }
     }
 
-    public synchronized void _undeploy(Entry entry) throws IOException {
+    public void _undeploy(Entry entry) throws IOException {
         try {
             entry.ctx.undeploy(entry.url);
         } finally {
@@ -108,7 +105,7 @@ public class ConfigurationDeployer implements FileChangeListener {
         undeploy(file.getCanonicalFile().toURI().toURL());
     }
 
-    protected synchronized void _deploy(RuntimeContext ctx, URL url, File watchFile, boolean trackChanges)
+    protected void _deploy(RuntimeContext ctx, URL url, File watchFile, boolean trackChanges)
             throws IOException {
         String id = url.toExternalForm();
         Entry entry = new Entry(ctx, url, watchFile);
@@ -122,15 +119,14 @@ public class ConfigurationDeployer implements FileChangeListener {
     @Override
     public void fileChanged(FileChangeNotifier.FileEntry entry, long now) {
         Entry e = urls.get(entry.id);
-        if (e != null) {
-            try {
-                e.ctx.undeploy(e.url);
-                e.ctx.deploy(e.url);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            } finally {
-                fireConfigurationChanged(e);
-            }
+        if (e == null) {
+            return;
+        }
+        try {
+            e.ctx.undeploy(e.url);
+            e.ctx.deploy(e.url);
+        } finally {
+            fireConfigurationChanged(e);
         }
     }
 

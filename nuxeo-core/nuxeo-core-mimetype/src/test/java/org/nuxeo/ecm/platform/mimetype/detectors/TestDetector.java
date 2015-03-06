@@ -27,11 +27,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.Ignore;
 import static org.junit.Assert.*;
 
 import org.nuxeo.common.utils.FileUtils;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
+@RunWith(FeaturesRunner.class)
 public class TestDetector {
 
     private static File getFileFromTestResource(String resource) {

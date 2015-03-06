@@ -952,7 +952,7 @@ public class TestSQLRepositoryFulltextQuery {
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/test-listeners-all-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/test-listeners-all-contrib.xml")
     public void testFulltextReindexOnCreateDelete() throws Exception {
         waitForFulltextIndexing();
 

@@ -1,0 +1,5 @@
+<component name="test:disable-works">
+    <extension target="org.nuxeo.ecm.core.work.service" point="queues">
+    <queue id="*" queuing="false" processing="false"/>
+  </extension>
+</component>

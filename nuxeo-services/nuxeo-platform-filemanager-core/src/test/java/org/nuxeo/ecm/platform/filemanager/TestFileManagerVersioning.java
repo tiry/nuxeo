@@ -53,7 +53,7 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
 @Features(CoreFeature.class)
 @RepositoryConfig(init = RepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy({ "org.nuxeo.ecm.platform.types.api", "org.nuxeo.ecm.platform.types.core",
-        "org.nuxeo.ecm.platform.filemanager.core", "org.nuxeo.ecm.platform.dublincore",
+    "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.platform.filemanager.core", "org.nuxeo.ecm.platform.dublincore",
         "org.nuxeo.ecm.platform.versioning.api", "org.nuxeo.ecm.platform.versioning" })
 @LocalDeploy("org.nuxeo.ecm.platform.types.core:ecm-types-test-contrib.xml")
 public class TestFileManagerVersioning {
@@ -98,7 +98,6 @@ public class TestFileManagerVersioning {
         harness.deployContrib(TEST_BUNDLE, INCORRECT_XML);
         assertEquals(VersioningOption.MINOR, service.getVersioningOption());
         assertFalse(service.doVersioningAfterAdd());
-        harness.undeployContrib(TEST_BUNDLE, INCORRECT_XML);
     }
 
     @Test
@@ -131,7 +130,6 @@ public class TestFileManagerVersioning {
         assertTrue(doc.isCheckedOut());
         assertEquals(2, coreSession.getVersions(docRef).size());
         assertEquals("2.0+", doc.getVersionLabel());
-        harness.undeployContrib(TEST_BUNDLE, CONTRIB_XML);
     }
 
     @Test
@@ -164,7 +162,6 @@ public class TestFileManagerVersioning {
         assertFalse(doc.isCheckedOut());
         assertEquals(3, coreSession.getVersions(docRef).size());
         assertEquals("0.3", doc.getVersionLabel());
-        harness.undeployContrib(TEST_BUNDLE, CONTRIB2_XML);
     }
 
     protected File getTestFile(String relativePath) {

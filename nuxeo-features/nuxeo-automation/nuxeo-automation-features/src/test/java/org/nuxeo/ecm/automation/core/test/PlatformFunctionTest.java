@@ -26,12 +26,15 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.nuxeo.ecm.automation.features.PlatformFunctions;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
 /**
  * @author <a href="mailto:bjalon@nuxeo.com">Benjamin JALON</a>
  * @since 5.7
  */
+@RunWith(FeaturesRunner.class)
 public class PlatformFunctionTest {
 
     List<String> listOfString = Arrays.asList(new String[] { "value list 1", "value list 2" });

@@ -26,12 +26,15 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Appender;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import javax.inject.Inject;
+
 import org.junit.Assert;
 import org.junit.runners.model.FrameworkMethod;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 
 /**
  * Test feature to capture from a log4j appender to check that some log4j calls have been correctly called.</br> On a
@@ -45,7 +48,7 @@ import org.junit.runners.model.FrameworkMethod;
  */
 public class LogCaptureFeature extends SimpleFeature {
 
-    public class NoLogCaptureFilterException extends Exception {
+    public static class NoLogCaptureFilterException extends Exception {
         private static final long serialVersionUID = 1L;
     }
 
@@ -59,8 +62,8 @@ public class LogCaptureFeature extends SimpleFeature {
         Class<? extends LogCaptureFeature.Filter> value();
     }
 
-    public class Result {
-        protected final ArrayList<LoggingEvent> caughtEvents = new ArrayList<>();
+    public static class Result {
+        protected final ArrayList<ILoggingEvent> caughtEvents = new ArrayList<>();
 
         protected boolean noFilterFlag = false;
 
@@ -76,7 +79,7 @@ public class LogCaptureFeature extends SimpleFeature {
             noFilterFlag = false;
         }
 
-        public List<LoggingEvent> getCaughtEvents() {
+        public List<ILoggingEvent> getCaughtEvents() {
             return caughtEvents;
         }
 
@@ -89,43 +92,39 @@ public class LogCaptureFeature extends SimpleFeature {
         /**
          * {@link LogCaptureFeature} will capture the event if it does match the implementation condition.
          */
-        boolean accept(LoggingEvent event);
+        boolean accept(ILoggingEvent event);
     }
 
-    protected Filter logCaptureFilter;
+    protected Filter filter;
 
     protected final Result myResult = new Result();
 
-    protected Logger rootLogger = Logger.getRootLogger();
+    protected final Appender appender = new Appender();
 
-    protected Appender logAppender = new AppenderSkeleton() {
-        @Override
-        public boolean requiresLayout() {
-            return false;
-        }
+    class Appender extends AppenderBase<ILoggingEvent> {
 
         @Override
-        public void close() {
-        }
-
-        @Override
-        protected void append(LoggingEvent event) {
-            if (logCaptureFilter == null) {
+        protected void append(ILoggingEvent event) {
+            if (filter == null) {
                 myResult.setNoFilterFlag(true);
                 return;
             }
-            if (logCaptureFilter.accept(event)) {
+            if (filter.accept(event)) {
                 myResult.caughtEvents.add(event);
             }
         }
     };
 
-    private Filter setupCaptureFiler;
+    private Filter setupFilter;
 
     @Override
     public void configure(FeaturesRunner runner, com.google.inject.Binder binder) {
         binder.bind(Result.class).toInstance(myResult);
     };
+
+    protected Logger getRootLogger() {
+        return (Logger)LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+    }
 
     @Override
     public void beforeSetup(FeaturesRunner runner) throws Exception {
@@ -158,31 +157,34 @@ public class LogCaptureFeature extends SimpleFeature {
         disable();
     }
 
+
     /**
      * @since 6.0
      */
     protected void enable(Class<? extends Filter> filterClass) throws InstantiationException, IllegalAccessException {
-        if (logCaptureFilter != null) {
-            setupCaptureFiler = logCaptureFilter;
+        if (filter != null) {
+            setupFilter = filter;
         } else {
-            rootLogger.addAppender(logAppender);
+            appender.start();
+            getRootLogger().addAppender(appender);
         }
-        logCaptureFilter = filterClass.newInstance();
+        filter = filterClass.newInstance();
     }
 
     /**
      * @since 6.0
      */
     protected void disable() {
-        if (setupCaptureFiler != null) {
-            logCaptureFilter = setupCaptureFiler;
-            setupCaptureFiler = null;
+        if (setupFilter != null) {
+            filter = setupFilter;
+            setupFilter = null;
             return;
         }
-        if (logCaptureFilter != null) {
+        if (filter != null) {
             myResult.clear();
-            rootLogger.removeAppender(logAppender);
-            logCaptureFilter = null;
+            appender.stop();
+            getRootLogger().detachAppender(appender);
+            filter = null;
         }
     }
 

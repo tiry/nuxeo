@@ -51,6 +51,10 @@ import org.nuxeo.ecm.core.event.impl.UnboundEventContext;
 import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
+import org.nuxeo.ecm.directory.Directory;
+import org.nuxeo.ecm.directory.DirectoryException;
+import org.nuxeo.ecm.directory.DirectoryServiceImpl;
+import org.nuxeo.ecm.directory.api.DirectoryService;
 import org.nuxeo.ecm.platform.audit.TestNXAuditEventsService.MyInit;
 import org.nuxeo.ecm.platform.audit.api.BuiltinLogEntryData;
 import org.nuxeo.ecm.platform.audit.api.FilterMapEntry;
@@ -208,7 +212,7 @@ public class TestNXAuditEventsService {
         DocumentModel rootDocument = session.getRootDocument();
         long count = serviceUnderTest.syncLogCreationEntries(session.getRepositoryName(),
                 rootDocument.getPathAsString(), true);
-        assertEquals(14, count);
+        assertEquals(7, count);
 
         String query = String.format("log.docUUID = '%s' and log.eventId = 'documentCreated'", rootDocument.getId());
 
@@ -303,4 +307,19 @@ public class TestNXAuditEventsService {
         assertEquals(new Long(1L), count);
     }
 
+    protected Directory getDirectory(String dirName) throws DirectoryException {
+        DirectoryServiceImpl dirServiceImpl = (DirectoryServiceImpl) Framework.getRuntime().getComponent(
+                DirectoryService.NAME);
+        Directory dir = dirServiceImpl.getDirectory(dirName);
+        return dir;
+    }
+
+    @Test
+    public void testDirectories() throws Exception {
+        Directory eventDir = getDirectory("eventTypes");
+        assertNotNull(eventDir);
+        Directory categoryDir = getDirectory("eventCategories");
+        assertNotNull(categoryDir);
+
+    }
 }

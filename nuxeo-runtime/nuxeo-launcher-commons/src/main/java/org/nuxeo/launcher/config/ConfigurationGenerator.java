@@ -64,15 +64,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
-import org.apache.log4j.helpers.NullEnumeration;
 
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.codec.Crypto;
 import org.nuxeo.common.codec.CryptoProperties;
 import org.nuxeo.common.utils.TextTemplate;
 import org.nuxeo.launcher.commons.DatabaseDriverException;
-import org.nuxeo.log4j.Log4JHelper;
+import org.nuxeo.runtime.logging.LoggingConfigurator;
 
 import freemarker.core.ParseException;
 import freemarker.template.TemplateException;
@@ -412,9 +410,7 @@ public class ConfigurationGenerator {
         } else {
             serverConfigurator = new UnknownServerConfigurator(this);
         }
-        if (Logger.getRootLogger().getAllAppenders() instanceof NullEnumeration) {
-            serverConfigurator.initLogs();
-        }
+        serverConfigurator.initLogs();
         String homeInfo = "Nuxeo home:          " + nuxeoHome.getPath();
         String confInfo = "Nuxeo configuration: " + nuxeoConf.getPath();
         if (quiet) {
@@ -1427,10 +1423,10 @@ public class ConfigurationGenerator {
      *         one.
      * @since 5.4.2
      */
-    public ArrayList<String> getLogFiles() {
+    public String[] getLogFiles() {
         File log4jConfFile = serverConfigurator.getLogConfFile();
         System.setProperty(org.nuxeo.common.Environment.NUXEO_LOG_DIR, getLogDir().getPath());
-        return Log4JHelper.getFileAppendersFiles(log4jConfFile);
+        return LoggingConfigurator.getInstance().getFileAppendersFiles(log4jConfFile);
     }
 
     /**

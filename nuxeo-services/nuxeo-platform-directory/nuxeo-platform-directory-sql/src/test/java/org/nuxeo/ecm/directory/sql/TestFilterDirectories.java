@@ -30,8 +30,6 @@ import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nuxeo.ecm.core.test.annotations.Granularity;
-import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.directory.Session;
 import org.nuxeo.ecm.directory.api.DirectoryService;
 import org.nuxeo.runtime.test.runner.Features;
@@ -40,8 +38,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy("org.nuxeo.ecm.directory.sql.tests:filterDirectoryContrib.xml")
+@LocalDeploy("org.nuxeo.ecm.directory.sql:filterDirectoryContrib.xml")
 public class TestFilterDirectories {
 
     @Inject

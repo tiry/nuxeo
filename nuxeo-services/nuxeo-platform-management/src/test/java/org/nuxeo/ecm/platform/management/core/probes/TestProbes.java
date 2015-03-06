@@ -79,8 +79,6 @@ public class TestProbes {
         assertNotNull(info);
         info = runner.runProbe(info);
         assertFalse(info.isInError());
-        String result = info.getStatus().getAsString();
-        System.out.print("populateRepository Probe result : " + result);
     }
 
     @Test
@@ -89,7 +87,6 @@ public class TestProbes {
         assertNotNull(info);
         info = runner.runProbe(info);
         assertFalse(info.isInError());
-        System.out.print(info.getStatus().getAsString());
     }
 
 }

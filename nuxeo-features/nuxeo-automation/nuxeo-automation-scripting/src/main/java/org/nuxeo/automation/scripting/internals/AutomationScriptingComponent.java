@@ -53,10 +53,16 @@ public class AutomationScriptingComponent extends DefaultComponent {
         super.activate(context);
         scriptingFactory = new ScriptingFactory();
         scriptingFactory.install();
+        scriptingService = createService();
+    }
+
+    protected AutomationScriptingService createService() {
+        AutomationScriptingService service = new AutomationScriptingServiceImpl();
         if (Boolean.valueOf(Framework.getProperty(AutomationScriptingConstants.AUTOMATION_SCRIPTING_MONITOR,
                 Boolean.toString(log.isTraceEnabled())))) {
-            scriptingService = MetricInvocationHandler.newProxy(scriptingService, AutomationScriptingService.class);
+            service = MetricInvocationHandler.newProxy(service, AutomationScriptingService.class);
         }
+        return service;
     }
 
     @Override

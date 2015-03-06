@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Versioning
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-versioning-co
+ re
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: false
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.versioning.service;uses:="org.nuxeo.ecm.core.api,org.nuxe
+ o.ecm.platform.versioning.api,org.nuxeo.runtime.model";version="0.0.0"
+Import-Package: org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.versioning;version="[0.0,1)",org.nuxeo.ecm.platform.versioning.api;
+ version="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.run
+ time.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/versioningmanager-service.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Bundle: org.nuxeo.ecm.core
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

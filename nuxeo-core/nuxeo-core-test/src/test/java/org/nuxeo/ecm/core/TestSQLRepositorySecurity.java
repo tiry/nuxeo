@@ -82,8 +82,8 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-contrib.xml",
-        "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-permissions-contrib.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-contrib.xml",
+        "org.nuxeo.ecm.core.test:OSGI-INF/test-permissions-contrib.xml" })
 public class TestSQLRepositorySecurity {
 
     @Inject

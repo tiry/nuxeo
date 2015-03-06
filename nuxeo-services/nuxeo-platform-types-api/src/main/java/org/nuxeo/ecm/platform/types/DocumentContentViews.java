@@ -41,7 +41,7 @@ public class DocumentContentViews implements Serializable {
     boolean append = false;
 
     @XNodeList(value = "contentView", type = DocumentContentView[].class, componentType = DocumentContentView.class)
-    DocumentContentView[] contentViews = new DocumentContentView[0];
+    public DocumentContentView[] contentViews = new DocumentContentView[0];
 
     public DocumentContentView[] getContentViews() {
         return contentViews;

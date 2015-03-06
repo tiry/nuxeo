@@ -48,8 +48,8 @@ public class ContextManager {
 
     public ContextManager(Server server) {
         this.server = server;
-        this.contexts = new HashMap<String, Context>();
-        this.listeners = new HashMap<String, ServletContextListenerDescriptor>();
+        contexts = new HashMap<String, Context>();
+        listeners = new HashMap<String, ServletContextListenerDescriptor>();
     }
 
     public Server getServer() {
@@ -119,14 +119,19 @@ public class ContextManager {
     }
 
     public void applyLifecycleListeners() {
-        HandlerCollection hc = (HandlerCollection) server.getHandler();
+        Handler container = server.getHandler();
+        if (!(container instanceof HandlerCollection)) {
+            return;
+        }
+        AssertionError errors = new AssertionError("installing lifecycle listeners");
+        HandlerCollection hc = (HandlerCollection) container;
         Handler[] handlers = hc.getChildHandlersByClass(WebAppContext.class);
         for (ServletContextListenerDescriptor desc : listeners.values()) {
             ServletContextListener listener;
             try {
                 listener = desc.clazz.newInstance();
             } catch (ReflectiveOperationException e) {
-                log.error("Cannot add life cycle listener " + desc.name, e);
+                errors.addSuppressed(e);
                 continue;
             }
             for (Handler handler : handlers) {
@@ -135,6 +140,9 @@ public class ContextManager {
                     context.addEventListener(listener);
                 }
             }
+        }
+        if (errors.getSuppressed().length > 0) {
+            throw errors;
         }
     }
 }

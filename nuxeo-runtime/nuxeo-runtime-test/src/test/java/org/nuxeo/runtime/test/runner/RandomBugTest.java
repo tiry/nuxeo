@@ -23,26 +23,29 @@ package org.nuxeo.runtime.test.runner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.util.Properties;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.junit.runner.Computer;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
+import org.junit.runner.Runner;
+import org.junit.runners.model.RunnerBuilder;
 import org.junit.runners.model.Statement;
-
 import org.nuxeo.runtime.test.Failures;
+import org.nuxeo.runtime.test.runner.RandomBug.Mode;
 import org.nuxeo.runtime.test.runner.RandomBug.RepeatRule;
 
 /**
@@ -56,26 +59,24 @@ public class RandomBugTest {
 
     protected static final String FAILURE_MESSAGE = "FAILURE";
 
-    protected static boolean isRunningInners;
-
-    private String oldProperty;
-
     protected static class IgnoreInner implements TestRule {
+
+        @Inject
+        FeaturesRunner runner;
+
         @Override
         public Statement apply(Statement base, Description description) {
-            Assume.assumeTrue(isRunningInners);
+            Assume.assumeTrue(isRunningInners());
             return base;
         }
-    }
 
-    @BeforeClass
-    public static void setInner() {
-        isRunningInners = true;
-    }
+        boolean isRunningInners() {
+            return Boolean.valueOf(runner.properties.getProperty(IgnoreInner.class.getName(), "false"));
+        }
 
-    @AfterClass
-    public static void resetInner() {
-        isRunningInners = false;
+        static void relax(Properties properties) {
+            properties.setProperty(IgnoreInner.class.getName(), "true");
+        }
     }
 
     @RunWith(FeaturesRunner.class)
@@ -98,13 +99,12 @@ public class RandomBugTest {
 
     @Test
     public void beforeShouldNotRunWhenAllTestsAreIgnored() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.BYPASS.toString());
-        runClassAndVerify(BeforeWithRandomTest.class,
+        runClassAndVerify(RandomBug.Mode.BYPASS, BeforeWithRandomTest.class,
                 "Before method should not have been executed because the test method is ignored", 1, 0, 1);
     }
 
     @RunWith(FeaturesRunner.class)
-    @Features({ RandomBug.Feature.class })
+    @Features(RandomBug.Feature.class)
     public static class AfterWithRandomTest {
         @ClassRule
         public static final IgnoreInner ignoreInner = new IgnoreInner();
@@ -123,13 +123,12 @@ public class RandomBugTest {
 
     @Test
     public void afterShouldNotRunWhenAllTestsAreIgnored() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.BYPASS.toString());
-        runClassAndVerify(AfterWithRandomTest.class,
+        runClassAndVerify(RandomBug.Mode.BYPASS, AfterWithRandomTest.class,
                 "After method should not have been executed because the test method is ignored", 1, 0, 1);
     }
 
     @RunWith(FeaturesRunner.class)
-    @Features({ RandomBug.Feature.class })
+    @Features( RandomBug.Feature.class )
     @RandomBug.Repeat(issue = "failingTest")
     public static class FailingTest {
         @ClassRule
@@ -177,7 +176,7 @@ public class RandomBugTest {
     }
 
     @RunWith(FeaturesRunner.class)
-    @Features({ RandomBug.Feature.class })
+    @Features(RandomBug.Feature.class)
     public static class FailingMethod {
         @ClassRule
         public static final IgnoreInner ignoreInner = new IgnoreInner();
@@ -228,39 +227,34 @@ public class RandomBugTest {
 
     @Test
     public void testBypassOnClass() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.BYPASS.toString());
-        runClassAndVerify(FailingTest.class, "Test should be ignored in BYPASS mode!", 0, 0, 1);
+        runClassAndVerify(RandomBug.Mode.BYPASS, FailingTest.class, "Test should be ignored in BYPASS mode!", 0, 0, 1);
     }
 
     @Test
     public void testBypassOnMethod() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.BYPASS.toString());
-        runClassAndVerify(FailingMethod.class, "Test should be ignored in BYPASS mode!", 5, 0, 4);
+        runClassAndVerify(RandomBug.Mode.BYPASS, FailingMethod.class, "Test should be ignored in BYPASS mode!", 5, 0,
+                4);
     }
 
     @Test
     public void testStrictOnClass() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.STRICT.toString());
-        runClassAndVerify(FailingTest.class, "STRICT mode should reveal failure", 5, 2, 1);
+        runClassAndVerify(RandomBug.Mode.STRICT, FailingTest.class, "STRICT mode should reveal failure", 5, 2, 1);
     }
 
     @Test
     public void testStrictOnMethod() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.STRICT.toString());
-        runClassAndVerify(FailingMethod.class, "STRICT mode should reveal failure", 5, 3, 1);
+        runClassAndVerify(RandomBug.Mode.STRICT, FailingMethod.class, "STRICT mode should reveal failure", 5, 3, 1);
     }
 
     @Test
     public void testRelaxOnClass() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.RELAX.toString());
         // JC: it remembers the failures: result.wasSuccessful() == false
-        runClassAndVerify(FailingTest.class, "RELAX mode expects a success", 35, 10, 7);
+        runClassAndVerify(RandomBug.Mode.RELAX, FailingTest.class, "RELAX mode expects a success", 35, 10, 7);
     }
 
     @Test
     public void testRelaxOnMethod() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.RELAX.toString());
-        runClassAndVerify(FailingMethod.class, "RELAX mode expects a success", 5, 0, 1);
+        runClassAndVerify(RandomBug.Mode.RELAX, FailingMethod.class, "RELAX mode expects a success", 5, 0, 1);
     }
 
     public static class ThisFeature extends SimpleFeature {
@@ -325,19 +319,17 @@ public class RandomBugTest {
 
     @Test
     public void shouldRepeatFeaturesOnClass() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.RELAX.toString());
-        runClassAndVerify(RepeatFeaturesTest.class, "RELAX mode expects a success", 5, 4, 0);
+        runClassAndVerify(RandomBug.Mode.RELAX, RepeatFeaturesTest.class, "RELAX mode expects a success", 5, 4, 0);
     }
 
     @Test
     public void shouldRepeatFeaturesOnMethod() {
-        System.setProperty(RandomBug.MODE_PROPERTY, RandomBug.Mode.RELAX.toString());
-        runClassAndVerify(RepeatFeaturesMethod.class, "RELAX mode expects a success", 1, 0, 0);
+        runClassAndVerify(RandomBug.Mode.RELAX, RepeatFeaturesMethod.class, "RELAX mode expects a success", 1, 0, 0);
     }
 
-    protected Result runClassAndVerify(Class<?> klass, String testFailureDescription, int runCount, int failureCount,
-            int ignoreCount) {
-        Result result = JUnitCore.runClasses(klass);
+    protected Result runClassAndVerify(Mode mode, Class<?> klass, String testFailureDescription, int runCount,
+            int failureCount, int ignoreCount) {
+        Result result = runClasses(mode, klass);
         assertThat(result.getRunCount()).isEqualTo(runCount);
         assertThat(result.getFailureCount()).isEqualTo(failureCount);
         if (failureCount == 0 && !result.wasSuccessful()) {
@@ -347,18 +339,23 @@ public class RandomBugTest {
         return result;
     }
 
-    @Before
-    public void storeSystemProperties() {
-        oldProperty = System.getProperty(RandomBug.MODE_PROPERTY);
-    }
+    protected Result runClasses(Mode mode, Class<?>... classes) {
+        return JUnitCore.runClasses(new Computer() {
+            @Override
+            protected Runner getRunner(RunnerBuilder builder, Class<?> testClass) throws Throwable {
+                return new RunnerBuilder() {
 
-    @After
-    public void clearSystemProperties() {
-        if (oldProperty != null) {
-            System.setProperty(RandomBug.MODE_PROPERTY, oldProperty);
-        } else {
-            System.clearProperty(RandomBug.MODE_PROPERTY);
-        }
-    }
+                    @Override
+                    public Runner runnerForClass(Class<?> testClass) throws Throwable {
+                        FeaturesRunner runner = (FeaturesRunner) builder.runnerForClass(testClass);
+                        Properties properties = runner.getProperties();
+                        mode.set(properties);
+                        IgnoreInner.relax(properties);
+                        return runner;
+                    }
 
+                }.runnerForClass(testClass);
+            }
+        }, classes);
+    }
 }

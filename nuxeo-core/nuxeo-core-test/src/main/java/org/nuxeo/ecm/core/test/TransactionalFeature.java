@@ -18,8 +18,9 @@
  */
 package org.nuxeo.ecm.core.test;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.repository.RepositoryFactory;
+import org.junit.runners.model.FrameworkMethod;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.core.test.annotations.TransactionalConfig;
@@ -33,44 +34,60 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 @Features(ContainerFeature.class)
 public class TransactionalFeature extends SimpleFeature {
 
-    protected TransactionalConfig config;
+    protected TransactionalConfig txConfig;
 
-    protected String autoactivationValue;
-
-    protected boolean nsOwner;
+    protected RepositoryConfig repoConfig;
 
     protected boolean txStarted;
 
-    protected Class<? extends RepositoryFactory> defaultFactory;
-
     @Override
     public void initialize(FeaturesRunner runner) throws Exception {
-        config = runner.getConfig(TransactionalConfig.class);
+        txConfig = runner.getConfig(TransactionalConfig.class);
+        repoConfig = runner.getConfig(RepositoryConfig.class);
     }
 
     @Override
-    public void beforeSetup(FeaturesRunner runner) throws Exception {
-        if (config.autoStart() == false) {
+    public void beforeRun(FeaturesRunner runner) throws Exception {
+        if (!txConfig.autoStart()) {
             return;
         }
         txStarted = TransactionHelper.startTransaction();
     }
 
     @Override
-    public void afterTeardown(FeaturesRunner runner) throws Exception {
+    public void afterRun(FeaturesRunner runner) throws Exception {
         if (txStarted == false) {
-            if (TransactionHelper.isTransactionActive()) {
-                try {
-                    TransactionHelper.setTransactionRollbackOnly();
-                    TransactionHelper.commitOrRollbackTransaction();
-                } finally {
-                    Logger.getLogger(TransactionalFeature.class).warn(
-                            "Committing a transaction for your, please do it yourself");
-                }
-            }
+            LogFactory.getLog(TransactionalFeature.class)
+                    .warn("Committing a transaction for your, please do it yourself");
+        }
+        TransactionHelper.setTransactionRollbackOnly();
+        TransactionHelper.commitOrRollbackTransaction();
+    }
+
+    @Override
+    public void beforeMethodRun(FeaturesRunner runner, FrameworkMethod method, Object test) throws Exception {
+        if (!Granularity.METHOD.equals(repoConfig.cleanup())) {
+            return;
+        }
+        if (!txStarted) {
             return;
         }
         TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
     }
+
+    @Override
+    public void afterMethodRun(FeaturesRunner runner, FrameworkMethod method, Object test) throws Exception {
+        if (!Granularity.METHOD.equals(repoConfig.cleanup())) {
+            return;
+        }
+        if (!txStarted) {
+            return;
+        }
+        TransactionHelper.setTransactionRollbackOnly();
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+    }
+
 
 }

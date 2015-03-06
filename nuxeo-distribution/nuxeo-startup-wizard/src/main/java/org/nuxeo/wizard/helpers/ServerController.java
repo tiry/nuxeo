@@ -30,8 +30,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.impl.SimpleLog;
 
+import org.nuxeo.launcher.commons.ThreadedStreamGobbler;
 import org.nuxeo.launcher.config.ConfigurationGenerator;
-import org.nuxeo.log4j.ThreadedStreamGobbler;
 import org.nuxeo.wizard.context.Context;
 import org.nuxeo.wizard.context.ParamCollector;
 

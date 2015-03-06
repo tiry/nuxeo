@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
-<component name="org.nuxeo.ecm.platform.relations.io.contrib">
+<component name="org.nuxeo.ecm.platform.relations.io.tests.contrib">
 
-  <extension target="org.nuxeo.ecm.platform.io.test.IOManager"
+  <extension target="org.nuxeo.ecm.platform.io.IOManager"
     point="adapters">
 
     <adapter name="all"

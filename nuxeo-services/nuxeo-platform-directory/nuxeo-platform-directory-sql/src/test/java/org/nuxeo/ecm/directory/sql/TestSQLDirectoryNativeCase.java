@@ -27,7 +27,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
-@LocalDeploy("org.nuxeo.ecm.directory.sql.tests:test-sql-directories-nativecase-config.xml")
+@LocalDeploy("org.nuxeo.ecm.directory.sql:test-sql-directories-nativecase-config.xml")
 public class TestSQLDirectoryNativeCase extends SQLDirectoryTestSuite {
 
 }

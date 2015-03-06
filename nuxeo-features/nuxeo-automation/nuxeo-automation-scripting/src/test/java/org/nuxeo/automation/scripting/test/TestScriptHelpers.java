@@ -18,25 +18,15 @@
  */
 package org.nuxeo.automation.scripting.test;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.List;
+import static org.hamcrest.CoreMatchers.*;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
-import org.junit.After;
-import org.junit.Before;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.nuxeo.automation.scripting.test.util.LogChecker;
 import org.nuxeo.ecm.automation.AutomationService;
 import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.automation.OperationException;
@@ -50,6 +40,10 @@ import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
+import org.nuxeo.runtime.test.runner.LogCaptureFeature;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
  * @since 7.10
@@ -69,42 +63,40 @@ public class TestScriptHelpers {
 
     protected RuntimeService runtime = Framework.getRuntime();
 
-    ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    public static class IsConsoleEvent implements LogCaptureFeature.Filter {
 
-    private PrintStream outStream;
+        @Override
+        public boolean accept(ILoggingEvent event) {
+            return "org.nuxeo.automation.scripting.Console".equals(event.getLoggerName());
+        }
 
-    @Before
-    public void setUpStreams() {
-        outStream = System.out;
-        System.setOut(new PrintStream(outContent));
     }
 
-    @After
-    public void cleanUpStreams() throws IOException {
-        outContent.close();
-        System.setOut(outStream);
-    }
 
     @Test
+    @LogCaptureFeature.FilterWith(IsConsoleEvent.class)
     public void canUseConsoleHelper() throws OperationException {
         OperationContext ctx = new OperationContext(session);
         automationService.run(ctx, "Scripting.UseConsoleHelper", null);
-        assertEquals("", outContent.toString());
-        Logger logger = Logger.getLogger("org.nuxeo.automation.scripting");
-        List<LoggingEvent> logs = ((LogChecker) logger.getAppender("CHECKER")).getLogs();
-        assertThat(logs.get(0).getLevel(), is(Level.WARN));
-        assertThat(logs.get(0).getMessage(), is("Warnings"));
-        assertThat(logs.get(1).getLevel(), is(Level.ERROR));
-        assertThat(logs.get(1).getMessage(), is("Errors"));
+        assertEvent(0, Level.WARN, "Warnings");
+        assertEvent(1, Level.ERROR, "Errors");
         runtime.setProperty(Framework.NUXEO_DEV_SYSTEM_PROP, true);
         automationService.run(ctx, "Scripting.UseConsoleHelper", null);
-        logs = ((LogChecker) logger.getAppender("CHECKER")).getLogs();
-        assertThat(logs.get(2).getLevel(), is(Level.WARN));
-        assertThat(logs.get(2).getMessage(), is("[INFO] Informations"));
-        assertThat(logs.get(3).getLevel(), is(Level.WARN));
-        assertThat(logs.get(3).getMessage(), is("Warnings"));
-        assertThat(logs.get(4).getLevel(), is(Level.ERROR));
-        assertThat(logs.get(4).getMessage(), is("Errors"));
+        assertEvent(2, Level.INFO, "[INFO] Informations");
+        assertEvent(3, Level.WARN, "Warnings");
+        assertEvent(4, Level.ERROR, "Errors");
+    }
+
+
+    @Inject
+    LogCaptureFeature.Result caughtEvents;
+
+
+    void assertEvent(int index, Level level, String message) {
+        assertThat(caughtEvents.getCaughtEvents().size(),  Matchers.greaterThan(index));
+        ILoggingEvent event = caughtEvents.getCaughtEvents().get(index);
+        assertThat(event.getLevel(), is(level));
+        assertThat(event.getMessage(), is(message));
     }
 
 }

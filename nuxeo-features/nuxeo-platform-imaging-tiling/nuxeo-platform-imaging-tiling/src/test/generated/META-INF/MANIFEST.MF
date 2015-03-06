@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-imaging-tiling.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-imaging-tilin
+ g.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-imaging-tiling
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.common
+ .utils;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.n
+ uxeo.ecm.core.api.model;version="[0.0,1)",org.nuxeo.ecm.core.test,org.n
+ uxeo.ecm.core.test.annotations,org.nuxeo.ecm.platform.picture.api;versi
+ on="[0.0,1)",org.nuxeo.ecm.platform.picture.magick.utils;version="[0.0,
+ 1)",org.nuxeo.ecm.platform.pictures.tiles.api,org.nuxeo.ecm.platform.pi
+ ctures.tiles.api.adapter,org.nuxeo.ecm.platform.pictures.tiles.magick.t
+ iler,org.nuxeo.ecm.platform.pictures.tiles.service,org.nuxeo.ecm.platfo
+ rm.pictures.tiles.tilers,org.nuxeo.runtime.api;version="[0.0,1)",org.nu
+ xeo.runtime.model;version="[0.0,1)",org.nuxeo.runtime.test,org.nuxeo.ru
+ ntime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.pictures.tiles.service.test
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

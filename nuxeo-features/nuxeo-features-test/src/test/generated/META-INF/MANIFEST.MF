@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-features-test.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-features-test.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-features-test
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.runtim
+ e.test.runner;version="[0.0,1)",org.nuxeo.runtime.test.runner.web;versi
+ on="[0.0,1)",org.openqa.selenium,org.openqa.selenium.support
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.webengine.test
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

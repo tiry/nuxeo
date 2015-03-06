@@ -41,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.Path;
+import org.nuxeo.ecm.automation.test.AutomationFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentRef;
@@ -49,7 +50,6 @@ import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.api.impl.DocumentModelImpl;
 import org.nuxeo.ecm.core.io.DocumentTranslationMap;
 import org.nuxeo.ecm.core.io.impl.DocumentTranslationMapImpl;
-import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.io.api.IOManager;
@@ -66,6 +66,8 @@ import org.nuxeo.ecm.platform.relations.api.impl.ResourceImpl;
 import org.nuxeo.ecm.platform.relations.api.impl.StatementImpl;
 import org.nuxeo.ecm.platform.relations.io.IORelationResources;
 import org.nuxeo.ecm.platform.relations.jena.JenaGraph;
+import org.nuxeo.ecm.platform.test.PlatformFeature;
+import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
@@ -76,12 +78,22 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  * @author <a href="mailto:at@nuxeo.com">Anahide Tchertchian</a>
  */
 @RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
+@Features({PlatformFeature.class, AutomationFeature.class})
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.relations.io.tests:io-test-framework.xml", //
-        "org.nuxeo.ecm.relations.io.tests:io-relations-test-contrib.xml", //
-        "org.nuxeo.ecm.relations.io.tests:jena-test-bundle.xml", //
+@Deploy({ //
+        "org.nuxeo.ecm.platform.content.template", //
+        "org.nuxeo.ecm.relations.api", //
+        "org.nuxeo.ecm.relations", //
+        "org.nuxeo.ecm.relations.jena", //
+        "org.nuxeo.ecm.platform.notification.api", //
+        "org.nuxeo.ecm.platform.notification.core", //
+        "org.nuxeo.ecm.platform.comment.api", //
+        "org.nuxeo.ecm.platform.comment.core", //
+        "org.nuxeo.ecm.platform.comment", //
+        "org.nuxeo.ecm.platform.io.core", //
+        "org.nuxeo.ecm.relations.io", //
 })
+@LocalDeploy({ "org.nuxeo.ecm.relations.io:jena-test-bundle.xml", "org.nuxeo.ecm.relations.io:io-relations-test-contrib.xml" })
 public class TestIORelationAdapter {
 
     private static final String graphName = "myrelations";
@@ -140,10 +152,10 @@ public class TestIORelationAdapter {
         String id2 = doc1RefCopy;
         String name = "file1";
         String parentPath = "/";
-        DocumentModel doc1 = new DocumentModelImpl((String) null, type, id1, new Path(name), null, null, new PathRef(
-                parentPath), null, null, null, session.getRepositoryName());
-        DocumentModel doc2 = new DocumentModelImpl((String) null, type, id2, new Path(name), null, null, new PathRef(
-                parentPath), null, null, null, session.getRepositoryName());
+        DocumentModel doc1 = new DocumentModelImpl((String) null, type, id1, new Path(name), null, null,
+                new PathRef(parentPath), null, null, null, session.getRepositoryName());
+        DocumentModel doc2 = new DocumentModelImpl((String) null, type, id2, new Path(name), null, null,
+                new PathRef(parentPath), null, null, null, session.getRepositoryName());
         session.importDocuments(Arrays.asList(doc1, doc2));
         session.save();
     }
@@ -210,9 +222,9 @@ public class TestIORelationAdapter {
         assertNotNull(adapter);
         List<DocumentRef> sources = Arrays.asList(new DocumentRef[] { new IdRef(doc1Ref) });
         IORelationResources ioRes = (IORelationResources) adapter.extractResources(repoName, sources);
-        List<Statement> expected = Arrays.asList(new Statement[] {
-                new StatementImpl(doc2Resource, isBasedOn, doc1Resource),
-                new StatementImpl(doc1Resource, references, simpleResource) });
+        List<Statement> expected = Arrays
+                .asList(new Statement[] { new StatementImpl(doc2Resource, isBasedOn, doc1Resource),
+                        new StatementImpl(doc1Resource, references, simpleResource) });
         Collections.sort(expected);
         assertEquals(2, ioRes.getStatements().size());
         List<Statement> actual = ioRes.getStatements();
@@ -227,8 +239,8 @@ public class TestIORelationAdapter {
         assertNotNull(adapter);
         List<DocumentRef> sources = Arrays.asList(new DocumentRef[] { new IdRef(doc1Ref) });
         IORelationResources ioRes = (IORelationResources) adapter.extractResources(repoName, sources);
-        List<Statement> expected = Arrays.asList(new Statement[] { new StatementImpl(doc1Resource, references,
-                simpleResource) });
+        List<Statement> expected = Arrays
+                .asList(new Statement[] { new StatementImpl(doc1Resource, references, simpleResource) });
         Collections.sort(expected);
         assertEquals(1, ioRes.getStatements().size());
         List<Statement> actual = ioRes.getStatements();
@@ -261,9 +273,9 @@ public class TestIORelationAdapter {
         InputStream stream = getTestFile("data/exported_statements.xml");
         IORelationResources ioRes = (IORelationResources) adapter.loadResourcesFromXML(stream);
         stream.close();
-        List<Statement> expected = Arrays.asList(new Statement[] {
-                new StatementImpl(doc2Resource, isBasedOn, doc1Resource),
-                new StatementImpl(doc1Resource, references, simpleResource) });
+        List<Statement> expected = Arrays
+                .asList(new Statement[] { new StatementImpl(doc2Resource, isBasedOn, doc1Resource),
+                        new StatementImpl(doc1Resource, references, simpleResource) });
         Collections.sort(expected);
         assertEquals(2, ioRes.getStatements().size());
         List<Statement> actual = ioRes.getStatements();
@@ -282,9 +294,9 @@ public class TestIORelationAdapter {
         docRefMap.put(new IdRef(doc1Ref), new IdRef(doc1RefCopy));
         DocumentTranslationMap map = new DocumentTranslationMapImpl(repoName, repoName, docRefMap);
         IORelationResources ioRes = (IORelationResources) adapter.translateResources(repoName, resources, map);
-        List<Statement> expected = Arrays.asList(new Statement[] {
-                new StatementImpl(doc2Resource, isBasedOn, doc1ResourceCopy),
-                new StatementImpl(doc1ResourceCopy, references, simpleResource) });
+        List<Statement> expected = Arrays
+                .asList(new Statement[] { new StatementImpl(doc2Resource, isBasedOn, doc1ResourceCopy),
+                        new StatementImpl(doc1ResourceCopy, references, simpleResource) });
         Collections.sort(expected);
         assertEquals(2, ioRes.getStatements().size());
         List<Statement> actual = ioRes.getStatements();
@@ -303,9 +315,9 @@ public class TestIORelationAdapter {
         docRefMap.put(new IdRef(doc1Ref), new IdRef(doc1Ref));
         DocumentTranslationMap map = new DocumentTranslationMapImpl(repoName, repoName, docRefMap);
         IORelationResources ioRes = (IORelationResources) adapter.translateResources(repoName, resources, map);
-        List<Statement> expected = Arrays.asList(new Statement[] {
-                new StatementImpl(doc2Resource, isBasedOn, doc1Resource),
-                new StatementImpl(doc1Resource, references, simpleResource) });
+        List<Statement> expected = Arrays
+                .asList(new Statement[] { new StatementImpl(doc2Resource, isBasedOn, doc1Resource),
+                        new StatementImpl(doc1Resource, references, simpleResource) });
         Collections.sort(expected);
         assertEquals(2, ioRes.getStatements().size());
         List<Statement> actual = ioRes.getStatements();

@@ -11,6 +11,8 @@
 
   <implementation class="org.nuxeo.ecm.core.work.WorkManagerImpl" />
 
+  <require>org.nuxeo.runtime.management.metrics</require>
+  
   <extension-point name="queues">
     <documentation>
       Defines the characteristics of work queues:

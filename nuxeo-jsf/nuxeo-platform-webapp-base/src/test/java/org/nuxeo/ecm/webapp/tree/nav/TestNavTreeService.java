@@ -21,49 +21,44 @@ package org.nuxeo.ecm.webapp.tree.nav;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.platform.actions.Action;
 import org.nuxeo.ecm.platform.actions.ejb.ActionManager;
+import org.nuxeo.ecm.webapp.WebappFeature;
 import org.nuxeo.ecm.webapp.directory.DirectoryTreeDescriptor;
-import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
-import org.nuxeo.runtime.test.runner.RuntimeFeature;
 
 @RunWith(FeaturesRunner.class)
-@Features(RuntimeFeature.class)
-@LocalDeploy({ "org.nuxeo.ecm.platform.actions.core:OSGI-INF/actions-framework.xml",
-        "org.nuxeo.ecm.webapp.base:OSGI-INF/navtree-framework.xml",
+@Features(WebappFeature.class)
+@LocalDeploy({ //
         "org.nuxeo.ecm.webapp.base:test-navtree-contrib-compat.xml",
         "org.nuxeo.ecm.webapp.base:test-navtree-contrib.xml" })
 public class TestNavTreeService {
 
-    @Test
-    public void testServiceLookup() {
-        NavTreeService service = Framework.getLocalService(NavTreeService.class);
-        assertNotNull(service);
-    }
+    @Inject
+    NavTreeService service;
+
+    @Inject
+    ActionManager am;
 
     @Test
     public void testNavTrees() throws Exception {
-        NavTreeService service = Framework.getLocalService(NavTreeService.class);
-        assertNotNull(service);
-
         List<NavTreeDescriptor> descs = service.getTreeDescriptors();
-        assertEquals(2, descs.size());
+        assertEquals(3, descs.size());
 
-        NavTreeDescriptor desc = descs.get(0);
+        NavTreeDescriptor desc = descs.get(1);
         assertEquals("/incl/tag_cloud.xhtml", desc.getXhtmlview());
         assertEquals("TAG_CLOUD", desc.getTreeId());
         assertFalse(desc.isDirectoryTreeBased());
 
-        desc = descs.get(1);
+        desc = descs.get(2);
         assertEquals("/incl/tag_cloud.xhtml", desc.getXhtmlview());
         assertEquals("TAG_CLOUD_COMPAT", desc.getTreeId());
         assertFalse(desc.isDirectoryTreeBased());
@@ -71,17 +66,16 @@ public class TestNavTreeService {
 
     @Test
     public void testNavTreeActions() throws Exception {
-        ActionManager am = Framework.getService(ActionManager.class);
         List<Action> actions = am.getAllActions(DirectoryTreeDescriptor.NAV_ACTION_CATEGORY);
-        assertEquals(2, actions.size());
-        Action a = actions.get(0);
+        assertEquals(3, actions.size());
+        Action a = actions.get(1);
         assertEquals("navtree_TAG_CLOUD", a.getId());
         assertEquals(100, a.getOrder());
         assertEquals("/img/TAG_CLOUD.png", a.getIcon());
         assertEquals("my cloud", a.getLabel());
         assertEquals("/incl/tag_cloud.xhtml", a.getLink());
         assertEquals("rest_document_link", a.getType());
-        a = actions.get(1);
+        a = actions.get(2);
         assertEquals("navtree_TAG_CLOUD_COMPAT", a.getId());
         assertEquals(100, a.getOrder());
         assertEquals("/img/TAG_CLOUD_COMPAT.png", a.getIcon());

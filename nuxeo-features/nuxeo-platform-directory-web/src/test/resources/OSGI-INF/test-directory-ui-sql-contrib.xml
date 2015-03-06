@@ -6,6 +6,7 @@
     point="directories">
 
     <directory name="country">
+      <dataSource>java:/nxsqldirectory</dataSource>
       <schema>xvocabulary</schema>
       <parentDirectory>continent</parentDirectory>
       <dataSource>java:/nxsqldirectory</dataSource>
@@ -17,6 +18,7 @@
     </directory>
 
     <directory name="continent">
+      <dataSource>java:/nxsqldirectory</dataSource>
       <schema>vocabulary</schema>
       <dataSource>java:/nxsqldirectory</dataSource>
       <table>continent</table>

@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateful
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Relations Default Configuration
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-relations-def
+ ault-config
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: directories;version="0.0.0",doc;version="0.0.0",doc-pare
+ nt;version="0.0.0"
+Nuxeo-Component: OSGI-INF/directories-contrib.xml,OSGI-INF/graph-contrib
+ .xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.directory.sql
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

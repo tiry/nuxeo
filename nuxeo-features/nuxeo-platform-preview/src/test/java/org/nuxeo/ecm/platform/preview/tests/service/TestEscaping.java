@@ -24,15 +24,15 @@ import static org.junit.Assert.assertTrue;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.platform.preview.adapter.HtmlPreviewer;
 import org.nuxeo.ecm.platform.preview.adapter.PlainTextPreviewer;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.RuntimeFeature;
 
 @RunWith(FeaturesRunner.class)
-@Features(RuntimeFeature.class)
+@Features(CoreFeature.class)
 @Deploy("org.nuxeo.ecm.platform.htmlsanitizer")
 public class TestEscaping {
 

@@ -1,0 +1,56 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Platform Content View JSF Fragment
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-contentview-j
+ sf
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.contentview.jsf;uses:="com.google.common.base,javax.faces
+ .context,org.apache.commons.logging,org.nuxeo.common.xmap.annotation,or
+ g.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.query.api,org.nuxeo.ecm.pla
+ tform.query.core,org.nuxeo.runtime.model";version="0.0.0",org.nuxeo.ecm
+ .platform.contentview.jsf.facelets.plugins;uses:="javax.faces.component
+ ,javax.faces.view.facelets,org.nuxeo.ecm.platform.forms.layout.api,org.
+ nuxeo.ecm.platform.forms.layout.api.exceptions,org.nuxeo.ecm.platform.f
+ orms.layout.facelets,org.nuxeo.ecm.platform.forms.layout.facelets.plugi
+ ns";version="0.0.0",org.nuxeo.ecm.platform.contentview.json;uses:="net.
+ sf.json,org.nuxeo.ecm.core.api,org.nuxeo.ecm.core.api.model,org.nuxeo.e
+ cm.core.api.model.impl,org.nuxeo.ecm.platform.contentview.jsf";version=
+ "0.0.0",org.nuxeo.ecm.platform.contentview.seam;uses:="javax.faces.mode
+ l,org.jboss.seam,org.jboss.seam.annotations,org.jboss.seam.annotations.
+ intercept,org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.actions,org.nux
+ eo.ecm.platform.contentview.jsf,org.nuxeo.ecm.platform.ui.web.api";vers
+ ion="0.0.0"
+Import-Package: com.google.common.base;version="[18.0,19)",javax.el,java
+ x.faces.component;version="[2.2,3)",javax.faces.context;version="[2.2,3
+ )",javax.faces.model;version="[2.2,3)",javax.faces.view.facelets;versio
+ n="[2.2,3)",net.sf.json,org.apache.commons.lang;version="[2.6,3)",org.a
+ pache.commons.logging;version="[1.2,2)",org.jboss.seam,org.jboss.seam.a
+ nnotations,org.jboss.seam.annotations.intercept,org.jboss.seam.core,org
+ .nuxeo.common.xmap.annotation;version="[0.0,1)",org.nuxeo.ecm.core.api;
+ version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",org.nux
+ eo.ecm.core.api.model;version="[0.0,1)",org.nuxeo.ecm.core.api.model.im
+ pl;version="[0.0,1)",org.nuxeo.ecm.core.api.model.impl.primitives;versi
+ on="[0.0,1)",org.nuxeo.ecm.core.query.sql.model;version="[0.0,1)",org.n
+ uxeo.ecm.core.schema.types;version="[0.0,1)",org.nuxeo.ecm.platform.act
+ ions;version="[0.0,1)",org.nuxeo.ecm.platform.actions.jsf;version="[0.0
+ ,1)",org.nuxeo.ecm.platform.actions.seam;version="[0.0,1)",org.nuxeo.ec
+ m.platform.contentview.jsf,org.nuxeo.ecm.platform.contentview.json,org.
+ nuxeo.ecm.platform.forms.layout.api;version="[0.0,1)",org.nuxeo.ecm.pla
+ tform.forms.layout.api.exceptions;version="[0.0,1)",org.nuxeo.ecm.platf
+ orm.forms.layout.api.impl;version="[0.0,1)",org.nuxeo.ecm.platform.form
+ s.layout.facelets;version="[0.0,1)",org.nuxeo.ecm.platform.forms.layout
+ .facelets.plugins;version="[0.0,1)",org.nuxeo.ecm.platform.forms.layout
+ .io;version="[0.0,1)",org.nuxeo.ecm.platform.query.api;version="[0.0,1)
+ ",org.nuxeo.ecm.platform.query.core;version="[0.0,1)",org.nuxeo.ecm.pla
+ tform.ui.web.api;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.cache;
+ version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.tag.handler;version="[0
+ .0,1)",org.nuxeo.ecm.platform.ui.web.util;version="[0.0,1)",org.nuxeo.r
+ untime.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/contentview-framework.xml, OSGI-INF/widgettype
+ s-contrib.xml, OSGI-INF/layouts-contrib.xml, OSGI-INF/actions-contrib.x
+ ml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

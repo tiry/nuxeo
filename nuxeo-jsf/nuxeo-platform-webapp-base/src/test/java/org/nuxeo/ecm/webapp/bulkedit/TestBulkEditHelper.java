@@ -19,6 +19,11 @@
 
 package org.nuxeo.ecm.webapp.bulkedit;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,27 +36,17 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.impl.SimpleDocumentModel;
 import org.nuxeo.ecm.core.event.EventService;
-import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.ecm.core.test.annotations.Granularity;
-import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.types.TypeManager;
+import org.nuxeo.ecm.webapp.WebappFeature;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="mailto:troger@nuxeo.com">Thomas Roger</a>
  */
 @RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.platform.types.api", "org.nuxeo.ecm.platform.types.core", "org.nuxeo.ecm.webapp.base" })
+@Features({ WebappFeature.class })
 public class TestBulkEditHelper {
 
     @Inject
@@ -135,7 +130,7 @@ public class TestBulkEditHelper {
         DocumentModel sourceDoc = new SimpleDocumentModel(commonSchemas);
         sourceDoc.setProperty("dublincore", "title", "new title");
         sourceDoc.setProperty("dublincore", "description", "new description");
-        sourceDoc.setPropertyValue("dublincore:creator", "new creator");
+        sourceDoc.setPropertyValue("dublincore:creator", "user1");
         sourceDoc.setPropertyValue("dc:source", "new source");
         ScopedMap map = sourceDoc.getContextData();
         map.put(BulkEditHelper.BULK_EDIT_PREFIX + "dc:title", true);
@@ -146,7 +141,7 @@ public class TestBulkEditHelper {
         BulkEditHelper.copyMetadata(session, sourceDoc, docs);
         for (DocumentModel doc : docs) {
             assertEquals("new title", doc.getPropertyValue("dc:title"));
-            assertEquals("new creator", doc.getProperty("dc:creator").getValue());
+            assertEquals("user1", doc.getProperty("dc:creator").getValue());
             assertFalse("new description".equals(doc.getPropertyValue("dc:description")));
             assertFalse("new source".equals(doc.getPropertyValue("dc:source")));
         }

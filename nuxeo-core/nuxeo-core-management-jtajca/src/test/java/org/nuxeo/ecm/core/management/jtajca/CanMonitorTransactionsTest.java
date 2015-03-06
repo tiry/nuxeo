@@ -35,17 +35,19 @@ import javax.transaction.TransactionManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.ecm.core.management.jtajca.internal.DefaultTransactionMonitor;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature.NoLogCaptureFilterException;
 import org.slf4j.MDC;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
  * @author matic
@@ -210,16 +212,14 @@ public class CanMonitorTransactionsTest {
 
     public static class LogRollbackTraceFilter implements LogCaptureFeature.Filter {
         @Override
-        public boolean accept(LoggingEvent event) {
+        public boolean accept(ILoggingEvent event) {
             if (event.getLevel() != Level.TRACE) {
                 return false;
             }
-            Object msg = event.getMessage();
-            if (!(msg instanceof TransactionStatistics)) {
+            if (!DefaultTransactionMonitor.class.getName().equals(event.getLoggerName())) {
                 return false;
             }
-            TransactionStatistics stats = (TransactionStatistics) msg;
-            if (!TransactionStatistics.Status.ROLLEDBACK.equals(stats.getStatus())) {
+            if (!event.getMessage().contains("was in status ROLLEDBACK")) {
                 return false;
             }
             return true;
@@ -237,7 +237,7 @@ public class CanMonitorTransactionsTest {
 
     public static class LogMessageFilter implements LogCaptureFeature.Filter {
         @Override
-        public boolean accept(LoggingEvent event) {
+        public boolean accept(ILoggingEvent event) {
             return MDC.get("tx") != null;
         }
     }

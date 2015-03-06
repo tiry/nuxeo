@@ -21,18 +21,16 @@
 
 package org.nuxeo.runtime.deploy;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
+
+import org.nuxeo.common.utils.ExceptionUtils;
+import org.nuxeo.runtime.RuntimeServiceException;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
 public class ContributionManager extends DependencyTree<String, Contribution> {
-
-    private static final Log log = LogFactory.getLog(ContributionManager.class);
 
     private final ManagedComponent component;
 
@@ -71,8 +69,9 @@ public class ContributionManager extends DependencyTree<String, Contribution> {
         contrib.resolve(this);
         try {
             contrib.install(component);
-        } catch (RuntimeException e) {
-            log.error(e, e);
+        } catch (Exception cause) { // deals with interrupt below
+            ExceptionUtils.checkInterrupt(cause);
+            throw new RuntimeServiceException("Cannot install " + contrib.contributionId, cause);
         }
     }
 
@@ -81,8 +80,9 @@ public class ContributionManager extends DependencyTree<String, Contribution> {
         Contribution contrib = entry.get();
         try {
             contrib.uninstall(component);
-        } catch (RuntimeException e) {
-            log.error(e, e);
+        } catch (Exception cause) { // deals with interrupt below
+            ExceptionUtils.checkInterrupt(cause);
+            throw new RuntimeServiceException("Cannot uninstall " + contrib.contributionId, cause);
         }
         contrib.unresolve(this);
     }

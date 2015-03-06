@@ -18,21 +18,19 @@
  */
 package org.nuxeo.ecm.platform.contentview.jsf.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
+import javax.inject.Inject;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.NuxeoException;
+import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.ecm.core.test.annotations.Granularity;
+import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.contentview.jsf.ContentView;
 import org.nuxeo.ecm.platform.contentview.jsf.ContentViewHeader;
 import org.nuxeo.ecm.platform.contentview.jsf.ContentViewLayout;
@@ -43,26 +41,29 @@ import org.nuxeo.ecm.platform.query.nxql.CoreQueryAndFetchPageProvider;
 import org.nuxeo.ecm.platform.query.nxql.CoreQueryDocumentPageProvider;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author Anahide Tchertchian
  */
+@RunWith(FeaturesRunner.class)
+@Features(CoreFeature.class)
+@RepositoryConfig(cleanup = Granularity.METHOD)
+@Deploy({ "org.nuxeo.ecm.platform.query.api", //
+    "org.nuxeo.ecm.actions", //
+    "org.nuxeo.ecm.platform.forms.layout.core", //
+    "org.nuxeo.ecm.platform.forms.layout.client", //
+    "org.nuxeo.ecm.platform.contentview.jsf", //
+})
+@LocalDeploy("org.nuxeo.ecm.platform.contentview.jsf:test-contentview-contrib.xml")
 public class TestContentViewService extends NXRuntimeTestCase {
 
+    @Inject
     protected ContentViewService service;
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        deployContrib("org.nuxeo.ecm.platform.query.api", "OSGI-INF/pageprovider-framework.xml");
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf", "OSGI-INF/contentview-framework.xml");
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-contrib.xml");
-
-        service = Framework.getService(ContentViewService.class);
-        assertNotNull(service);
-    }
 
     @Test
     public void testRegistration() throws Exception {
@@ -135,7 +136,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
         assertTrue(contentView.getShowFilterForm());
         assertFalse(contentView.getShowRefreshCommand());
 
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-contentview-override-contrib.xml");
 
         // check content view has been disabled correctly
         contentView = service.getContentView("CURRENT_DOCUMENT_CHILDREN_FETCH");
@@ -229,7 +230,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
         assertEquals("CURRENT_DOCUMENT_CHILDREN_WITH_SEARCH_DOCUMENT_REF", orderedNames.get(5));
 
         // check after override too
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-contentview-override-contrib.xml");
 
         names = service.getContentViewNames();
         assertNotNull(names);
@@ -291,7 +292,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
         assertEquals(0, names.size());
 
         // check after override too
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-contentview-override-contrib.xml");
 
         names = service.getContentViewNames("foo");
         assertNotNull(names);
@@ -361,7 +362,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
         assertEquals("OVERRIDE_PAGE_PROVIDER_WITH_GENERIC", pp.getName());
 
         // check after override too
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-contentview-override-contrib.xml");
 
         cv = service.getContentView("OVERRIDE_PAGE_PROVIDER_WITH_GENERIC");
         pp = cv.getPageProvider(null, null, -1L, -1L);
@@ -377,7 +378,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
         assertEquals("CURRENT_DOCUMENT_CHILDREN_PP", pp.getName());
 
         // check after override too
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-contentview-override-contrib.xml");
 
         cv = service.getContentView("CURRENT_DOCUMENT_CHILDREN_REF");
         pp = cv.getPageProvider(null, null, -1L, -1L);
@@ -387,7 +388,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
 
     @Test
     public void testSetResultLayoutByName() throws Exception {
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-contentview-override-contrib.xml");
 
         ContentView contentView = service.getContentView("CURRENT_DOCUMENT_CHILDREN");
         assertNotNull(contentView);
@@ -438,7 +439,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
         assertNotNull(ppService.getPageProviderDefinition("PP_NAME"));
 
         // override page provider directly on page provider service
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-pageprovider-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-pageprovider-override-contrib.xml");
         cv = service.getContentView("NAMED_PAGE_PROVIDER");
         cv.setExecuted(true);
         assertEquals("PP_NAME", cv.getPageProvider().getName());
@@ -448,7 +449,7 @@ public class TestContentViewService extends NXRuntimeTestCase {
         assertNotNull(ppService.getPageProviderDefinition("PP_NAME"));
 
         // override again the complete content view definition
-        deployContrib("org.nuxeo.ecm.platform.contentview.jsf.test", "test-contentview-override-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.platform.contentview.jsf", "test-contentview-override-contrib.xml");
         cv = service.getContentView("NAMED_PAGE_PROVIDER");
         cv.setExecuted(true);
         assertEquals("PP_NAME_OVERRIDE", cv.getPageProvider().getName());

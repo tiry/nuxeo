@@ -34,41 +34,26 @@ import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.NuxeoGroup;
 import org.nuxeo.ecm.core.api.NuxeoPrincipal;
+import org.nuxeo.ecm.core.api.impl.UserPrincipal;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.platform.task.Task;
 import org.nuxeo.ecm.platform.task.TaskComment;
 import org.nuxeo.ecm.platform.task.TaskService;
+import org.nuxeo.ecm.platform.task.core.helpers.TaskActorsHelper;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
-import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author Anahide Tchertchian
  * @author Antoine Taillefer
  */
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.ecm.platform.content.template", //
-        "org.nuxeo.ecm.directory", //
-        "org.nuxeo.ecm.platform.usermanager", //
-        "org.nuxeo.ecm.directory.types.contrib", //
-        "org.nuxeo.ecm.directory.sql", //
-        "org.nuxeo.ecm.platform.query.api", //
-        "org.nuxeo.ecm.platform.task.core", //
-})
-@LocalDeploy({ "org.nuxeo.ecm.platform.task.testing:OSGI-INF/test-sql-directories-contrib.xml", //
-        "org.nuxeo.ecm.platform.test:test-usermanagerimpl/directory-config.xml" })
-public class TaskServiceTest {
+public class TaskServiceTest extends TaskTestCase {
 
     @Inject
     protected CoreFeature coreFeature;
@@ -93,7 +78,8 @@ public class TaskServiceTest {
     protected NuxeoPrincipal user4;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+
         administrator = userManager.getPrincipal(SecurityConstants.ADMINISTRATOR);
         assertNotNull(administrator);
 
@@ -108,6 +94,61 @@ public class TaskServiceTest {
 
         user4 = userManager.getPrincipal("myuser4");
         assertNotNull(user4);
+    }
+
+    /**
+     * Test get task actors.
+     */
+    @Test
+    public void testGetTaskActors() {
+
+        final String username = "joe";
+
+        // Test unprefixed user name
+        NuxeoPrincipal principal = new UserPrincipal(username, null, false, false);
+
+        List<String> actors = TaskActorsHelper.getTaskActors(principal);
+        assertEquals(2, actors.size());
+        assertTrue(actors.contains("joe"));
+        assertTrue(actors.contains("user:joe"));
+
+        // Test prefixed user name
+        principal.setName("user:joe");
+
+        actors = TaskActorsHelper.getTaskActors(principal);
+        assertEquals(2, actors.size());
+        assertTrue(actors.contains("joe"));
+        assertTrue(actors.contains("user:joe"));
+
+        // Test unprefixed group names
+        List<String> groups = new ArrayList<String>();
+        groups.add("marketing");
+        groups.add("sales");
+        principal.setGroups(groups);
+
+        actors = TaskActorsHelper.getTaskActors(principal);
+        assertEquals(6, actors.size());
+        assertTrue(actors.contains("joe"));
+        assertTrue(actors.contains("user:joe"));
+        assertTrue(actors.contains("marketing"));
+        assertTrue(actors.contains("group:marketing"));
+        assertTrue(actors.contains("sales"));
+        assertTrue(actors.contains("group:sales"));
+
+        // Test prefixed group names
+        groups.clear();
+        groups.add("group:marketing");
+        groups.add("group:sales");
+        principal.setGroups(groups);
+
+        actors = TaskActorsHelper.getTaskActors(principal);
+        assertEquals(6, actors.size());
+        assertTrue(actors.contains("joe"));
+        assertTrue(actors.contains("user:joe"));
+        assertTrue(actors.contains("marketing"));
+        assertTrue(actors.contains("group:marketing"));
+        assertTrue(actors.contains("sales"));
+        assertTrue(actors.contains("group:sales"));
     }
 
     @Test
@@ -464,8 +505,8 @@ public class TaskServiceTest {
         actors.add(user4.getName());
 
         // create task
-        taskService.createTask(session, administrator, document, "Task assigned to user3 and user4", actors, true,
-                null, null, null, null, null);
+        taskService.createTask(session, administrator, document, "Task assigned to user3 and user4", actors, true, null,
+                null, null, null, null);
 
         // get user3 tasks
         tasks = taskService.getTaskInstances(document, user3, session);
@@ -562,7 +603,8 @@ public class TaskServiceTest {
 
         // create task
         taskService.createTask(session, administrator, document,
-                "Task assigned to prefixed ans unprefixed users and groups", actors, true, null, null, null, null, null);
+                "Task assigned to prefixed ans unprefixed users and groups", actors, true, null, null, null, null,
+                null);
 
         // get user1 tasks: should have 2 since in members group
         List<Task> tasks = taskService.getTaskInstances(document, user1, session);

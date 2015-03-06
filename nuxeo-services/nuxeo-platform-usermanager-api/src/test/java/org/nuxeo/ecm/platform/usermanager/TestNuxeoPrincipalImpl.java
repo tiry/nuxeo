@@ -21,28 +21,20 @@
 
 package org.nuxeo.ecm.platform.usermanager;
 
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
+import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
 
 /**
  * @author Florent Guillaume
  */
+@Features(CoreFeature.class)
+@Deploy("org.nuxeo.ecm.directory.types.contrib")
 public class TestNuxeoPrincipalImpl extends NXRuntimeTestCase {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployBundle("org.nuxeo.ecm.core");
-        deployBundle("org.nuxeo.ecm.core.event");
-        deployBundle("org.nuxeo.ecm.directory.types.contrib");
-    }
 
-    @SuppressWarnings({ "SimplifiableJUnitAssertion", "ObjectEqualsNull" })
     @Test
     public void testEquals() {
         NuxeoPrincipalImpl a = new NuxeoPrincipalImpl("foo");

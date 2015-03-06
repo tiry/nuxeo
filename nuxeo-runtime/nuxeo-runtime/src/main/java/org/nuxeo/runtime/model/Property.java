@@ -45,7 +45,7 @@ public class Property implements Serializable {
     private Serializable value;
 
     @XNode("@value")
-    private void setStringValue(String value) {
+    private void setValue(String value) {
         this.value = PropertyDecoder.decode(type, value);
     }
 

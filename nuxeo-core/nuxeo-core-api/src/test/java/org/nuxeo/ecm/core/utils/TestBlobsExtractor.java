@@ -19,9 +19,6 @@
 
 package org.nuxeo.ecm.core.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,26 +27,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.impl.DocumentModelImpl;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author Florent Guillaume
  */
+@Deploy({"org.nuxeo.ecm.core.schema","org.nuxeo.ecm.core.api"})
+@LocalDeploy("org.nuxeo.ecm.core.schema:OSGI-INF/test-blobsextractor-types-contrib.xml")
 public class TestBlobsExtractor extends NXRuntimeTestCase {
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployContrib("org.nuxeo.ecm.core.api.tests", "OSGI-INF/test-blobsextractor-types-contrib.xml");
-    }
 
     @Test
     public void test() throws Exception {

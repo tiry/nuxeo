@@ -22,13 +22,9 @@ package org.nuxeo.ecm.webapp.seam;
 import java.lang.reflect.Field;
 import java.util.Set;
 
-import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
-import javax.management.MBeanException;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 

@@ -18,15 +18,10 @@
  */
 package org.nuxeo.runtime.services.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
 /**
@@ -36,6 +31,7 @@ public class TestConfigurationService extends NXRuntimeTestCase {
 
     ConfigurationService cs;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -74,20 +70,19 @@ public class TestConfigurationService extends NXRuntimeTestCase {
         // Assert property don't exist
         assertNull(cs.getProperty("nuxeo.test.overrideContribDummyProperty"));
         // Deploy another contrib with a new property and override existing properties
-        deployContrib("org.nuxeo.runtime.test.tests", "configuration-override-contrib.xml");
-        // Assert new property was added
-        assertEquals("overrideContrib", cs.getProperty("nuxeo.test.overrideContribDummyProperty"));
-        // Assert framework property does not takes precedence
-        assertEquals("dummyStringValueOverridden", cs.getProperty("nuxeo.test.dummyStringProperty"));
-        Framework.getProperties().setProperty("nuxeo.test.dummyStringProperty", "anotherDummyValue");
-        assertEquals("dummyStringValueOverridden", cs.getProperty("nuxeo.test.dummyStringProperty"));
-        Framework.getProperties().remove("nuxeo.test.dummyStringProperty");
-        // Assert old properties have overridden values
-        assertEquals("dummyStringValueOverridden", cs.getProperty("nuxeo.test.dummyStringProperty"));
-        assertTrue(cs.isBooleanPropertyFalse("nuxeo.test.dummyBooleanProperty"));
-
-        // Undeploy contrib
-        undeployContrib("org.nuxeo.runtime.test.tests", "configuration-override-contrib.xml");
+        try (RuntimeContext context = deployContrib("org.nuxeo.runtime.test.tests",
+                "configuration-override-contrib.xml")) {
+            // Assert new property was added
+            assertEquals("overrideContrib", cs.getProperty("nuxeo.test.overrideContribDummyProperty"));
+            // Assert framework property does not takes precedence
+            assertEquals("dummyStringValueOverridden", cs.getProperty("nuxeo.test.dummyStringProperty"));
+            Framework.getProperties().setProperty("nuxeo.test.dummyStringProperty", "anotherDummyValue");
+            assertEquals("dummyStringValueOverridden", cs.getProperty("nuxeo.test.dummyStringProperty"));
+            Framework.getProperties().remove("nuxeo.test.dummyStringProperty");
+            // Assert old properties have overridden values
+            assertEquals("dummyStringValueOverridden", cs.getProperty("nuxeo.test.dummyStringProperty"));
+            assertTrue(cs.isBooleanPropertyFalse("nuxeo.test.dummyBooleanProperty"));
+        }
         // Assert property was removed
         assertNull(cs.getProperty("nuxeo.test.overrideContribDummyProperty"));
         // Assert overridden values were restored

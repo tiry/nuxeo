@@ -70,13 +70,13 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.directory.sql", //
-        "org.nuxeo.ecm.directory.ldap.tests", //
+@Deploy({ "org.nuxeo.ecm.core.management",
+        "org.nuxeo.ecm.directory", //
+        "org.nuxeo.ecm.directory.sql", //
+        "org.nuxeo.ecm.directory.ldap", //
 })
-@LocalDeploy({ "org.nuxeo.ecm.directory.ldap.tests:ldap-test-setup/DirectoryTypes.xml",
-        "org.nuxeo.ecm.directory.ldap.tests:ldap-test-setup/DirectoryService.xml",
-        "org.nuxeo.ecm.directory.ldap.tests:ldap-test-setup/LDAPDirectoryFactory.xml",
-        "org.nuxeo.ecm.directory.ldap.tests:TestSQLDirectories.xml", })
+@LocalDeploy({ "org.nuxeo.ecm.directory.ldap:ldap-test-setup/types.xml",
+        "org.nuxeo.ecm.directory.ldap:ldap-test-setup/directories.xml" })
 public abstract class LDAPDirectoryTestCase {
 
     private static final Log log = LogFactory.getLog(LDAPDirectoryTestCase.class);
@@ -147,7 +147,6 @@ public abstract class LDAPDirectoryTestCase {
                 destroyRecursively("ou=people,dc=example,dc=com", ctx, -1);
                 destroyRecursively("ou=groups,dc=example,dc=com", ctx, -1);
             }
-            runtimeHarness.undeployContrib("org.nuxeo.ecm.directory.ldap.tests", EXTERNAL_SERVER_SETUP);
         } else {
             if (server != null) {
                 try {
@@ -156,7 +155,6 @@ public abstract class LDAPDirectoryTestCase {
                     server = null;
                 }
             }
-            runtimeHarness.undeployContrib("org.nuxeo.ecm.directory.ldap.tests", INTERNAL_SERVER_SETUP);
         }
     }
 

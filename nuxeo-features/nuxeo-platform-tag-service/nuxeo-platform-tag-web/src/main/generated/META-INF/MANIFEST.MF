@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateless
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Tag Web
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-tag-web
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.tag.automation;uses:="org.nuxeo.ecm.automation,org.nuxeo.
+ ecm.automation.core.annotations,org.nuxeo.ecm.core.api,org.nuxeo.ecm.pl
+ atform.tag";version="0.0.0",org.nuxeo.ecm.platform.tag.web;uses:="javax
+ .faces.event,net.sf.json,org.jboss.seam,org.jboss.seam.annotations,org.
+ jboss.seam.annotations.intercept,org.jboss.seam.annotations.web,org.jbo
+ ss.seam.faces,org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.tag,org.nux
+ eo.ecm.platform.ui.web.api,org.nuxeo.ecm.webapp.helpers";version="0.0.0
+ "
+Import-Package: javax.faces.event;version="[2.2,3)",net.sf.json,org.apac
+ he.commons.lang;version="[2.6,3)",org.apache.commons.logging;version="[
+ 1.2,2)",org.jboss.seam,org.jboss.seam.annotations,org.jboss.seam.annota
+ tions.intercept,org.jboss.seam.annotations.web,org.jboss.seam.contexts,
+ org.jboss.seam.faces,org.jboss.seam.international,org.nuxeo.common.coll
+ ections;version="[0.0,1)",org.nuxeo.ecm.automation;version="[0.0,1)",or
+ g.nuxeo.ecm.automation.core.annotations;version="[0.0,1)",org.nuxeo.ecm
+ .core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1
+ )",org.nuxeo.ecm.platform.tag;version="[0.0,1)",org.nuxeo.ecm.platform.
+ ui.select2.common;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.api;v
+ ersion="[0.0,1)",org.nuxeo.ecm.webapp.helpers;version="[0.0,1)",org.nux
+ eo.runtime.api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/navtree-contrib.xml,OSGI-INF/tag-widgets-contr
+ ib.xml,OSGI-INF/operations-contrib.xml,OSGI-INF/tag-theme-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.tag.api,org.nuxeo.ecm.webapp.ui
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

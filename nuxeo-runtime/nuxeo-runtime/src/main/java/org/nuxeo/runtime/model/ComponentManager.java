@@ -116,7 +116,7 @@ public interface ComponentManager {
      *
      * @return the pending registrations
      */
-    Map<ComponentName, Set<ComponentName>> getPendingRegistrations();
+    Map<ComponentName, Set<RegistrationInfo>> getPendingRegistrations();
 
     /**
      * Gets the pending extensions by component.
@@ -125,13 +125,6 @@ public interface ComponentManager {
      */
     Collection<ComponentName> getActivatingRegistrations();
 
-
-    /**
-     * Gets the components that fail on applicationStarted notification
-     *
-     * @since 7.4
-     */
-    Collection<ComponentName> getStartFailureRegistrations();
 
     /**
      * Gets the number of registered objects in this registry.
@@ -161,7 +154,7 @@ public interface ComponentManager {
     /**
      * Get the list of all registered service names An empty array is returned if no registered services are found.
      *
-     * @return an array of registered service.
+     * @return an array of registration.
      */
     String[] getServices();
 

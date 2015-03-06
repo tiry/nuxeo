@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-Category: core
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Mail Core
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-mail-types
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: false
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",schemas;v
+ ersion="0.0.0"
+Nuxeo-Component: OSGI-INF/nxmail-core-types-contrib.xml,OSGI-INF/nxmail-
+ lifecycle-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Provide-Package: org.nuxeo.ecm.platform.mail.types
+Require-Bundle: org.nuxeo.ecm.core.api,org.nuxeo.ecm.core
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

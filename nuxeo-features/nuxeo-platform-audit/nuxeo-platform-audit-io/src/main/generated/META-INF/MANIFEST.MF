@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Platform Audit Logs IO Fragment
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-audit-io
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.audit.io;uses:="org.dom4j,org.nuxeo.ecm.core.api,org.nuxe
+ o.ecm.core.io,org.nuxeo.ecm.platform.audit.api,org.nuxeo.ecm.platform.i
+ o.api";version="0.0.0"
+Import-Package: org.apache.commons.beanutils;version="[1.9,2)",org.apach
+ e.commons.logging;version="[1.2,2)",org.dom4j,org.dom4j.io,org.nuxeo.co
+ mmon.utils;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",o
+ rg.nuxeo.ecm.core.io;version="[0.0,1)",org.nuxeo.ecm.platform.audit.api
+ ;version="[0.0,1)",org.nuxeo.ecm.platform.io.api;version="[0.0,1)",org.
+ nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/io-audit-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.core.api,org.nuxeo.ecm.core.io,org.nuxeo.e
+ cm.platform.io.api,org.nuxeo.ecm.platform.audit.api,org.nuxeo.ecm.platf
+ orm.audit
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

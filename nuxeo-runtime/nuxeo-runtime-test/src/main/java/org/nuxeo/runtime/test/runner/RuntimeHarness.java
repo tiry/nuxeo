@@ -20,14 +20,16 @@
 package org.nuxeo.runtime.test.runner;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Properties;
 
-import org.nuxeo.osgi.OSGiAdapter;
+import org.nuxeo.osgi.bootstrap.application.OSGiAdapter;
 import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.test.WorkingDirectoryConfigurator;
+import org.nuxeo.runtime.test.runner.DefaultRuntimeHarness.DeploymentScope;
 
 /**
  * TODO: Move this to org.nuxeo.runtime package
@@ -44,7 +46,7 @@ public interface RuntimeHarness {
     /**
      * Fires the event {@code FrameworkEvent.STARTED}.
      */
-    void fireFrameworkStarted() throws Exception;
+    void fireFrameworkStarted();
 
     /**
      * Deploys a whole OSGI bundle.
@@ -54,33 +56,8 @@ public interface RuntimeHarness {
      *
      * @param bundle the symbolic name
      */
-    void deployBundle(String bundle) throws Exception;
+    RuntimeContext deployBundle(String bundle);
 
-    /**
-     * Undeploys a contribution from a given bundle.
-     * <p>
-     * The path will be relative to the bundle root. Example: <code>
-     * undeployContrib("org.nuxeo.ecm.core", "OSGI-INF/CoreExtensions.xml")
-     * </code>
-     *
-     * @param bundle the bundle
-     * @param contrib the contribution
-     */
-    void undeployContrib(String bundle, String contrib) throws Exception;
-
-    /**
-     * @deprecated use {@link #undeployContrib(String, String)} instead
-     */
-    @Deprecated
-    void undeployContrib(String contrib);
-
-    /**
-     * @deprecated use {@link #undeployContrib(String, String)} instead
-     */
-    @Deprecated
-    void undeploy(String contrib);
-
-    RuntimeContext deployTestContrib(String bundle, URL contrib) throws Exception;
 
     /**
      * Deploys an XML contribution from outside a bundle.
@@ -94,7 +71,9 @@ public interface RuntimeHarness {
      * @param bundle the bundle that becomes the contribution owner
      * @param contrib the contribution to deploy as part of the given bundle
      */
-    RuntimeContext deployTestContrib(String bundle, String contrib) throws Exception;
+    RuntimeContext deployTestContrib(String bundle, String contrib);
+
+    RuntimeContext deployTestContrib(String bundle, URL contrib);
 
     /**
      * Deploys a contribution from a given bundle.
@@ -108,33 +87,15 @@ public interface RuntimeHarness {
      * @param bundle the name of the bundle to peek the contrib in
      * @param contrib the path to contrib in the bundle.
      */
-    void deployContrib(String bundle, String contrib) throws Exception;
+    RuntimeContext deployContrib(String bundle, String contrib);
 
-    /**
-     * Deploys a contribution file by looking for it in the class loader.
-     * <p>
-     * The first contribution file found by the class loader will be used. You have no guarantee in case of name
-     * collisions.
-     *
-     * @deprecated use the less ambiguous {@link #deployContrib(String, String)}
-     * @param contrib the relative path to the contribution file
-     */
-    @Deprecated
-    void deployContrib(String contrib);
+    void start();
 
-    /**
-     * @deprecated use <code>deployContrib()</code> instead
-     */
-    @Deprecated
-    void deploy(String contrib);
-
-    void start() throws Exception;
-
-    void stop() throws Exception;
+    void stop();
 
     boolean isStarted();
 
-    void deployFolder(File folder, ClassLoader loader) throws Exception;
+    void deployFolder(File folder, ClassLoader loader);
 
     void addWorkingDirectoryConfigurator(WorkingDirectoryConfigurator config);
 
@@ -168,12 +129,36 @@ public interface RuntimeHarness {
      * @since 5.5
      * @throws Exception
      */
-    public void restart() throws Exception;
+    public void restart();
 
     /**
      * @throws URISyntaxException
      * @since 5.7
      */
-    public List<String> getClassLoaderFiles() throws URISyntaxException;
+    public List<String> getClassLoaderFiles();
+
+    /**
+     * Push a new scope on the deployment stack
+     *
+     * @since 7.2
+     */
+    void pushDeploymentScope();
+
+    /**
+     * Pop the current scope from the deployment stack and uninstall all contained deployments
+     *
+     * @since 7.2
+     */
+    void popDeploymentScope();
+
+    DeploymentScope deploymentScope();
+
+    /**
+     * Locate resource in target classes
+     *
+     * @return
+     * @throws IOException
+     */
+    URL getResource(String pathname);
 
 }

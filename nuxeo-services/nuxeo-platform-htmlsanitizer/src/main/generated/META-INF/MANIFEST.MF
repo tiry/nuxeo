@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo HTML Sanitizer Service
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-htmlsanitizer
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.htmlsanitizer;uses:="org.nuxeo.common.xmap.annotation,org
+ .nuxeo.ecm.core.api,org.nuxeo.ecm.core.event,org.nuxeo.runtime.model,or
+ g.owasp.validator.html";version="0.0.0"
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.nuxeo.c
+ ommon.xmap.annotation;version="[0.0,1)",org.nuxeo.ecm.core.api;version=
+ "[0.0,1)",org.nuxeo.ecm.core.api.model;version="[0.0,1)",org.nuxeo.ecm.
+ core.event;version="[0.0,1)",org.nuxeo.ecm.core.event.impl;version="[0.
+ 0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.model;v
+ ersion="[0.0,1)",org.owasp.validator.html
+Nuxeo-Component: OSGI-INF/htmlsanitizer-service.xml,OSGI-INF/htmlsanitiz
+ er-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Private-Package: .
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

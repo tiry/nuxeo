@@ -69,6 +69,8 @@ public class ComponentEvent implements Serializable {
 
     public static final int EXTENSION_PENDING = 11;
 
+    public static final int COMPONENT_BLACKLISTED = 12;
+
     public static final int COMPONENT_EVENT = 100;
 
     private static final long serialVersionUID = 8936615866437064000L;

@@ -20,24 +20,13 @@
 package org.nuxeo.ecm.platform.convert.tests;
 
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
-
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.convert.api.ConversionService;
 import org.nuxeo.ecm.core.convert.api.ConverterCheckResult;
 import org.nuxeo.runtime.api.Framework;
 
-import static org.junit.Assert.*;
-
 public class TestWPD2TextConverter extends BaseConverterTest {
-
-    @Before
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        deployBundle("org.nuxeo.ecm.platform.commandline.executor");
-    }
 
     @Test
     public void testWordPerfectToTextConverter() throws Exception {

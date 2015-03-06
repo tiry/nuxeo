@@ -24,9 +24,9 @@ import org.nuxeo.ecm.automation.client.Session;
 import org.nuxeo.ecm.automation.client.jaxrs.impl.HttpAutomationClient;
 import org.nuxeo.ecm.core.test.DetectThreadDeadlocksFeature;
 import org.nuxeo.ecm.webengine.test.WebEngineFeature;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.JettyFeature;
 import org.nuxeo.runtime.test.runner.SimpleFeature;
 
 import com.google.inject.Binder;
@@ -39,9 +39,7 @@ import com.google.inject.Scopes;
  * @since 5.7
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-@Deploy({ "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.io", "org.nuxeo.ecm.automation.server",
-        "org.nuxeo.ecm.automation.features", "org.nuxeo.ecm.platform.query.api" })
-@Features({ DetectThreadDeadlocksFeature.class, WebEngineFeature.class })
+@Features({ DetectThreadDeadlocksFeature.class, AutomationFeature.class, WebEngineFeature.class })
 @DetectThreadDeadlocksFeature.Config(dumpAtTearDown = true)
 public class EmbeddedAutomationServerFeature extends SimpleFeature {
 
@@ -64,11 +62,12 @@ public class EmbeddedAutomationServerFeature extends SimpleFeature {
     @Override
     public void configure(FeaturesRunner runner, Binder binder) {
         super.configure(runner, binder);
+        String connectionURL = runner.getFeature(JettyFeature.class).getConnectionURL("/automation/");
         binder.bind(HttpAutomationClient.class).toProvider(new Provider<HttpAutomationClient>() {
             @Override
             public HttpAutomationClient get() {
                 if (client == null) {
-                    client = getHttpAutomationClient();
+                    client = getHttpAutomationClient(connectionURL);
                 }
                 return client;
             }
@@ -77,7 +76,7 @@ public class EmbeddedAutomationServerFeature extends SimpleFeature {
             @Override
             public Session get() {
                 if (client == null) {
-                    client = getHttpAutomationClient();
+                    client = getHttpAutomationClient(connectionURL);
                 }
                 if (session == null) {
                     try {
@@ -91,9 +90,8 @@ public class EmbeddedAutomationServerFeature extends SimpleFeature {
         }).in(Scopes.SINGLETON);
     }
 
-    protected HttpAutomationClient getHttpAutomationClient() {
-        HttpAutomationClient client = new HttpAutomationClient("http://localhost:18080/automation",
-                HTTP_CONNECTION_TIMEOUT);
+    protected HttpAutomationClient getHttpAutomationClient(String connectionURL) {
+        HttpAutomationClient client = new HttpAutomationClient(connectionURL, HTTP_CONNECTION_TIMEOUT);
         // Deactivate global operation registry cache to allow tests using this
         // feature in a test suite to deploy different set of operations
         client.setSharedRegistryExpirationDelay(0);

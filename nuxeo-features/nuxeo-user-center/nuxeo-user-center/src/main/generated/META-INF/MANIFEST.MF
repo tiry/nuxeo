@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo User Center
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-user-center
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.user.center;uses:="org.jboss.seam,org.jboss.seam.annotations,org.n
+ uxeo.ecm.platform.actions,org.nuxeo.ecm.platform.ui.web.api,org.nuxeo.e
+ cm.platform.url.api,org.nuxeo.ecm.platform.url.service";version="0.0.0"
+ ,themes.css;version="0.0.0",themes.sass;version="0.0.0"
+Import-Package: org.jboss.seam,org.jboss.seam.annotations,org.nuxeo.comm
+ on.utils;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org
+ .nuxeo.ecm.core.api.impl;version="[0.0,1)",org.nuxeo.ecm.core.api.repos
+ itory;version="[0.0,1)",org.nuxeo.ecm.platform.actions;version="[0.0,1)
+ ",org.nuxeo.ecm.platform.ui.web.api;version="[0.0,1)",org.nuxeo.ecm.pla
+ tform.url;version="[0.0,1)",org.nuxeo.ecm.platform.url.api;version="[0.
+ 0,1)",org.nuxeo.ecm.platform.url.service;version="[0.0,1)",org.nuxeo.ru
+ ntime.api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/actions-contrib.xml,OSGI-INF/action-widgets-co
+ ntrib.xml,OSGI-INF/theme-contrib.xml,OSGI-INF/auth-contrib.xml,OSGI-INF
+ /urlservice-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

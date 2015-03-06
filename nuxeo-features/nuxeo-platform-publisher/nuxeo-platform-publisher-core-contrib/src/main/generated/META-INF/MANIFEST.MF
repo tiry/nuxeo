@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-Category: core,stateful
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Publisher Service JBPM
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-publisher-cor
+ e-contrib
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0"
+Nuxeo-Component: OSGI-INF/publisher-relations-contrib.xml, OSGI-INF/publ
+ isher-audit-contrib.xml, OSGI-INF/publisher-permissions-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.relations,org.nuxeo.ecm.relations.jena,org
+ .nuxeo.ecm.platform.audit
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

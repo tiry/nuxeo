@@ -25,41 +25,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.After;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import javax.inject.Inject;
 
+import org.junit.Test;
+import org.nuxeo.ecm.core.CoreTestCase;
 import org.nuxeo.ecm.core.CoreUTConstants;
-import org.nuxeo.ecm.core.NXCore;
 import org.nuxeo.ecm.core.api.NuxeoPrincipal;
 import org.nuxeo.ecm.core.api.impl.UserPrincipal;
 import org.nuxeo.ecm.core.api.security.PermissionProvider;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
 import org.nuxeo.ecm.core.api.security.UserVisiblePermission;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
 /**
  * @author <a href="mailto:gracinet@nuxeo.com">Georges Racinet</a>
  * @author <a href="mailto:ogrisel@nuxeo.com">Olivier Grisel</a>
  */
-public class TestSecurityService extends NXRuntimeTestCase {
+public class TestSecurityService extends CoreTestCase {
 
+    @Inject
     private SecurityService service;
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployContrib(CoreUTConstants.CORE_BUNDLE, "OSGI-INF/SecurityService.xml");
-        deployContrib(CoreUTConstants.CORE_BUNDLE, "OSGI-INF/permissions-contrib.xml");
-        service = NXCore.getSecurityService();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-        service = null;
-    }
 
     // TODO: Make this test independent of the permissions-contrib.xml file.
     @Test

@@ -147,7 +147,11 @@ public abstract class ComplexProperty extends AbstractProperty implements Map<St
 
     @Override
     public Property get(String name) throws PropertyNotFoundException {
-        Field field = getType().getField(name);
+        ComplexType type = getType();
+        if (type == null) {
+            throw new NullPointerException("No such type "  + name);
+        }
+        Field field = type.getField(name);
         if (field == null) {
             return null;
         }

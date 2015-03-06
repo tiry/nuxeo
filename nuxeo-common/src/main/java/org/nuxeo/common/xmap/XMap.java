@@ -77,7 +77,6 @@ import org.xml.sax.SAXException;
  *
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-@SuppressWarnings({ "SuppressionAnnotation" })
 public class XMap {
 
     private static final DocumentBuilderFactory initFactory() {
@@ -105,7 +104,9 @@ public class XMap {
     // the scanned objects
     private final Map<Class<?>, XAnnotatedObject> objects;
 
-    private final Map<Class<?>, XValueFactory> factories;
+    private final Map<Class<?>, XValueFactory<?>> factories;
+
+    protected boolean deferClassLoading = false;
 
     /**
      * Creates a new XMap object.
@@ -113,7 +114,11 @@ public class XMap {
     public XMap() {
         objects = new Hashtable<Class<?>, XAnnotatedObject>();
         roots = new Hashtable<String, XAnnotatedObject>();
-        factories = new Hashtable<Class<?>, XValueFactory>(XValueFactory.defaultFactories);
+        factories = new Hashtable<Class<?>, XValueFactory<?>>(XValueFactory.defaultFactories);
+    }
+
+    public void deferClassLoading() {
+        deferClassLoading = true;
     }
 
     /**
@@ -124,8 +129,9 @@ public class XMap {
      * @param type the object type
      * @return the value factory if any, null otherwise
      */
-    public XValueFactory getValueFactory(Class<?> type) {
-        return factories.get(type);
+    @SuppressWarnings("unchecked")
+    public <T> XValueFactory<T> getValueFactory(Class<T> type) {
+        return (XValueFactory<T>) factories.get(type);
     }
 
     /**
@@ -136,8 +142,12 @@ public class XMap {
      * @param type the object type
      * @param factory the value factory to use for the given type
      */
-    public void setValueFactory(Class<?> type, XValueFactory factory) {
+    public void setValueFactory(Class<?> type, XValueFactory<?> factory) {
         factories.put(type, factory);
+    }
+
+    public void setValueFactory(XValueFactory<?> factory) {
+        factories.put(factory.getType(), factory);
     }
 
     /**
@@ -385,7 +395,7 @@ public class XMap {
             while (p != null) {
                 if (p.getNodeType() == Node.ELEMENT_NODE) {
                     // Recurse in the first child Element
-                    return load((Element) p);
+                    return load(ctx, (Element) p);
                 }
                 p = p.getNextSibling();
             }
@@ -456,6 +466,16 @@ public class XMap {
         }
     }
 
+    public void flushDeferred() {
+        if (!deferClassLoading) {
+            return;
+        }
+        for (XAnnotatedObject object : objects.values()) {
+            object.flushDeferred();
+        }
+        deferClassLoading = false;
+    }
+
     protected static Annotation checkMemberAnnotation(AnnotatedElement ae) {
         Annotation[] annos = ae.getAnnotations();
         for (Annotation anno : annos) {
@@ -485,6 +505,9 @@ public class XMap {
             member = new XAnnotatedContent(this, setter, (XContent) annotation);
         } else if (type == XMemberAnnotation.CONTEXT) {
             member = new XAnnotatedContext(this, setter, (XContext) annotation);
+        }
+        if (deferClassLoading && Class.class.isAssignableFrom(member.getType())) {
+            member = new XDeferredAnnotatedMember(member);
         }
         return member;
     }

@@ -35,7 +35,7 @@ import com.google.common.collect.Iterables;
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-public class AnnotationScanner {
+public class AnnotationScanner  {
 
     protected final Set<Class<?>> visitedClasses = new HashSet<Class<?>>();
 
@@ -93,7 +93,7 @@ public class AnnotationScanner {
         }
         visitedClasses.add(clazz);
         List<Annotation> result = new ArrayList<Annotation>(); // collect only the annotation on this class
-        result.addAll(Arrays.asList(clazz.getAnnotations()));
+        result.addAll(Arrays.asList(clazz.getDeclaredAnnotations()));
         // first scan interfaces
         for (Class<?> itf : clazz.getInterfaces()) {
             result.addAll(collectAnnotations(itf));

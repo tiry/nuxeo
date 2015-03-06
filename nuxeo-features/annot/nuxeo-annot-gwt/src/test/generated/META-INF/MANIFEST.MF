@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.annot.nuxeo-annot-gwt.tests
+Bundle-SymbolicName: org.nuxeo.ecm.annot.nuxeo-annot-gwt.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.annot.nuxeo-annot-gwt
+Import-Package: com.google.gwt.core.client,com.google.gwt.dom.client,com
+ .google.gwt.junit.client,com.google.gwt.junit.tools,com.google.gwt.user
+ .client,com.google.gwt.user.client.ui,com.google.gwt.xml.client,org.jun
+ it.runner,org.junit.runners,org.nuxeo.ecm.platform.annotations.gwt.clie
+ nt.configuration,org.nuxeo.ecm.platform.annotations.gwt.client.controle
+ r,org.nuxeo.ecm.platform.annotations.gwt.client.view.decorator
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.annotations.gwt.client,org.nuxeo
+ .ecm.platform.annotations.gwt.client.annotea,org.nuxeo.ecm.platform.ann
+ otations.gwt.client.model,org.nuxeo.ecm.platform.annotations.gwt.client
+ .util,org.nuxeo.ecm.platform.annotations.gwt.client.view
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

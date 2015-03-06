@@ -24,8 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
@@ -39,6 +37,9 @@ import org.nuxeo.runtime.test.runner.LogCaptureFeature;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature.NoLogCaptureFilterException;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+
 @RunWith(FeaturesRunner.class)
 @Features({ CoreFeature.class, LogCaptureFeature.class })
 @RepositoryConfig(init = DefaultRepositoryInit.class)
@@ -49,14 +50,14 @@ public class QueryResultsAreAutomaticallyClosedTest {
 
     public static class LogFilter implements LogCaptureFeature.Filter {
         @Override
-        public boolean accept(LoggingEvent event) {
+        public boolean accept(ILoggingEvent event) {
             if (!Level.WARN.equals(event.getLevel())) {
                 return false;
             }
             if (!ConnectionImpl.class.getName().equals(event.getLoggerName())) {
                 return false;
             }
-            if (!ConnectionImpl.QueryResultContextException.class.isAssignableFrom(event.getThrowableInformation().getThrowable().getClass())) {
+            if (!ConnectionImpl.QueryResultContextException.class.getName().equals(event.getThrowableProxy().getClassName())) {
                 return false;
             }
             return true;
@@ -72,7 +73,7 @@ public class QueryResultsAreAutomaticallyClosedTest {
     protected void assertWarnInLogs() throws NoLogCaptureFilterException {
         if (coreFeature.getStorageConfiguration().isVCS()) {
             logCaptureResults.assertHasEvent();
-            LoggingEvent event = logCaptureResults.getCaughtEvents().get(0);
+            ILoggingEvent event = logCaptureResults.getCaughtEvents().get(0);
             assertEquals(Level.WARN, event.getLevel());
             assertEquals(VCS_CLOSING_WARN, event.getMessage());
         }

@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.common.xmap.DOMSerializer;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.model.persistence.Contribution;
 import org.nuxeo.runtime.model.persistence.ContributionStorage;
 import org.w3c.dom.DOMException;
@@ -57,7 +58,7 @@ public class FileSystemStorage implements ContributionStorage {
         root.mkdirs();
     }
 
-    public static synchronized String safeRead(File file) {
+    public static  String safeRead(File file) {
         try {
             return FileUtils.readFile(file);
         } catch (IOException e) {
@@ -65,7 +66,7 @@ public class FileSystemStorage implements ContributionStorage {
         }
     }
 
-    public static synchronized void safeWrite(File file, String content) {
+    public static  void safeWrite(File file, String content) {
         try {
             FileUtils.writeFile(file, content);
         } catch (IOException e) {
@@ -73,7 +74,7 @@ public class FileSystemStorage implements ContributionStorage {
         }
     }
 
-    public static synchronized boolean safeCreate(File file, String content) {
+    public static  boolean safeCreate(File file, String content) {
         if (file.isFile()) {
             return false;
         }
@@ -85,7 +86,7 @@ public class FileSystemStorage implements ContributionStorage {
         return true;
     }
 
-    public static synchronized boolean safeRemove(File file) {
+    public static  boolean safeRemove(File file) {
         return file.delete();
     }
 
@@ -116,7 +117,7 @@ public class FileSystemStorage implements ContributionStorage {
                 contrib.setDescription("");
             }
         } catch (ParserConfigurationException | SAXException | IOException | DOMException e) {
-            log.error("Failed to read contribution metadata", e);
+            throw new RuntimeServiceException("Failed to read contribution metadata", e);
         }
     }
 

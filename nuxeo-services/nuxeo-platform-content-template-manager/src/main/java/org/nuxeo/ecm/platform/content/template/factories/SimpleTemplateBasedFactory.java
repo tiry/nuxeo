@@ -44,10 +44,11 @@ public class SimpleTemplateBasedFactory extends BaseContentFactory {
         return session.getChildren(eventDoc.getRef()).isEmpty();
     }
 
+    @Override
     public void createContentStructure(DocumentModel eventDoc) {
         initSession(eventDoc);
 
-        if (eventDoc.isVersion() || !isTargetEmpty(eventDoc)) {
+        if (!accept(eventDoc)) {
             return;
         }
 
@@ -65,6 +66,16 @@ public class SimpleTemplateBasedFactory extends BaseContentFactory {
             newChild = session.createDocument(newChild);
             setAcl(item.getAcl(), newChild.getRef());
         }
+    }
+
+    protected boolean accept(DocumentModel eventDoc) {
+        if (eventDoc.isVersion()) {
+            return false;
+        }
+        if (!isTargetEmpty(eventDoc)) {
+            return false;
+        }
+        return true;
     }
 
     protected void setProperties(List<PropertyDescriptor> properties, DocumentModel doc) {
@@ -94,6 +105,7 @@ public class SimpleTemplateBasedFactory extends BaseContentFactory {
         }
     }
 
+    @Override
     public boolean initFactory(Map<String, String> options, List<ACEDescriptor> rootAcl,
             List<TemplateItemDescriptor> template) {
         this.template = template;

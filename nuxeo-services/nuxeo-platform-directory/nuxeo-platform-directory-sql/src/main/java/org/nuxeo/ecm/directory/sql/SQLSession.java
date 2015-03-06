@@ -158,7 +158,7 @@ public class SQLSession extends BaseSession implements EntrySource {
     private void acquireConnection() throws DirectoryException {
         try {
             if (sqlConnection == null || sqlConnection.isClosed()) {
-                sqlConnection = directory.getConnection();
+                sqlConnection = directory.getConnection(false);
             }
         } catch (SQLException e) {
             throw new DirectoryException("Cannot connect to SQL directory '" + directory.getName() + "': "

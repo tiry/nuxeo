@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.localconf.nuxeo-localconf-simple.tests
+Bundle-SymbolicName: org.nuxeo.ecm.localconf.nuxeo-localconf-simple.test
+ s
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.localconf.nuxeo-localconf-simple
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.au
+ tomation;version="[0.0,1)",org.nuxeo.ecm.automation.core.util;version="
+ [0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.ap
+ i.localconfiguration;version="[0.0,1)",org.nuxeo.ecm.core.api.security;
+ version="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.core.test.annot
+ ations,org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.localconf
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -20,7 +20,6 @@
 package org.nuxeo.ecm.core.storage.sql;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,8 +49,6 @@ public class DatabaseSQLServer extends DatabaseHelper {
 
     private static final String DEF_PASSWORD = "nuxeo";
 
-    private static final String CONTRIB_XML = "OSGI-INF/test-repo-repository-mssql-contrib.xml";
-
     // true for the Microsoft JDBC driver
     // false for the jTDS JDBC driver (open source)
     private static final boolean MSFT = false;
@@ -62,60 +59,39 @@ public class DatabaseSQLServer extends DatabaseHelper {
     private static final String XA_DATASOURCE = MSFT ? "com.microsoft.sqlserver.jdbc.SQLServerXADataSource"
             : "net.sourceforge.jtds.jdbcx.JtdsDataSource";
 
-    private void setProperties() {
+    @Override
+    protected void setProperties() {
         setProperty(SERVER_PROPERTY, DEF_SERVER);
         setProperty(PORT_PROPERTY, DEF_PORT);
         setProperty(DATABASE_PROPERTY, DEF_DATABASE);
         setProperty(USER_PROPERTY, DEF_USER);
         setProperty(PASSWORD_PROPERTY, DEF_PASSWORD);
         setProperty(XA_DATASOURCE_PROPERTY, XA_DATASOURCE);
-        // for sql directory tests
         setProperty(DRIVER_PROPERTY, DRIVER);
-        String url;
         if (DRIVER.startsWith("com.microsoft")) {
-            url = String.format("jdbc:sqlserver://%s:%s;databaseName=%s;user=%s;password=%s",
-                    Framework.getProperty(SERVER_PROPERTY), Framework.getProperty(PORT_PROPERTY),
-                    Framework.getProperty(DATABASE_PROPERTY), Framework.getProperty(USER_PROPERTY),
-                    Framework.getProperty(PASSWORD_PROPERTY));
+            setProperty(URL_PROPERTY, "jdbc:sqlserver://%s:%s;databaseName=%s;user=%s;password=%s", SERVER_PROPERTY,
+                    PORT_PROPERTY, DATABASE_PROPERTY, USER_PROPERTY, PASSWORD_PROPERTY);
 
         } else {
-            url = String.format("jdbc:jtds:sqlserver://%s:%s;databaseName=%s;user=%s;password=%s",
-                    Framework.getProperty(SERVER_PROPERTY), Framework.getProperty(PORT_PROPERTY),
-                    Framework.getProperty(DATABASE_PROPERTY), Framework.getProperty(USER_PROPERTY),
-                    Framework.getProperty(PASSWORD_PROPERTY));
+            setProperty("jdbc:jtds:sqlserver://%s:%s;databaseName=%s;user=%s;password=%s", SERVER_PROPERTY,
+                    PORT_PROPERTY, DATABASE_PROPERTY, USER_PROPERTY, PASSWORD_PROPERTY);
         }
-        setProperty(URL_PROPERTY, url);
         setProperty(ID_TYPE_PROPERTY, DEF_ID_TYPE);
     }
 
     @Override
-    public void setUp() throws SQLException {
-        super.setUp();
-        try {
-            Class.forName(DRIVER);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-        setProperties();
-        Connection connection = DriverManager.getConnection(Framework.getProperty(URL_PROPERTY));
-        try {
-            doOnAllTables(connection, null, null, "DROP TABLE [%s]"); // no CASCADE...
-            checkSupports(connection);
-            // SEQUENCE in SQL Server 2012, but not Azure
-            if (supportsSequences) {
-                Statement st = connection.createStatement();
+    public void initDatabase(Connection connection) throws Exception {
+
+        doOnAllTables(connection, null, null, "DROP TABLE [%s]"); // no CASCADE...
+        checkSupports(connection);
+        // SEQUENCE in SQL Server 2012, but not Azure
+        if (supportsSequences) {
+            try (Statement st = connection.createStatement()) {
                 executeSql(st, "IF EXISTS (SELECT 1 FROM sys.sequences WHERE name = 'hierarchy_seq')"
                         + " DROP SEQUENCE hierarchy_seq");
-                st.close();
             }
-        } finally {
-            connection.close();
         }
-    }
 
-    @Override
-    public String getDeploymentContrib() {
-        return CONTRIB_XML;
     }
 
     @Override
@@ -146,20 +122,19 @@ public class DatabaseSQLServer extends DatabaseHelper {
     }
 
     protected void checkSupports(Connection connection) throws SQLException {
-        Statement st = connection.createStatement();
-        try {
-            ResultSet rs = st.executeQuery("SELECT SERVERPROPERTY('ProductVersion'), CONVERT(NVARCHAR(100), SERVERPROPERTY('EngineEdition'))");
-            rs.next();
-            String productVersion = rs.getString(1);
-            /** 9 = SQL Server 2005, 10 = SQL Server 2008, 11 = SQL Server 2012 / Azure */
-            int majorVersion = Integer.parseInt(productVersion.split("\\.")[0]);
-            /** 5 = Azure */
-            int engineEdition = rs.getInt(2);
-            boolean azure = engineEdition == 5;
-            supportsXA = !azure;
-            supportsSequences = majorVersion >= 11 && !azure;
-        } finally {
-            st.close();
+        try (Statement st = connection.createStatement()) {
+            try (ResultSet rs = st.executeQuery(
+                    "SELECT SERVERPROPERTY('ProductVersion'), CONVERT(NVARCHAR(100), SERVERPROPERTY('EngineEdition'))")) {
+                rs.next();
+                String productVersion = rs.getString(1);
+                /** 9 = SQL Server 2005, 10 = SQL Server 2008, 11 = SQL Server 2012 / Azure */
+                int majorVersion = Integer.parseInt(productVersion.split("\\.")[0]);
+                /** 5 = Azure */
+                int engineEdition = rs.getInt(2);
+                boolean azure = engineEdition == 5;
+                supportsXA = !azure;
+                supportsSequences = majorVersion >= 11 && !azure;
+            }
         }
     }
 

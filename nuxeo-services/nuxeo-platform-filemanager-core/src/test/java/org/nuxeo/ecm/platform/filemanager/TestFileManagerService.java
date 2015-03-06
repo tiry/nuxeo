@@ -63,7 +63,7 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
 @Features(CoreFeature.class)
 @RepositoryConfig(init = RepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy({ "org.nuxeo.ecm.platform.types.api", "org.nuxeo.ecm.platform.types.core",
-        "org.nuxeo.ecm.platform.filemanager.core" })
+    "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.platform.filemanager.core" })
 @LocalDeploy({ FileManagerUTConstants.FILEMANAGER_BUNDLE + ":ecm-types-test-contrib.xml",
         FileManagerUTConstants.FILEMANAGER_BUNDLE + ":nxfilemanager-test-contribs.xml" })
 public class TestFileManagerService {

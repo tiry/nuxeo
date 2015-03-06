@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Thumbnail tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-thumbnail.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-thumbnail
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",
+ org.nuxeo.ecm.core.api.model;version="[0.0,1)",org.nuxeo.ecm.core.api.t
+ humbnail;version="[0.0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",o
+ rg.nuxeo.ecm.core.event.impl;version="[0.0,1)",org.nuxeo.ecm.core.test,
+ org.nuxeo.ecm.core.test.annotations,org.nuxeo.runtime.test.runner,org.n
+ uxeo.runtime.transaction;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.thumbnail.test,test-data
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

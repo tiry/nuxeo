@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import org.nuxeo.ecm.core.event.EventService;
 import org.nuxeo.ecm.core.event.PostCommitEventListener;
@@ -34,7 +33,6 @@ import org.nuxeo.ecm.core.event.impl.EventListenerDescriptor;
 import org.nuxeo.ecm.core.event.impl.EventServiceImpl;
 import org.nuxeo.ecm.core.event.script.ScriptingPostCommitEventListener;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.model.RuntimeContext;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
 public class TestEventListenerContrib extends NXRuntimeTestCase {
@@ -50,7 +48,7 @@ public class TestEventListenerContrib extends NXRuntimeTestCase {
     @Test
     public void testMerge() throws Exception {
         URL url = EventListenerTest.class.getClassLoader().getResource("test-listeners.xml");
-        RuntimeContext rc = deployTestContrib("org.nuxeo.ecm.core.event", url);
+        deployTestContrib("org.nuxeo.ecm.core.event", url);
 
         EventService service = Framework.getService(EventService.class);
         EventServiceImpl serviceImpl = (EventServiceImpl) service;

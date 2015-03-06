@@ -31,8 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.redis.RedisFeature;
-import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.directory.AbstractDirectory;
 import org.nuxeo.ecm.directory.DirectoryCache;
 import org.nuxeo.ecm.directory.DirectoryException;
@@ -52,7 +50,7 @@ import com.codahale.metrics.SharedMetricRegistries;
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
 @Deploy("org.nuxeo.ecm.core.cache")
-@LocalDeploy("org.nuxeo.ecm.directory.sql.tests:sql-directory-cache-config.xml")
+@LocalDeploy("org.nuxeo.ecm.directory.sql:sql-directory-cache-config.xml")
 public class TestCachedSQLDirectory extends SQLDirectoryTestSuite {
 
     protected final static String REDIS_CACHE_CONFIG = "sql-directory-redis-cache-config.xml";
@@ -66,12 +64,6 @@ public class TestCachedSQLDirectory extends SQLDirectoryTestSuite {
 
     @Before
     public void setUp() throws Exception {
-
-        if (RedisFeature.setup(harness)) {
-            harness.deployTestContrib("org.nuxeo.ecm.directory.sql.tests", REDIS_CACHE_CONFIG);
-            Framework.getService(WorkManager.class).init();
-        }
-
         AbstractDirectory dir = getSQLDirectory();
         DirectoryCache cache = dir.getCache();
         cache.setEntryCacheName(ENTRY_CACHE_NAME);

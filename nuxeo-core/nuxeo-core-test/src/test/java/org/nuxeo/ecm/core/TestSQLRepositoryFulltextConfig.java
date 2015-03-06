@@ -166,9 +166,9 @@ public class TestSQLRepositoryFulltextConfig {
 
     @Test
     // deploy contrib where only Note and File documents are fulltext indexed
-    @LocalDeploy({ "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-fulltext-note-file-only-contrib.xml",
-            "org.nuxeo.ecm.core.test.tests:OSGI-INF/testquery-core-types-contrib.xml",
-            "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-contrib-2.xml" })
+    @LocalDeploy({ "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-fulltext-note-file-only-contrib.xml",
+            "org.nuxeo.ecm.core.test:OSGI-INF/testquery-core-types-contrib.xml",
+            "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-contrib-2.xml" })
     public void testFulltextOnlyNoteFile() throws Exception {
         newRepository();
 
@@ -198,9 +198,9 @@ public class TestSQLRepositoryFulltextConfig {
 
     @Test
     // deploy contrib where only Note and File are not fulltext indexed
-    @LocalDeploy({ "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-fulltext-note-file-excluded-contrib.xml",
-            "org.nuxeo.ecm.core.test.tests:OSGI-INF/testquery-core-types-contrib.xml",
-            "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-contrib-2.xml" })
+    @LocalDeploy({ "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-fulltext-note-file-excluded-contrib.xml",
+            "org.nuxeo.ecm.core.test:OSGI-INF/testquery-core-types-contrib.xml",
+            "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-contrib-2.xml" })
     public void testFulltextNoteFileExcluded() throws Exception {
         newRepository();
 
@@ -231,9 +231,9 @@ public class TestSQLRepositoryFulltextConfig {
 
     @Test
     // deploy contrib where fulltext configuration is mixed include types should have the priority
-    @LocalDeploy({ "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-fulltext-mixed-contrib.xml",
-            "org.nuxeo.ecm.core.test.tests:OSGI-INF/testquery-core-types-contrib.xml",
-            "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-contrib-2.xml" })
+    @LocalDeploy({ "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-fulltext-mixed-contrib.xml",
+            "org.nuxeo.ecm.core.test:OSGI-INF/testquery-core-types-contrib.xml",
+            "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-contrib-2.xml" })
     public void testFulltextMixedConfig() throws Exception {
         newRepository();
 
@@ -264,7 +264,7 @@ public class TestSQLRepositoryFulltextConfig {
 
     @Test
     // deploy contrib where only Note and File are not fulltext indexed
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-note-not-indexable-contrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-note-not-indexable-contrib.xml")
     public void testNotFulltextIndexableFacet() throws Exception {
         newRepository();
 

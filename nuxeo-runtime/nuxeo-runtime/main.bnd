@@ -1,0 +1,2 @@
+Import-Package: org.nuxeo.runtime.logging,*
+Provide-Capability: osgi.extender;osgi.extender=nuxeo.runtime;version:Version="8.0.0"

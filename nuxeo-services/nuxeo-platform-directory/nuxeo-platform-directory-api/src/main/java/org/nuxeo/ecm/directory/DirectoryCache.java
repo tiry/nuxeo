@@ -72,7 +72,7 @@ public class DirectoryCache {
 
     private final static Log log = LogFactory.getLog(DirectoryCache.class);
 
-    protected DirectoryCache(String name) {
+    public DirectoryCache(String name) {
         this.name = name;
         hitsCounter = metrics.counter(MetricRegistry.name("nuxeo", "directories", name, "cache", "hits"));
         negativeHitsCounter = metrics.counter(MetricRegistry.name("nuxeo", "directories", name, "cache", "neghits"));

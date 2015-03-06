@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-connect-client-wrapper.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-connect-client-wrapper
+ .tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-connect-client-wrapper
+Import-Package: org.junit,org.nuxeo.connect,org.nuxeo.connect.connector,
+ org.nuxeo.connect.downloads,org.nuxeo.connect.packages,org.nuxeo.connec
+ t.registration,org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtim
+ e.model;version="[0.0,1)",org.nuxeo.runtime.test
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.connect.services,org.nuxeo.connect.version,te
+ st-data
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

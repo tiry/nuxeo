@@ -96,8 +96,12 @@ public class CacheDescriptor {
         if (cacheChecker == null) {
             return;
         }
-        cacheChecker.cache = null;
-        cacheChecker = null;
+        try {
+            cacheChecker.cache.invalidateAll();
+        } finally {
+            cacheChecker.cache = null;
+            cacheChecker = null;
+        }
     }
 
 }

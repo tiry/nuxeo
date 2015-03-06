@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Assume;
 import org.junit.Test;
@@ -138,19 +140,23 @@ public class TestAnyToPDFConverters extends BaseConverterTest {
 
     protected class ConversionThread extends Thread {
 
+        public ConversionThread(ThreadGroup group, String name, CountDownLatch terminated) {
+            super(group, name);
+            this.terminated = terminated;
+        }
+
         boolean exception = false;
 
-        boolean terminated = false;
+        final CountDownLatch terminated;
 
         @Override
         public void run() {
-
             try {
                 testAnyToPDFConverter();
             } catch (Exception e) {
                 exception = false;
             } finally {
-                terminated = true;
+                terminated.countDown();
             }
 
         }
@@ -158,29 +164,18 @@ public class TestAnyToPDFConverters extends BaseConverterTest {
 
     @Test
     public void testMultiThreadsConverter() throws Exception {
-
-        int t = 0;
-        int tMax = 120;
-        ConversionThread t1 = new ConversionThread();
-        ConversionThread t2 = new ConversionThread();
+        ThreadGroup group = new ThreadGroup("multithreads-converter");
+        CountDownLatch terminated = new CountDownLatch(2);
+        ConversionThread t1 = new ConversionThread(group, "conversion-1", terminated);
+        ConversionThread t2 = new ConversionThread(group, "conversion-2", terminated);
 
         t1.start();
         t2.start();
 
-        while (!(t1.terminated && t2.terminated)) {
-            Thread.sleep(1000);
-            t += 1;
-            if (t > tMax) {
-                if (!t1.terminated) {
-                    t1.interrupt();
-                }
-                if (!t2.terminated) {
-                    t2.interrupt();
-                }
-                break;
-            }
+        if (!terminated.await(2, TimeUnit.MINUTES)) {
+            group.interrupt();
+            fail("conversions did not terminate");
         }
-
         assertFalse(t1.exception);
         assertFalse(t2.exception);
     }

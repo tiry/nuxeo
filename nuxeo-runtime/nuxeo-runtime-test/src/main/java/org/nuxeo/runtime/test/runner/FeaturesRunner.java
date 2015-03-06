@@ -18,25 +18,33 @@
  */
 package org.nuxeo.runtime.test.runner;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.internal.AssumptionViolatedException;
+import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
+import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.runner.notification.StoppedByUserException;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestClass;
+import org.nuxeo.common.Environment;
+import org.nuxeo.common.LoaderConstants;
+import org.nuxeo.osgi.bootstrap.OSGiClassLoader;
 import org.nuxeo.runtime.test.TargetResourceLocator;
 import org.nuxeo.runtime.test.runner.FeaturesLoader.Callable;
 import org.nuxeo.runtime.test.runner.FeaturesLoader.Direction;
@@ -54,9 +62,14 @@ import com.google.inject.name.Names;
  *
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
+@SuppressWarnings("deprecation")
 public class FeaturesRunner extends BlockJUnit4ClassRunner {
 
-    protected static final AnnotationScanner scanner = new AnnotationScanner();
+    protected final Properties properties;
+
+    protected final AnnotationScanner scanner;
+
+    protected Class<?> otherClass;
 
     /**
      * Guice injector.
@@ -67,18 +80,59 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
 
     protected final TargetResourceLocator locator;
 
-    public static AnnotationScanner getScanner() {
-        return scanner;
+    public FeaturesRunner(Class<?> classToRun) throws InitializationError {
+        this(classToRun, new Properties(System.getProperties()));
     }
 
-    public FeaturesRunner(Class<?> classToRun) throws InitializationError {
+    public FeaturesRunner(Class<?> classToRun, Properties properties) throws InitializationError {
         super(classToRun);
         locator = new TargetResourceLocator(classToRun);
-        try {
-            loader.loadFeatures(getTargetTestClass());
-        } catch (Throwable t) {
-            throw new InitializationError(Collections.singletonList(t));
+        scanner = new AnnotationScanner();
+        this.properties = properties;
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    @Override
+    public void run(final RunNotifier notifier) {
+        Description description = getDescription();
+        if (!(this.getClass().getClassLoader() instanceof OSGiClassLoader)) {
+            try {
+                new OSGiTestLoader(description.getDisplayName()).reloadAndRun(this, notifier);
+            } catch (Exception cause) {
+                notifier.fireTestFailure(new Failure(description, cause));
+            }
+            return;
         }
+        Environment.getDefault().setProperty(LoaderConstants.APP_NAME, description.getClassName());
+        EachTestNotifier testNotifier = new EachTestNotifier(notifier, description);
+        try {
+            if (otherClass != null) {
+                loader.loadFeatures(otherClass);
+            }
+            loader.loadFeatures(getTargetTestClass());
+        } catch (Exception cause) {
+            if (cause instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            testNotifier.addFailure(cause);
+            return;
+        }
+        injector = onInjector(notifier);
+        try {
+            classBlock(notifier).evaluate();
+        } catch (AssumptionViolatedException e) {
+            testNotifier.fireTestIgnored();
+        } catch (StoppedByUserException e) {
+            throw e;
+        } catch (Throwable e) {
+            testNotifier.addFailure(e);
+        } finally {
+            onResetInjector(notifier);
+        }
+        return;
     }
 
     public Class<?> getTargetTestClass() {
@@ -89,7 +143,7 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
         return locator.getBasepath();
     }
 
-    public URL getTargetTestResource(String name) throws IOException {
+    public URL getTargetTestResource(String name) {
         return locator.getTargetTestResource(name);
     }
 
@@ -102,16 +156,20 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
      */
     public <T extends Annotation> T getConfig(Class<T> type) {
         List<T> configs = new ArrayList<>();
-        T annotation = scanner.getAnnotation(getTargetTestClass(), type);
-        if (annotation != null) {
-            configs.add(annotation);
+        // fetch config on target test class
+        {
+            T annotation = scanner.getAnnotation(getTargetTestClass(), type);
+            if (annotation != null) {
+                configs.add(annotation);
+            }
         }
+        // fetch config on feature holders
         loader.apply(Direction.BACKWARD, new Callable() {
             @Override
             public void call(Holder holder) throws Exception {
-                T hAnnotation = scanner.getAnnotation(holder.type, type);
-                if (hAnnotation != null) {
-                    configs.add(hAnnotation);
+                T annotation = scanner.getAnnotation(holder.type, type);
+                if (annotation != null) {
+                    configs.add(annotation);
                 }
             }
         });
@@ -144,9 +202,14 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
     }
 
     protected void initialize() throws Exception {
-        for (RunnerFeature each : getFeatures()) {
-            each.initialize(this);
-        }
+        loader.apply(Direction.FORWARD, new Callable() {
+
+            @Override
+            public void call(Holder holder) throws Exception {
+                holder.feature.initialize(FeaturesRunner.this);
+            }
+
+        });
     }
 
     protected void beforeRun() throws Exception {
@@ -155,6 +218,11 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
             @Override
             public void call(Holder holder) throws Exception {
                 holder.feature.beforeRun(FeaturesRunner.this);
+            }
+
+            @Override
+            public void rollback(Holder holder) throws Exception {
+                holder.feature.afterRun(FeaturesRunner.this);
             }
         });
     }
@@ -195,6 +263,11 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
             @Override
             public void call(Holder holder) throws Exception {
                 holder.feature.start(FeaturesRunner.this);
+            }
+
+            @Override
+            public void rollback(Holder holder) throws Exception {
+                holder.feature.stop(FeaturesRunner.this);
             }
         });
     }
@@ -244,11 +317,26 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
             @Override
             public void configure(Binder aBinder) {
                 aBinder.bind(FeaturesRunner.class).toInstance(FeaturesRunner.this);
+                aBinder.bind(Properties.class).toInstance(properties);
                 aBinder.bind(RunNotifier.class).toInstance(aNotifier);
                 aBinder.bind(TargetResourceLocator.class).toInstance(locator);
             }
 
         });
+    }
+
+    protected void onResetInjector(RunNotifier notifier) {
+        try {
+            Field field = injector.getClass().getDeclaredField("localContext");
+            field.setAccessible(true);
+            ThreadLocal<?> instance = (ThreadLocal<?>) field.get(injector);
+            instance.remove();
+        } catch (ReflectiveOperationException cause) {
+            notifier.fireTestFailure(
+                    new Failure(getDescription(), new AssertionError("Cannot reset injector thread local", cause)));
+        } finally {
+            injector = null;
+        }
     }
 
     protected class BeforeClassStatement extends Statement {
@@ -262,9 +350,9 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
         public void evaluate() throws Throwable {
             initialize();
             start();
-            beforeRun();
             injector = injector.createChildInjector(loader.onModule());
             try {
+                beforeRun();
                 next.evaluate();
             } finally {
                 injector = injector.getParent();
@@ -299,10 +387,19 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
         return actual;
     }
 
-    @Override
-    protected Statement classBlock(final RunNotifier aNotifier) {
-        injector = onInjector(aNotifier);
-        return super.classBlock(aNotifier);
+    class ChildrenInvoker extends Statement {
+
+        Statement base;
+
+        public ChildrenInvoker(Statement base) {
+            this.base = base;
+        }
+
+        @Override
+        public void evaluate() throws Throwable {
+            base.evaluate();
+        }
+
     }
 
     @Override
@@ -570,7 +667,9 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
         }
 
         public RulesFactory<A, R> withRules(List<R> someRules) {
-            this.rules.addAll(someRules);
+            for (R eachRule : someRules) {
+                withRule(eachRule);
+            }
             return this;
         }
 
@@ -609,6 +708,10 @@ public class FeaturesRunner extends BlockJUnit4ClassRunner {
 
     public <T extends RunnerFeature> T getFeature(Class<T> aType) {
         return loader.getFeature(aType);
+    }
+
+    public AnnotationScanner getScanner() {
+        return scanner;
     }
 
 }

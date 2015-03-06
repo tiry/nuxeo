@@ -22,41 +22,44 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.mockito.MockitoFeature;
-import org.nuxeo.runtime.mockito.RuntimeService;
+import org.nuxeo.runtime.test.mockito.MockitoTestCase;
+import org.nuxeo.runtime.test.mockito.RuntimeService;
 
 /**
  * @since 5.8
  */
 
 @RunWith(FeaturesRunner.class)
-@Features({ RuntimeFeature.class, MockitoFeature.class })
-public class CanMockServicesTest {
+@Features({ RuntimeFeature.class })
+public class CanMockServicesTest extends MockitoTestCase {
 
     @RuntimeService
     @Mock
     AFakeService myService;
 
-    @Before
-    public void doBefore() {
-        when(myService.getSomething()).thenReturn("Hello !");
-    }
-
     @Test
     public void itShouldBindMocktoAService() throws Exception {
         AFakeService service = Framework.getService(AFakeService.class);
         assertNotNull(service);
-        assertEquals("Hello !", service.getSomething());
     }
 
     @Test
     public void itShouldMockFields() throws Exception {
+        when(myService.getSomething()).thenReturn("Hello !");
         assertEquals("Hello !", myService.getSomething());
     }
 
+    @Test
+    public void canMockServletRequest() {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getContentLength()).thenReturn(10);
+        assertEquals(10, request.getContentLength());
+        return;
+    }
 }

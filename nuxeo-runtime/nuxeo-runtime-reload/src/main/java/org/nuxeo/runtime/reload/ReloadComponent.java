@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transaction;
 
@@ -34,7 +35,6 @@ import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.common.utils.JarUtils;
 import org.nuxeo.common.utils.ZipUtils;
 import org.nuxeo.runtime.RuntimeService;
-import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.api.ServicePassivator;
 import org.nuxeo.runtime.deployment.preprocessor.DeploymentPreprocessor;
@@ -46,8 +46,12 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.framework.namespace.HostNamespace;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
+import org.osgi.service.repository.Repository;
+import org.osgi.service.resolver.ResolveContext;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
@@ -85,16 +89,12 @@ public class ReloadComponent extends DefaultComponent implements ReloadService {
         if (log.isDebugEnabled()) {
             log.debug("Starting reload");
         }
-        try {
-            reloadProperties();
-        } catch (IOException e) {
-            throw new RuntimeServiceException(e);
-        }
+        reloadProperties();
         triggerReloadWithNewTransaction(RELOAD_EVENT_ID);
     }
 
     @Override
-    public void reloadProperties() throws IOException {
+    public void reloadProperties() {
         log.info("Reload runtime properties");
         Framework.getRuntime().reloadProperties();
     }
@@ -199,6 +199,22 @@ public class ReloadComponent extends DefaultComponent implements ReloadService {
         }
     }
 
+    Iterable<Bundle> getBundles(BundleContext context, String name) {
+        Bundle system = context.getBundle(0);
+        Repository repository = system.adapt(Repository.class);
+        ResolveContext resolver = system.adapt(ResolveContext.class);
+        Requirement requirement = repository.newRequirementBuilder(HostNamespace.HOST_NAMESPACE)
+                .addDirective(HostNamespace.HOST_NAMESPACE, name)
+                .setResource(bundle.adapt(BundleRevision.class))
+                .build();
+        return resolver.findProviders(requirement)
+                .stream()
+                .map(Capability::getResource)
+                .map(BundleRevision.class::cast)
+                .map(BundleRevision::getBundle)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public void undeployBundle(String bundleName) throws BundleException {
         if (bundleName == null) {
@@ -206,23 +222,16 @@ public class ReloadComponent extends DefaultComponent implements ReloadService {
             return;
         }
         log.info(String.format("Before undeploy bundle with name '%s'.\n" + "%s", bundleName, getRuntimeStatus()));
-        BundleContext ctx = getBundleContext();
-        ServiceReference ref = ctx.getServiceReference(PackageAdmin.class.getName());
-        PackageAdmin srv = (PackageAdmin) ctx.getService(ref);
-        try {
-            for (Bundle b : srv.getBundles(bundleName, null)) {
-                if (b != null && b.getState() == Bundle.ACTIVE) {
-                    Transaction tx = TransactionHelper.suspendTransaction();
-                    try {
-                        b.stop();
-                        b.uninstall();
-                    } finally {
-                        TransactionHelper.resumeTransaction(tx);
-                    }
+        for (Bundle b : getBundles(getBundleContext(), bundleName)) {
+            if (b != null && b.getState() == Bundle.ACTIVE) {
+                Transaction tx = TransactionHelper.suspendTransaction();
+                try {
+                    b.stop();
+                    b.uninstall();
+                } finally {
+                    TransactionHelper.resumeTransaction(tx);
                 }
             }
-        } finally {
-            ctx.ungetService(ref);
         }
         log.info(String.format("Undeploy done.\n" + "%s", getRuntimeStatus()));
     }

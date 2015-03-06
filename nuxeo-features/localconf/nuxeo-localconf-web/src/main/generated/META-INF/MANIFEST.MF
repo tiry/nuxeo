@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Platform Local Configuration Web
+Bundle-SymbolicName: org.nuxeo.ecm.localconf.nuxeo-localconf-web
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.localconf;uses:="javax.faces.model,org.jboss.seam,org.jboss.seam.a
+ nnotations,org.nuxeo.ecm.core.api,org.nuxeo.ecm.core.schema,org.nuxeo.e
+ cm.platform.contentview.jsf,org.nuxeo.ecm.platform.types,org.nuxeo.ecm.
+ platform.ui.web.api,org.nuxeo.theme.styling.negotiation,org.nuxeo.theme
+ .styling.service,org.nuxeo.theme.styling.service.descriptors";version="
+ 0.0.0"
+Import-Package: javax.faces.context;version="[2.2,3)",javax.faces.model;
+ version="[2.2,3)",org.apache.commons.logging;version="[1.2,2)",org.jbos
+ s.seam,org.jboss.seam.annotations,org.nuxeo.ecm.core.api;version="[0.0,
+ 1)",org.nuxeo.ecm.core.schema;version="[0.0,1)",org.nuxeo.ecm.platform.
+ contentview.jsf;version="[0.0,1)",org.nuxeo.ecm.platform.types;version=
+ "[0.0,1)",org.nuxeo.ecm.platform.types.localconfiguration;version="[0.0
+ ,1)",org.nuxeo.ecm.platform.ui.web.api;version="[0.0,1)",org.nuxeo.ecm.
+ platform.ui.web.component;version="[0.0,1)",org.nuxeo.runtime.api;versi
+ on="[0.0,1)",org.nuxeo.theme.localconfiguration;version="[0.0,1)",org.n
+ uxeo.theme.styling.negotiation;version="[0.0,1)",org.nuxeo.theme.stylin
+ g.service;version="[0.0,1)",org.nuxeo.theme.styling.service.descriptors
+ ;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/local-configuration-ui-types.xml,OSGI-INF/loca
+ l-configuration-theme.xml,OSGI-INF/local-configuration-content-view.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -29,9 +29,8 @@ import org.junit.runner.RunWith;
 import org.nuxeo.ecm.automation.AutomationService;
 import org.nuxeo.ecm.automation.OperationType;
 import org.nuxeo.ecm.automation.core.OperationChainContribution.Operation;
+import org.nuxeo.ecm.automation.io.AutomationIOFeature;
 import org.nuxeo.ecm.automation.io.yaml.YamlWriter;
-import org.nuxeo.ecm.platform.test.PlatformFeature;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
@@ -40,8 +39,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  * @since 5.9.4
  */
 @RunWith(FeaturesRunner.class)
-@Features(PlatformFeature.class)
-@Deploy({ "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.io" })
+@Features(AutomationIOFeature.class)
 @LocalDeploy("org.nuxeo.ecm.automation.io:test-chains.xml")
 public class TestAutomationYaml {
 

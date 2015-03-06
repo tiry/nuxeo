@@ -8,8 +8,6 @@
 
 <component name="org.nuxeo.ecm.directory.ldap.storage.override">
 
-  <implementation class="org.nuxeo.ecm.directory.ldap.LDAPDirectoryDescriptor" />
-  <require>org.nuxeo.ecm.directory.ldap.LDAPDirectoryFactory</require>
   <require>org.nuxeo.ecm.directory.ldap.storage</require>
 
   <extension target="org.nuxeo.ecm.directory.ldap.LDAPDirectoryFactory"

@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo User Manager Module API
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-usermanager-a
+ pi
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: false
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.usermanager;api=split;mandatory=api;uses:="org.nuxeo.comm
+ on.xmap.annotation,org.nuxeo.ecm.core.api,org.nuxeo.ecm.core.api.securi
+ ty,org.nuxeo.ecm.platform.usermanager.exceptions,org.nuxeo.runtime.api.
+ login,org.nuxeo.runtime.services.event";version="0.0.0",org.nuxeo.ecm.p
+ latform.usermanager.exceptions;api=split;mandatory=api;uses:="org.nuxeo
+ .ecm.core.api";version="0.0.0",org.nuxeo.ecm.platform.usermanager.provi
+ ders;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.query.api,org
+ .nuxeo.ecm.platform.usermanager";version="0.0.0"
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.apache.com
+ mons.logging;version="[1.2,2)",org.nuxeo.common.xmap.annotation;version
+ ="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.
+ api.impl;version="[0.0,1)",org.nuxeo.ecm.core.api.model;version="[0.0,1
+ )",org.nuxeo.ecm.core.api.security;version="[0.0,1)",org.nuxeo.ecm.dire
+ ctory;version="[0.0,1)",org.nuxeo.ecm.platform.query.api;version="[0.0,
+ 1)",org.nuxeo.ecm.platform.usermanager,org.nuxeo.ecm.platform.usermanag
+ er.exceptions,org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime
+ .api.login;version="[0.0,1)",org.nuxeo.runtime.services.event;version="
+ [0.0,1)"
+Nuxeo-Component: OSGI-INF/pageproviders-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

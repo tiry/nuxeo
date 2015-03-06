@@ -21,10 +21,6 @@
 
 package org.nuxeo.runtime.management;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Set;
 
 import javax.management.MBeanServer;
@@ -64,32 +60,42 @@ public class TestResourcePublisherService extends ManagementTestCase {
     @Test
     public void testServerLocator() throws Exception {
         MBeanServer testServer = MBeanServerFactory.createMBeanServer("test");
-        ObjectName testName = new ObjectName("test:test=test");
-        publisherService.bindForTest(testServer, testName, new DummyService(), DummyMBean.class);
-        publisherService.bindResources();
-        locatorService.registerLocator("test", true);
-        MBeanServer locatedServer = locatorService.lookupServer(testName);
-        assertNotNull(locatedServer);
-        assertTrue(locatedServer.isRegistered(testName));
+        try {
+            ObjectName testName = new ObjectName("test:test=test");
+            try {
+                publisherService.bindForTest(testServer, testName, new DummyService(), DummyMBean.class);
+            } catch (IllegalAccessError cause) {
+                throw cause;
+            }
+            publisherService.bindResources();
+            locatorService.registerLocator("test", true);
+            MBeanServer locatedServer = locatorService.lookupServer(testName);
+            assertNotNull(locatedServer);
+            assertTrue(locatedServer.isRegistered(testName));
+        } finally {
+            MBeanServerFactory.releaseMBeanServer(testServer);
+        }
     }
 
     @Test
     public void testXMLConfiguration() throws Exception {
+        String qualifiedName = ObjectNameFactory.formatTypeQuery("service");
+        Set<ObjectName> registeredNames = doQuery(qualifiedName);
+        int objects = registeredNames.size();
         Set<String> shortcutsName = publisherService.getShortcutsName();
-        int size = shortcutsName.size();
+        int shortcuts = shortcutsName.size();
         deployTestContrib(OSGI_BUNDLE_NAME, "management-tests-service.xml");
         deployTestContrib(OSGI_BUNDLE_NAME, "management-tests-contrib.xml");
 
         publisherService.bindResources();
-        String qualifiedName = ObjectNameFactory.formatTypeQuery("service");
 
-        Set<ObjectName> registeredNames = doQuery(qualifiedName);
+        registeredNames = doQuery(qualifiedName);
         assertNotNull(registeredNames);
-        assertEquals(4, registeredNames.size());
+        assertEquals(objects + 3, registeredNames.size());
 
         shortcutsName = publisherService.getShortcutsName();
         assertNotNull(shortcutsName);
-        assertEquals(size + 4, shortcutsName.size());
+        assertEquals(shortcuts + 3, shortcutsName.size());
         assertTrue(shortcutsName.contains("dummy"));
     }
 

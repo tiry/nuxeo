@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Directory tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-directory-cor
+ e.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-directory-core
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.api.localconfiguration;vers
+ ion="[0.0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",org.nuxeo.ecm.
+ core.test,org.nuxeo.ecm.core.test.annotations,org.nuxeo.ecm.directory.a
+ pi;version="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.
+ runtime.test,org.nuxeo.runtime.test.runner
+Nuxeo-Component: types-for-test-directory-local-configuration.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.directory,org.nuxeo.ecm.directory.localco
+ nfiguration,org.nuxeo.ecm.directory.memory,schemas
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

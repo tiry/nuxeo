@@ -4,6 +4,8 @@
     Event service
   </documentation>
 
+  <require>org.nuxeo.ecm.core.work.service</require>
+  
   <implementation class="org.nuxeo.ecm.core.event.EventServiceComponent"/>
 
   <service>

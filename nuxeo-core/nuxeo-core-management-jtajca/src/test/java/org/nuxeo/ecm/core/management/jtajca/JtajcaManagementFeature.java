@@ -42,36 +42,36 @@ import com.google.inject.Binder;
 import com.google.inject.name.Names;
 
 @Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.runtime.metrics", "org.nuxeo.runtime.datasource", "org.nuxeo.ecm.core.management.jtajca" })
-@LocalDeploy({ "org.nuxeo.ecm.core.management.jtajca:login-config.xml",
-        "org.nuxeo.ecm.core.management.jtajca:ds-contrib.xml" })
+@Deploy({ "org.nuxeo.ecm.core.management.jtajca" })
+@LocalDeploy({ "org.nuxeo.ecm.core.management.jtajca:login-config.xml" })
 @ConditionalIgnoreRule.Ignore(condition = IgnoreNonPooledCondition.class)
 public class JtajcaManagementFeature extends SimpleFeature {
 
-    protected ObjectName nameOf(Class<?> itf) {
+    protected ObjectName nameOf(Class<?> itf, String value) {
         try {
-            return new ObjectName(Defaults.instance.name(itf, "*"));
+            return new ObjectName(Defaults.instance.name(itf, value));
         } catch (MalformedObjectNameException cause) {
             throw new AssertionError("Cannot name monitor", cause);
         }
     }
 
     protected <T> void bind(Binder binder, MBeanServer mbs, Class<T> type) {
-        final Set<ObjectName> names = mbs.queryNames(nameOf(type), null);
+        final Set<ObjectName> names = mbs.queryNames(nameOf(type, "*"), null);
         for (ObjectName name : names) {
             T instance = type.cast(JMX.newMXBeanProxy(mbs, name, type));
             binder.bind(type).annotatedWith(Names.named(name.getKeyProperty("name"))).toInstance(instance);
         }
     }
 
+    <T> T lookup(Class<T> type, String name) {
+        MBeanServer mbs = Framework.getLocalService(ServerLocator.class).lookupServer();
+        return type.cast(JMX.newMXBeanProxy(mbs, nameOf(type, name), type));
+    }
+
     @Override
     public void configure(FeaturesRunner runner, Binder binder) {
-        // bind repository
-        String repositoryName = runner.getFeature(CoreFeature.class).getStorageConfiguration().getRepositoryName();
-        NuxeoContainer.getConnectionManager(repositoryName);
-
         MBeanServer mbs = Framework.getLocalService(ServerLocator.class).lookupServer();
-        bind(binder, mbs, ConnectionPoolMonitor.class);
+        // bind(binder, mbs, ConnectionPoolMonitor.class); not yet bound
         bind(binder, mbs, CoreSessionMonitor.class);
         TransactionManager tm = NuxeoContainer.getTransactionManager();
         if (tm != null) {

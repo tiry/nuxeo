@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-ws.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-ws.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-ws
+Import-Package: javax.inject,javax.xml.ws,javax.xml.ws.handler,org.apach
+ e.commons.logging;version="[1.2,2)",org.junit,org.junit.runner,org.nuxe
+ o.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.
+ core.test.annotations,org.nuxeo.ecm.platform.api.ws,org.nuxeo.ecm.platf
+ orm.api.ws.session,org.nuxeo.ecm.platform.usermanager;version="[0.0,1)"
+ ,org.nuxeo.ecm.platform.ws,org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

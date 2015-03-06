@@ -23,18 +23,24 @@ import java.net.URL;
 
 import javax.persistence.EntityManager;
 
-import org.junit.Before;
-import org.junit.After;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.persistence.HibernateConfiguration;
 import org.nuxeo.ecm.core.persistence.PersistenceProvider;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.RuntimeFeature;
 
 /**
  * Base class for persistence
  *
  * @author Stephane Lacoin (Nuxeo EP Software Engineer)
  */
+@RunWith(FeaturesRunner.class)
+@Features(RuntimeFeature.class)
 public abstract class PersistenceTestCase {
 
     protected static final Log log = LogFactory.getLog(PersistenceTestCase.class);

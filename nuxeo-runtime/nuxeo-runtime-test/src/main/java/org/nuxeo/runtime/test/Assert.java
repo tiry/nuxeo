@@ -21,7 +21,6 @@
 package org.nuxeo.runtime.test;
 
 import org.junit.ComparisonFailure;
-
 import org.nuxeo.common.utils.FileUtils;
 
 /**

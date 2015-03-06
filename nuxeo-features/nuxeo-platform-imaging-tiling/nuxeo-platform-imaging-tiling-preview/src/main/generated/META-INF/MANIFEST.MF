@@ -1,0 +1,46 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateless
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Imaging Tiling Preview
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-imaging-tilin
+ g-preview
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.pictures.tiles;uses:="org.jboss.seam,org.jboss.seam.annot
+ ations";version="0.0.0",org.nuxeo.ecm.platform.pictures.tiles.gwt.clien
+ t;uses:="com.google.gwt.core.client";version="0.0.0",org.nuxeo.ecm.plat
+ form.pictures.tiles.gwt.client.controller;uses:="com.google.gwt.user.cl
+ ient,org.nuxeo.ecm.platform.pictures.tiles.gwt.client.model";version="0
+ .0.0",org.nuxeo.ecm.platform.pictures.tiles.gwt.client.model;version="0
+ .0.0",org.nuxeo.ecm.platform.pictures.tiles.gwt.client.util;version="0.
+ 0.0",org.nuxeo.ecm.platform.pictures.tiles.gwt.client.view;uses:="com.g
+ oogle.gwt.user.client.ui,org.nuxeo.ecm.platform.pictures.tiles.gwt.clie
+ nt.controller,org.nuxeo.ecm.platform.pictures.tiles.gwt.client.model,or
+ g.nuxeo.ecm.platform.pictures.tiles.gwt.client.util";version="0.0.0",or
+ g.nuxeo.ecm.platform.pictures.tiles.gwt.client.view.i18n;uses:="com.goo
+ gle.gwt.i18n.client";version="0.0.0",org.nuxeo.ecm.platform.pictures.ti
+ les.service;version="0.0.0";uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm
+ .platform.preview.adapter,org.nuxeo.ecm.platform.preview.api"
+Import-Package: com.allen_sauer.gwt.log.client,com.google.gwt.core.clien
+ t,com.google.gwt.dom.client,com.google.gwt.http.client,com.google.gwt.i
+ 18n.client,com.google.gwt.json.client,com.google.gwt.user.client,com.go
+ ogle.gwt.user.client.ui,org.apache.commons.logging;version="[1.2,2)",or
+ g.jboss.seam,org.jboss.seam.annotations,org.nuxeo.ecm.core.api;version=
+ "[0.0,1)",org.nuxeo.ecm.platform.picture.api;version="[0.0,1)",org.nuxe
+ o.ecm.platform.pictures.tiles.gwt.client.controller,org.nuxeo.ecm.platf
+ orm.pictures.tiles.gwt.client.model,org.nuxeo.ecm.platform.pictures.til
+ es.gwt.client.util,org.nuxeo.ecm.platform.pictures.tiles.gwt.client.vie
+ w,org.nuxeo.ecm.platform.pictures.tiles.gwt.client.view.i18n,org.nuxeo.
+ ecm.platform.pictures.tiles.service;version="[0.0,1)",org.nuxeo.ecm.pla
+ tform.preview.adapter;version="[0.0,1)",org.nuxeo.ecm.platform.preview.
+ api;version="[0.0,1)",org.nuxeo.ecm.platform.web.common.vh;version="[0.
+ 0,1)",org.nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/preview-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.pictures.tiles, org.nuxeo.ecm.pla
+ tform.preview, org.nuxeo.ecm.platform.picture.api
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -30,8 +30,15 @@ public class RedisPoolExecutor implements RedisExecutor {
     private Thread monitorThread;
     protected Pool<Jedis> pool;
 
+    protected final boolean supportPipeline;
+
     public RedisPoolExecutor(Pool<Jedis> pool) {
+        this(pool, true);
+    }
+
+    public RedisPoolExecutor(Pool<Jedis> pool, boolean supportPipeline) {
         this.pool = pool;
+        this.supportPipeline = supportPipeline;
     }
 
     @Override
@@ -69,7 +76,7 @@ public class RedisPoolExecutor implements RedisExecutor {
 
     @Override
     public boolean supportPipelined() {
-        return true;
+        return supportPipeline;
     }
 
     @Override

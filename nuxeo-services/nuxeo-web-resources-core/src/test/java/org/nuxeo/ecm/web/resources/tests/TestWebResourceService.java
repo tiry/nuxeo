@@ -191,7 +191,7 @@ public class TestWebResourceService {
 
         String contrib = "webresources-test-override-config.xml";
         URL url = getClass().getClassLoader().getResource(contrib);
-        try (RuntimeContext ctx = harness.deployTestContrib(BUNDLE, url)) {
+        try (AutoCloseable ctx = harness.deployTestContrib(BUNDLE, url)) {
             p = service.getProcessor("myProc");
             assertNull(p);
             procs = service.getProcessors("wroPost");

@@ -27,15 +27,11 @@ import static org.junit.Assert.fail;
 
 import javax.inject.Inject;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreInstance;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -142,48 +138,12 @@ public class TestSQLRepositoryJTAJCA {
         t.join();
     }
 
-    protected static final Log log = LogFactory.getLog(TestSQLRepositoryJTAJCA.class);
-
-    protected static class TxWarnChecker extends AppenderSkeleton {
-
-        boolean seenWarn;
-
-        @Override
-        public void close() {
-
-        }
-
-        @Override
-        public boolean requiresLayout() {
-            return false;
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see org.apache.log4j.AppenderSkeleton#append(org.apache.log4j.spi. LoggingEvent)
-         */
-        @Override
-        protected void append(LoggingEvent event) {
-            if (!Level.WARN.equals(event.getLevel())) {
-                return;
-            }
-            Object msg = event.getMessage();
-            if (msg instanceof String
-                    && (((String) msg).startsWith("Session invoked in a container without a transaction active"))) {
-                seenWarn = true;
-            }
-        }
-
-    }
-
     /**
      * Cannot use session after close if no tx.
      */
     @Test
-    public void testAccessWithoutTx() {
+    public void testAccessWithoutTx() throws ClientException {
         TransactionHelper.commitOrRollbackTransaction();
-        TxWarnChecker checker = new TxWarnChecker();
-        Logger.getRootLogger().addAppender(checker);
         try {
             session.getRootDocument();
             fail("should throw");
@@ -227,7 +187,7 @@ public class TestSQLRepositoryJTAJCA {
                         doc.getProperty("dc:title").setValue("second update");
                         session2.saveDocument(doc);
                     } catch (Exception e) {
-                        log.error("Catched error while setting title", e);
+                        LogFactory.getLog(TestSQLRepositoryJTAJCA.class).error("Catched error while setting title", e);
                     } finally {
                         TransactionHelper.commitOrRollbackTransaction();
                     }

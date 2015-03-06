@@ -1,0 +1,36 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Directory API
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-directory-api
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: true
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.directory;api=split;uses:="com.codahale.metrics,org.nuxeo.common.x
+ map.annotation,org.nuxeo.ecm.core.api,org.nuxeo.ecm.core.cache";version
+ ="0.0.0",org.nuxeo.ecm.directory.api;mandatory=api;api=split;uses:="org
+ .nuxeo.ecm.core.api,org.nuxeo.ecm.directory,org.nuxeo.runtime.model";ve
+ rsion="0.0.0",org.nuxeo.ecm.directory.impl;api=split;uses:="org.apache.
+ commons.logging,org.nuxeo.ecm.core.api,org.nuxeo.ecm.directory";version
+ ="0.0.0",org.nuxeo.ecm.directory.localconfiguration;uses:="org.nuxeo.ec
+ m.core.api.localconfiguration";version="0.0.0"
+Ignore-Package: org.nuxeo.ecm.core.api
+Import-Package: com.codahale.metrics;version="[3.0,4)",org.apache.common
+ s.logging;version="[1.2,2)",org.nuxeo.common.collections;version="[0.0,
+ 1)",org.nuxeo.common.utils;version="[0.0,1)",org.nuxeo.common.xmap.anno
+ tation;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.n
+ uxeo.ecm.core.api.impl;version="[0.0,1)",org.nuxeo.ecm.core.api.local;v
+ ersion="[0.0,1)",org.nuxeo.ecm.core.api.localconfiguration;version="[0.
+ 0,1)",org.nuxeo.ecm.core.cache;version="[0.0,1)",org.nuxeo.ecm.director
+ y,org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.metrics;ver
+ sion="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Bundle: org.nuxeo.ecm.core
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

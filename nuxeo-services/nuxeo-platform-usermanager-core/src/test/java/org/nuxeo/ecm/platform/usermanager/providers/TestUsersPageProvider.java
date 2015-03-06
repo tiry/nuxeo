@@ -36,11 +36,8 @@ import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.platform.query.api.PageProvider;
 import org.nuxeo.ecm.platform.query.api.PageProviderService;
-import org.nuxeo.ecm.platform.usermanager.UserManager;
 import org.nuxeo.ecm.platform.usermanager.UserManagerTestCase;
-import org.nuxeo.runtime.test.runner.LocalDeploy;
 
-@LocalDeploy("org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/directory-config.xml")
 public class TestUsersPageProvider extends UserManagerTestCase {
 
     protected static final String PROVIDER_NAME = "users_listing";
@@ -73,7 +70,7 @@ public class TestUsersPageProvider extends UserManagerTestCase {
     @Test
     public void testUsersPageProviderAllMode() {
         Map<String, Serializable> properties = new HashMap<String, Serializable>();
-        properties.put(UsersPageProvider.USERS_LISTING_MODE_PROPERTY, UsersPageProvider.ALL_MODE);
+        properties.put(AbstractUsersPageProvider.USERS_LISTING_MODE_PROPERTY, AbstractUsersPageProvider.ALL_MODE);
         PageProvider<DocumentModel> usersProvider = (PageProvider<DocumentModel>) ppService.getPageProvider(
                 PROVIDER_NAME, null, null, null, properties, "");
         List<DocumentModel> users = usersProvider.getCurrentPage();
@@ -97,7 +94,7 @@ public class TestUsersPageProvider extends UserManagerTestCase {
     @Test
     public void testUsersPageProviderSearchMode() {
         Map<String, Serializable> properties = new HashMap<String, Serializable>();
-        properties.put(UsersPageProvider.USERS_LISTING_MODE_PROPERTY, UsersPageProvider.SEARCH_ONLY_MODE);
+        properties.put(AbstractUsersPageProvider.USERS_LISTING_MODE_PROPERTY, AbstractUsersPageProvider.SEARCH_ONLY_MODE);
         PageProvider<DocumentModel> usersProvider = (PageProvider<DocumentModel>) ppService.getPageProvider(
                 PROVIDER_NAME, null, null, null, properties, "j");
         List<DocumentModel> users = usersProvider.getCurrentPage();
@@ -112,7 +109,7 @@ public class TestUsersPageProvider extends UserManagerTestCase {
     @Test
     public void testUsersPageProviderTabbedMode() {
         Map<String, Serializable> properties = new HashMap<String, Serializable>();
-        properties.put(UsersPageProvider.USERS_LISTING_MODE_PROPERTY, UsersPageProvider.TABBED_MODE);
+        properties.put(AbstractUsersPageProvider.USERS_LISTING_MODE_PROPERTY, AbstractUsersPageProvider.TABBED_MODE);
         PageProvider<DocumentModel> usersProvider = (PageProvider<DocumentModel>) ppService.getPageProvider(
                 PROVIDER_NAME, null, null, null, properties, "B");
         List<DocumentModel> users = usersProvider.getCurrentPage();

@@ -1,21 +1,15 @@
 <?xml version="1.0"?>
 <component name="org.nuxeo.ecm.core.automation.user-directories">
 
+  <require>org.nuxeo.ecm.platform.test.directory.sql.storage</require>
+  
   <extension target="org.nuxeo.ecm.directory.sql.SQLDirectoryFactory"
     point="directories">
 
 
  <directory name="userDirectory">
 
-      <schema>user</schema>
-      <dataSource>java:/nxsqldirectory</dataSource>
-      <table>users</table>
-      <idField>username</idField>
-      <passwordField>password</passwordField>
-
-      <autoincrementIdField>false</autoincrementIdField>
       <dataFile>testdirectorydata/users.csv</dataFile>
-      <createTablePolicy>always</createTablePolicy>
 
       <references>
         <tableReference field="groups" directory="groupDirectory"
@@ -28,24 +22,8 @@
 
     <directory name="groupDirectory">
 
-      <schema>group</schema>
-      <dataSource>java:/nxsqldirectory</dataSource>
-      <table>groups</table>
-      <idField>groupname</idField>
-      <autoincrementIdField>false</autoincrementIdField>
       <dataFile>testdirectorydata/groups.csv</dataFile>
-      <createTablePolicy>always</createTablePolicy>
-
-      <references>
-        <inverseReference field="members" directory="userDirectory"
-            dualReferenceField="groups"/>
-        <tableReference field="subGroups" directory="groupDirectory"
-            table="group2group" sourceColumn="childGroupId"
-            targetColumn="parentGroupId"/>
-        <inverseReference field="parentGroups"
-            directory="groupDirectory" dualReferenceField="subGroups"/>
-      </references>
-
+      
     </directory>
   </extension>
 

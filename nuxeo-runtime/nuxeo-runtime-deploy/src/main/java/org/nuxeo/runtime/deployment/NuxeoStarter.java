@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -50,7 +51,9 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.osgi.application.loader.FrameworkLoader;
+import org.nuxeo.common.LoaderConstants;
+import org.nuxeo.osgi.bootstrap.application.OSGiFrameworkLoader;
+import org.nuxeo.runtime.api.Framework;
 import org.osgi.framework.BundleException;
 
 /**
@@ -62,9 +65,9 @@ import org.osgi.framework.BundleException;
  * Allowable parameter names come from {@link org.nuxeo.common.Environment}, mainly
  * {@link org.nuxeo.common.Environment#NUXEO_RUNTIME_HOME NUXEO_RUNTIME_HOME} and
  * {@link org.nuxeo.common.Environment#NUXEO_CONFIG_DIR NUXEO_CONFIG_DIR}, but also
- * {@link org.nuxeo.common.Environment#NUXEO_DATA_DIR NUXEO_DATA_DIR},
- * {@link org.nuxeo.common.Environment#NUXEO_LOG_DIR NUXEO_LOG_DIR}, {@link org.nuxeo.common.Environment#NUXEO_TMP_DIR
- * NUXEO_TMP_DIR} and {@link org.nuxeo.common.Environment#NUXEO_WEB_DIR NUXEO_WEB_DIR}.
+ * {@link org.nuxeo.common.Environment#NUXEO_DATA_DIR NUXEO_DATA_DIR}, {@link org.nuxeo.common.Environment#NUXEO_LOG_DIR
+ * NUXEO_LOG_DIR}, {@link org.nuxeo.common.Environment#NUXEO_TMP_DIR NUXEO_TMP_DIR} and
+ * {@link org.nuxeo.common.Environment#NUXEO_WEB_DIR NUXEO_WEB_DIR}.
  */
 public class NuxeoStarter implements ServletContextListener {
 
@@ -82,46 +85,69 @@ public class NuxeoStarter implements ServletContextListener {
      */
     public static final String NUXEO_BUNDLES_LIST = ".nuxeo-bundles";
 
-    protected final Map<String, Object> env = new HashMap<>();
+    protected final Map<String, String> env = new HashMap<>();
 
-    protected List<File> bundleFiles = new ArrayList<>();
+    protected final List<File> bundleFiles = new ArrayList<File>();
+
+    protected final List<File> libraryFiles = new ArrayList<File>();
+
+    boolean isLauncher;
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
         try {
-            long startTime = System.currentTimeMillis();
-            start(event);
-            long finishedTime = System.currentTimeMillis();
-            @SuppressWarnings("boxing")
-            Double duration = (finishedTime - startTime) / 1000.0;
-            log.info(String.format("Nuxeo framework started in %.1f sec.", duration));
-        } catch (IOException | BundleException e) {
-            throw new RuntimeException(e);
+            if (Framework.isInitialized()) {
+                try {
+                    OSGiFrameworkLoader.start();
+                } catch (BundleException | IOException cause) {
+                    throw new RuntimeException("Cannot initialize nuxeo runtime", cause);
+                }
+                return;
+            }
+            isLauncher = true;
+            try {
+                long startTime = System.currentTimeMillis();
+                start(event);
+                long finishedTime = System.currentTimeMillis();
+                @SuppressWarnings("boxing")
+                Double duration = (finishedTime - startTime) / 1000.0;
+                log.info(String.format("Nuxeo framework started in %.1f sec.", duration));
+            } catch (IOException | BundleException cause) {
+                throw new RuntimeException("Cannot initialize nuxeo runtime", cause);
+            }
+        } catch (Throwable cause) {
+            throw cause;
         }
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
+        if (!isLauncher) {
+            return;
+        }
         try {
             stop();
-        } catch (BundleException e) {
-            throw new RuntimeException(e);
+        } catch (Exception cause) {
+            throw new RuntimeException("Cannot stop nuxeo runtime", cause);
+        } finally {
+            isLauncher = false;
         }
     }
 
     protected void start(ServletContextEvent event) throws IOException, BundleException {
         ServletContext servletContext = event.getServletContext();
+        findLibraries(servletContext);
         findBundles(servletContext);
         findEnv(servletContext);
 
-        ClassLoader cl = getClass().getClassLoader();
-        File home = new File((String) env.get(NUXEO_RUNTIME_HOME));
-        FrameworkLoader.initialize(cl, home, bundleFiles, env);
-        FrameworkLoader.start();
+        File home = new File(env.get(NUXEO_RUNTIME_HOME).toString());
+        OSGiFrameworkLoader.initialize(home, null, libraryFiles.toArray(new File[libraryFiles.size()]),
+                bundleFiles.toArray(new File[bundleFiles.size()]), env);
+        OSGiFrameworkLoader.start();
     }
 
     protected void stop() throws BundleException {
-        FrameworkLoader.stop();
+        OSGiFrameworkLoader.stop();
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
             Driver driver = drivers.nextElement();
@@ -137,29 +163,48 @@ public class NuxeoStarter implements ServletContextListener {
     protected void findBundles(ServletContext servletContext) throws IOException {
         InputStream bundlesListStream = servletContext.getResourceAsStream("/WEB-INF/" + NUXEO_BUNDLES_LIST);
         if (bundlesListStream != null) {
-            File lib = new File(servletContext.getRealPath("/WEB-INF/lib/"));
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(bundlesListStream))) {
                 String bundleName;
                 while ((bundleName = reader.readLine()) != null) {
-                    bundleFiles.add(new File(lib, bundleName));
+                    String path = servletContext.getRealPath("/WEB-INF/lib/" + bundleName);
+                    if (path == null) {
+                        continue;
+                    }
+                    bundleFiles.add(new File(path));
                 }
             }
         }
         if (bundleFiles.isEmpty()) { // Fallback on directory scan
-            File root = new File(servletContext.getRealPath("/"));
             Set<String> ctxpaths = servletContext.getResourcePaths("/WEB-INF/lib/");
-            if (ctxpaths != null) {
-                for (String ctxpath : ctxpaths) {
-                    if (!ctxpath.endsWith(".jar")) {
-                        continue;
-                    }
-                    bundleFiles.add(new File(root, ctxpath));
+            for (String ctxpath : ctxpaths) {
+                if (!ctxpath.endsWith(".jar")) {
+                    continue;
                 }
+                String path = servletContext.getRealPath(ctxpath);
+                if (path == null) {
+                    continue;
+                }
+                bundleFiles.add(new File(path));
             }
         }
     }
 
-    protected void findEnv(ServletContext servletContext) {
+    protected void findLibraries(ServletContext servletContext) {
+        @SuppressWarnings("unchecked")
+        Set<String> ctxpaths = servletContext.getResourcePaths("/OSGI-INF/lib/");
+        for (String ctxpath : ctxpaths) {
+            if (!ctxpath.endsWith(".jar")) {
+                continue;
+            }
+            String path = servletContext.getRealPath(ctxpath);
+            if (path == null) {
+                continue;
+            }
+            bundleFiles.add(new File(path));
+        }
+    }
+
+    protected void findEnv(ServletContext servletContext) throws MalformedURLException {
         for (String param : Arrays.asList( //
                 NUXEO_RUNTIME_HOME, //
                 NUXEO_CONFIG_DIR, //
@@ -174,7 +219,7 @@ public class NuxeoStarter implements ServletContextListener {
         }
         // default env values
         if (!env.containsKey(NUXEO_CONFIG_DIR)) {
-            String webinf = servletContext.getRealPath("/WEB-INF");
+            String webinf = servletContext.getResource("OSGI-INF").getFile();
             env.put(NUXEO_CONFIG_DIR, webinf);
         }
         if (!env.containsKey(NUXEO_RUNTIME_HOME)) {
@@ -183,9 +228,9 @@ public class NuxeoStarter implements ServletContextListener {
         }
         // host
         if (getClass().getClassLoader().getClass().getName().startsWith("org.jboss.classloader")) {
-            env.put(FrameworkLoader.HOST_NAME, JBOSS_HOST);
+            env.put(LoaderConstants.HOST_NAME, JBOSS_HOST);
         } else if (servletContext.getClass().getName().startsWith("org.apache.catalina")) {
-            env.put(FrameworkLoader.HOST_NAME, TOMCAT_HOST);
+            env.put(LoaderConstants.HOST_NAME, TOMCAT_HOST);
         }
     }
 

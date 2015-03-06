@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-collections-core.test
+ s
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-collections-c
+ ore.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-collections-core
+Import-Package: javax.inject,junit.framework,org.junit,org.junit.runner,
+ org.nuxeo.common.utils;version="[0.0,1)",org.nuxeo.ecm.automation;versi
+ on="[0.0,1)",org.nuxeo.ecm.automation.jaxrs.io.documents;version="[0.0,
+ 1)",org.nuxeo.ecm.collections.api,org.nuxeo.ecm.collections.core.adapte
+ r,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;
+ version="[0.0,1)",org.nuxeo.ecm.core.api.model;version="[0.0,1)",org.nu
+ xeo.ecm.core.api.security;version="[0.0,1)",org.nuxeo.ecm.core.api.secu
+ rity.impl;version="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.core.
+ trash;version="[0.0,1)",org.nuxeo.ecm.core.work.api;version="[0.0,1)",o
+ rg.nuxeo.ecm.platform.test,org.nuxeo.runtime.test.runner,org.nuxeo.runt
+ ime.transaction;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.collections.core.test,org.nuxeo.ecm.colle
+ ctions.core.test.operations
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

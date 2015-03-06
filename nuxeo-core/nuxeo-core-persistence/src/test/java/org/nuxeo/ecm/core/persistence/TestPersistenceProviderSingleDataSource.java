@@ -18,11 +18,21 @@
  */
 package org.nuxeo.ecm.core.persistence;
 
+import org.nuxeo.ecm.core.test.NoopRepositoryInit;
+import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
+import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.datasource.ConnectionHelper;
+import org.nuxeo.runtime.test.runner.RuntimeHarness;
+
+@RepositoryConfig(init = TestPersistenceProviderSingleDataSource.SingleDSInit.class)
 public class TestPersistenceProviderSingleDataSource extends TestPersistenceProvider {
 
-    @Override
-    protected boolean useSingleDataSource() {
-        return true;
+    public static class SingleDSInit extends NoopRepositoryInit {
+        @Override
+        public void onDatabaseSetup(RuntimeHarness harness) {
+            Framework.getProperties().setProperty(ConnectionHelper.SINGLE_DS, "jdbc/single");
+            super.onDatabaseSetup(harness);
+        }
     }
 
 }

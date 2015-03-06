@@ -23,24 +23,23 @@ import java.util.Map;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.security.auth.login.LoginContext;
-import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.geronimo.connector.outbound.AbstractConnectionManager;
+import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreInstance;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.NuxeoException;
+import org.nuxeo.ecm.core.api.UnrestrictedSessionRunner;
+import org.nuxeo.ecm.core.management.jtajca.ConnectionPoolMonitor;
 import org.nuxeo.ecm.core.management.jtajca.CoreSessionMonitor;
 import org.nuxeo.ecm.core.management.jtajca.Defaults;
-import org.nuxeo.ecm.core.management.jtajca.ConnectionPoolMonitor;
 import org.nuxeo.ecm.core.management.jtajca.TransactionMonitor;
 import org.nuxeo.ecm.core.repository.RepositoryService;
 import org.nuxeo.runtime.api.Framework;
@@ -106,7 +105,8 @@ public class DefaultMonitorComponent extends DefaultComponent {
     @Override
     public int getApplicationStartedOrder() {
         // should deploy after metrics service
-        return ((MetricsServiceImpl) Framework.getRuntime().getComponent(MetricsService.class.getName())).getApplicationStartedOrder() + 1;
+        return ((MetricsServiceImpl) Framework.getRuntime().getComponent(MetricsService.class.getName()))
+                .getApplicationStartedOrder() + 1;
     }
 
     @Override
@@ -126,28 +126,26 @@ public class DefaultMonitorComponent extends DefaultComponent {
         transactionMonitor = new DefaultTransactionMonitor();
         transactionMonitor.install();
 
-        try {
-            installPoolMonitors();
-        } catch (LoginException cause) {
-            log.warn("Cannot install storage monitors", cause);
-        }
-
+        installPoolMonitors();
     }
 
-    protected void installPoolMonitors() throws LoginException {
+    protected void installPoolMonitors() {
         NuxeoContainer.addListener(cmUpdater);
         NuxeoException errors = new NuxeoException("Cannot install pool monitors");
-        LoginContext loginContext = Framework.login();
-        try {
-            for (String name : Framework.getLocalService(RepositoryService.class).getRepositoryNames()) {
-                try (CoreSession session = CoreInstance.openCoreSession(name)) {;
-                } catch (NuxeoException cause) {
-                    errors.addSuppressed(cause);
-                }
+
+        for (String name : Framework.getLocalService(RepositoryService.class).getRepositoryNames()) {
+            try {
+                new UnrestrictedSessionRunner(name) {
+                    @Override
+                    public void run() {
+                        ;
+                    }
+                }.runUnrestricted();
+            } catch (Exception error) {
+                errors.addSuppressed(error);
             }
-        } finally {
-            loginContext.logout();
         }
+
         if (errors.getSuppressed().length > 0) {
             throw errors;
         }
@@ -156,7 +154,7 @@ public class DefaultMonitorComponent extends DefaultComponent {
     /**
      * Make sure we open the repository, to initialize its connection manager.
      */
-    protected void activateRepository(String repositoryName) {
+    protected void activateRepository(String repositoryName) throws ClientException {
         try (CoreSession session = CoreInstance.openCoreSessionSystem(repositoryName)) {
             // do nothing, just open and close
         }
@@ -203,11 +201,14 @@ public class DefaultMonitorComponent extends DefaultComponent {
 
     protected static void unbind(ObjectInstance instance) {
         MBeanServer mbs = Framework.getLocalService(ServerLocator.class).lookupServer();
+        ObjectName name = instance.getObjectName();
+        if (!mbs.isRegistered(name)) {
+            return;
+        }
         try {
-            mbs.unregisterMBean(instance.getObjectName());
+            mbs.unregisterMBean(name);
         } catch (MBeanRegistrationException | InstanceNotFoundException e) {
             throw new UnsupportedOperationException("Cannot unbind " + instance, e);
         }
     }
-
 }

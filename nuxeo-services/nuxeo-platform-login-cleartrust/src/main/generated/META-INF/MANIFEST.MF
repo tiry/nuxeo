@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ClearTrust extension
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-cleartr
+ ust
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.ui.web.auth.cleartrust;uses:="javax.servlet.http,org.nuxe
+ o.ecm.platform.api.login,org.nuxeo.ecm.platform.ui.web.auth.interfaces"
+ ;version="0.0.0"
+Import-Package: javax.servlet.http;version="[3.0,4)",org.apache.commons.
+ logging;version="[1.2,2)",org.nuxeo.ecm.platform.api.login;version="[0.
+ 0,1)",org.nuxeo.ecm.platform.ui.web.auth.interfaces;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/cleartrust-authenticator-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.login
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

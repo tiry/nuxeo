@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -35,8 +36,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.nuxeo.common.LoaderConstants;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
@@ -47,29 +47,31 @@ public class FrameworkBootstrap implements LoaderConstants {
 
     protected static final String DEFAULT_LIBS_CP = "lib/*:.:config";
 
-    private static final Log log = LogFactory.getLog(FrameworkBootstrap.class);
-
     protected File home;
 
-    protected MutableClassLoader loader;
+    protected BootstrapClassLoader bootstrapLoader;
 
-    protected Map<String, Object> env;
+    protected Map<String, String> env;
 
     protected Class<?> frameworkLoaderClass;
 
     protected long startTime;
 
-    protected boolean scanForNestedJars = true;
+    protected List<File> libraries = new ArrayList<File>();
+
+    protected final List<File> bundles = new ArrayList<File>();
+
+    protected boolean scanForNestedJars = false;
 
     protected boolean flushCache = false;
 
-    public FrameworkBootstrap(ClassLoader cl, File home) throws IOException {
-        this(new MutableClassLoaderDelegate(cl), home);
-    }
+    protected String bootDelegation = "";
 
-    public FrameworkBootstrap(MutableClassLoader loader, File home) throws IOException {
+    public FrameworkBootstrap(ClassLoader loader, String bootDelegation, File home) throws IOException {
         this.home = home.getCanonicalFile();
-        this.loader = loader;
+        this.bootDelegation = bootDelegation;
+        bootstrapLoader = new BootstrapClassLoader(loader);
+        bootstrapLoader.addURL(home.toURI().toURL());
         initializeEnvironment();
     }
 
@@ -97,70 +99,110 @@ public class FrameworkBootstrap implements LoaderConstants {
         this.scanForNestedJars = scanForNestedJars;
     }
 
-    public Map<String, Object> env() {
+    public Map<String, String> env() {
         return env;
-    }
-
-    public MutableClassLoader getLoader() {
-        return loader;
-    }
-
-    public ClassLoader getClassLoader() {
-        return loader.getClassLoader();
     }
 
     public File getHome() {
         return home;
     }
 
-    public void initialize() throws ReflectiveOperationException, IOException {
+    public void initialize() throws IOException {
         startTime = System.currentTimeMillis();
-        List<File> bundleFiles = buildClassPath();
-        frameworkLoaderClass = getClassLoader().loadClass("org.nuxeo.osgi.application.loader.FrameworkLoader");
-        Method init = frameworkLoaderClass.getMethod("initialize", ClassLoader.class, File.class, List.class, Map.class);
-        init.invoke(null, loader.getClassLoader(), home, bundleFiles, env);
+        List<File> libraries = buildLibsClassPath();
+        List<File> bundles = buildBundlesClassPath(libraries);
+        try {
+            frameworkLoaderClass = bootstrapLoader.loadClass("org.nuxeo.osgi.bootstrap.OSGiFrameworkLoader");
+            Method init = frameworkLoaderClass.getDeclaredMethod("initialize", File.class, File[].class, File[].class,
+                    Map.class);
+            init.invoke(null, home, libraries.toArray(new File[libraries.size()]),
+                    bundles.toArray(new File[bundles.size()]), env);
+        } catch (ReflectiveOperationException cause) {
+            throw new RuntimeException("Cannot invoke framework loader", cause);
+        }
     }
 
-    public void start() throws ReflectiveOperationException, IOException {
+    public void start() {
         if (frameworkLoaderClass == null) {
             throw new IllegalStateException("Framework Loader was not initialized. Call initialize() method first");
         }
-        Method start = frameworkLoaderClass.getMethod("start");
-        start.invoke(null);
-        printStartedMessage();
+        try {
+            Method start = frameworkLoaderClass.getMethod("start");
+            start.invoke(null);
+        } catch (ReflectiveOperationException cause) {
+            throw new RuntimeException("Cannot invoke framework loader", cause);
+        }
     }
 
-    public void stop() throws ReflectiveOperationException {
+    public URL[] getURLs() {
         if (frameworkLoaderClass == null) {
             throw new IllegalStateException("Framework Loader was not initialized. Call initialize() method first");
         }
-        Method stop = frameworkLoaderClass.getMethod("stop");
-        stop.invoke(null);
+        try {
+            Method urls = frameworkLoaderClass.getMethod("getURLs");
+            return (URL[]) urls.invoke(null);
+        } catch (ReflectiveOperationException cause) {
+            throw new RuntimeException("Cannot invoke framework loader", cause);
+        }
+
     }
 
-    public String installBundle(File f) throws ReflectiveOperationException {
+    public void stop() {
         if (frameworkLoaderClass == null) {
             throw new IllegalStateException("Framework Loader was not initialized. Call initialize() method first");
         }
-        Method install = frameworkLoaderClass.getMethod("install", File.class);
-        return (String) install.invoke(null, f);
+        try {
+            Method stop = frameworkLoaderClass.getMethod("stop");
+            stop.invoke(null);
+        } catch (ReflectiveOperationException cause) {
+            throw new RuntimeException("Cannot invoke framework loader", cause);
+        }
     }
 
-    public void uninstallBundle(String name) throws ReflectiveOperationException {
+    public ClassLoader getOSGiLoader() {
         if (frameworkLoaderClass == null) {
             throw new IllegalStateException("Framework Loader was not initialized. Call initialize() method first");
         }
-        Method uninstall = frameworkLoaderClass.getMethod("uninstall", String.class);
-        uninstall.invoke(null, name);
+        try {
+            Method loader = frameworkLoaderClass.getMethod("getOSGiLoader");
+            return (ClassLoader) loader.invoke(null);
+        } catch (ReflectiveOperationException cause) {
+            throw new RuntimeException("Cannot invoke framework loader", cause);
+        }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public String installBundle(File f) {
+        if (frameworkLoaderClass == null) {
+            throw new IllegalStateException("Framework Loader was not initialized. Call initialize() method first");
+        }
+        try {
+            Method install = frameworkLoaderClass.getMethod("install", File.class);
+            return (String) install.invoke(null, f);
+        } catch (ReflectiveOperationException cause) {
+            throw new RuntimeException("Cannot invoke framework loader", cause);
+        }
+    }
+
+    public void uninstallBundle(String name) {
+        if (frameworkLoaderClass == null) {
+            throw new IllegalStateException("Framework Loader was not initialized. Call initialize() method first");
+        }
+        try {
+            Method uninstall = frameworkLoaderClass.getMethod("uninstall", String.class);
+            uninstall.invoke(null, name);
+        } catch (ReflectiveOperationException cause) {
+            throw new RuntimeException("Cannot invoke framework loader", cause);
+        }
+    }
+
     protected void initializeEnvironment() throws IOException {
-        System.setProperty(HOME_DIR, home.getAbsolutePath());
-        env = new HashMap<String, Object>();
+        env = new HashMap<String, String>();
         // initialize with default values
+        env.put(HOME_DIR, home.getAbsoluteFile().toString());
         env.put(BUNDLES, DEFAULT_BUNDLES_CP);
         env.put(LIBS, DEFAULT_LIBS_CP);
+        env.put(OSGI_BOOT_DELEGATION, bootDelegation);
+        env.put(PREPROCESSING, "true");
         // load launcher.properties file if exists to overwrite default values
         File file = new File(home, "launcher.properties");
         if (!file.isFile()) {
@@ -170,22 +212,20 @@ public class FrameworkBootstrap implements LoaderConstants {
         FileInputStream in = new FileInputStream(file);
         try {
             p.load(in);
-            env.putAll((Map) p);
-            String v = (String) env.get(SCAN_FOR_NESTED_JARS);
+            for (Object key : p.keySet()) {
+                env.put(key.toString(), p.get(key).toString());
+            }
+            String v = env.get(SCAN_FOR_NESTED_JARS);
             if (v != null) {
                 scanForNestedJars = Boolean.parseBoolean(v);
             }
-            v = (String) env.get(FLUSH_CACHE);
+            v = env.get(FLUSH_CACHE);
             if (v != null) {
                 flushCache = Boolean.parseBoolean(v);
             }
         } finally {
             in.close();
         }
-    }
-
-    protected void printStartedMessage() {
-        log.info("Framework started in " + ((System.currentTimeMillis() - startTime) / 1000) + " sec.");
     }
 
     protected File newFile(String path) throws IOException {
@@ -201,65 +241,67 @@ public class FrameworkBootstrap implements LoaderConstants {
      *
      * @return the list of bundle files.
      */
-    protected List<File> buildClassPath() throws IOException {
-        List<File> bundleFiles = new ArrayList<File>();
-        String libsCp = (String) env.get(LIBS);
-        if (libsCp != null) {
-            buildLibsClassPath(libsCp);
-        }
-        String bundlesCp = (String) env.get(BUNDLES);
-        if (bundlesCp != null) {
-            buildBundlesClassPath(bundlesCp, bundleFiles);
-        }
-        extractNestedJars(bundleFiles, new File(home, "tmp/nested-jars"));
-        return bundleFiles;
-    }
-
-    protected void buildLibsClassPath(String libsCp) throws IOException {
-        String[] ar = libsCp.split(":");
-        for (String entry : ar) {
-            File entryFile;
-            if (entry.endsWith("/*")) {
-                entryFile = newFile(entry.substring(0, entry.length() - 2));
-                File[] files = entryFile.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        loader.addURL(file.toURI().toURL());
-                    }
-                }
-            } else {
-                entryFile = newFile(entry);
-                loader.addURL(entryFile.toURI().toURL());
+    protected List<File> buildBundlesClassPath(List<File> libraries) throws IOException {
+        String bundlesCp = env.get(BUNDLES).toString();
+        List<File> bundles = new ArrayList<File>();
+        for (String path : expandWildcard(bundlesCp)) {
+            File file = newFile(path);
+            if (path.contains("nuxeo-runtime-osgi")) {
+                bootstrapLoader.addURL(file.toURI().toURL());
+            } else if (path.contains("nuxeo-common")) {
+                bootstrapLoader.addURL(file.toURI().toURL());
+                bundles.add(file);
+            } else if (file.getName().endsWith(".jar") || file.isDirectory()) {
+                bundles.add(file);
             }
         }
+
+        extractNestedJars(libraries, bundles, new File(home, "tmp/nested-jars"));
+
+        return bundles;
     }
 
-    protected void buildBundlesClassPath(String bundlesCp, List<File> bundleFiles) throws IOException {
-        String[] ar = bundlesCp.split(":");
-        for (String entry : ar) {
-            File entryFile;
-            if (entry.endsWith("/*")) {
-                entryFile = newFile(entry.substring(0, entry.length() - 2));
-                File[] files = entryFile.listFiles();
-                if (files != null) {
-                    for (File file : files) {
-                        String path = file.getPath();
-                        if (path.endsWith(".jar") || path.endsWith(".zip") || path.endsWith(".war")
-                                || path.endsWith("rar")) {
-                            bundleFiles.add(file);
-                            loader.addURL(file.toURI().toURL());
-                        }
-                    }
-                }
+    protected List<File> buildLibsClassPath() throws IOException {
+        List<File> files = new ArrayList<File>();
+        String libsCp = env.get(LIBS).toString();
+        for (String path : expandWildcard(libsCp)) {
+            File file = newFile(path);
+            if (path.contains("org.osgi.core")) {
+                bootstrapLoader.addURL(file.toURI().toURL());
+            } else if (path.contains("org.osgi.compendium")) {
+                bootstrapLoader.addURL(file.toURI().toURL());
             } else {
-                entryFile = newFile(entry);
-                bundleFiles.add(entryFile);
-                loader.addURL(entryFile.toURI().toURL());
+                if (file.getName().endsWith(".jar") || file.isDirectory()) {
+                    files.add(file);
+                }
             }
         }
+        return files;
     }
 
-    protected void extractNestedJars(List<File> bundleFiles, File dir) throws IOException {
+    protected String[] expandWildcard(String cp) throws IOException {
+        if (cp == null || cp.isEmpty()) {
+            return new String[0];
+        }
+        String[] patterns = cp.split(":");
+        List<String> paths = new ArrayList<String>(patterns.length);
+        for (String pattern : patterns) {
+            if (!pattern.endsWith("/*")) {
+                paths.add(pattern);
+            } else {
+                File dirPath = newFile(pattern.substring(0, pattern.length() - 2));
+                File[] files = dirPath.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        paths.add(file.getPath());
+                    }
+                }
+            }
+        }
+        return paths.toArray(new String[paths.size()]);
+    }
+
+    protected void extractNestedJars(List<File> libraries, List<File> bundles, File dir) throws IOException {
         if (!scanForNestedJars) {
             return;
         }
@@ -270,23 +312,23 @@ public class FrameworkBootstrap implements LoaderConstants {
                 File[] files = dir.listFiles();
                 if (files != null) {
                     for (File f : files) {
-                        loader.addURL(f.toURI().toURL());
+                        libraries.add(f);
                     }
                 }
                 return;
             }
         }
         dir.mkdirs();
-        for (File f : bundleFiles) {
-            if (f.isFile()) {
-                extractNestedJars(f, dir);
+        for (File bundle : bundles) {
+            if (bundle.isFile() && bundle.getName().endsWith(".jar")) {
+                extractNestedJars(libraries, bundle, dir);
             }
         }
     }
 
-    protected void extractNestedJars(File file, File tmpDir) throws IOException {
-        JarFile jarFile = new JarFile(file);
-        String fileName = file.getName();
+    protected void extractNestedJars(List<File> libraries, File bundle, File tmpDir) throws IOException {
+        JarFile jarFile = new JarFile(bundle);
+        String fileName = bundle.getName();
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
@@ -295,7 +337,7 @@ public class FrameworkBootstrap implements LoaderConstants {
                 String name = path.replace('/', '_');
                 File dest = new File(tmpDir, fileName + '-' + name);
                 extractNestedJar(jarFile, entry, dest);
-                loader.addURL(dest.toURI().toURL());
+                libraries.add(dest);
             }
         }
     }

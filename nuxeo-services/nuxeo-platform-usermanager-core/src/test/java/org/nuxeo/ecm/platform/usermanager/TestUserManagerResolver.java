@@ -47,8 +47,7 @@ import org.nuxeo.ecm.core.schema.types.SimpleType;
 import org.nuxeo.ecm.core.schema.types.resolver.ObjectResolver;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
-@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/directory-config.xml",
-        "org.nuxeo.ecm.platform.usermanager.tests:test-usermanager-resolver.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.platform.usermanager:test-usermanager-resolver.xml" })
 public class TestUserManagerResolver extends UserManagerTestCase {
 
     private static final String USER_XPATH = "umr:user";
@@ -431,13 +430,16 @@ public class TestUserManagerResolver extends UserManagerTestCase {
 
     @Test
     public void testConfigurationIsLoaded() {
-        UserManagerResolver userResolver = (UserManagerResolver) ((SimpleType) doc.getProperty(USER_XPATH).getType()).getObjectResolver();
+        UserManagerResolver userResolver = (UserManagerResolver) ((SimpleType) doc.getProperty(USER_XPATH).getType())
+                .getObjectResolver();
         assertTrue(userResolver.isIncludingUsers());
         assertFalse(userResolver.isIncludingGroups());
-        UserManagerResolver groupResolver = (UserManagerResolver) ((SimpleType) doc.getProperty(GROUP_XPATH).getType()).getObjectResolver();
+        UserManagerResolver groupResolver = (UserManagerResolver) ((SimpleType) doc.getProperty(GROUP_XPATH).getType())
+                .getObjectResolver();
         assertFalse(groupResolver.isIncludingUsers());
         assertTrue(groupResolver.isIncludingGroups());
-        UserManagerResolver anyResolver = (UserManagerResolver) ((SimpleType) doc.getProperty(USER_GROUP_XPATH).getType()).getObjectResolver();
+        UserManagerResolver anyResolver = (UserManagerResolver) ((SimpleType) doc.getProperty(USER_GROUP_XPATH)
+                .getType()).getObjectResolver();
         assertTrue(anyResolver.isIncludingUsers());
         assertTrue(anyResolver.isIncludingGroups());
     }

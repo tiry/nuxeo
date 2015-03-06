@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-Category: api
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Web Resources API
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-web-resources-api
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.web.resources.api;version="0.0.0",org.nuxeo.ecm.web.resources.api.
+ service;uses:="org.nuxeo.ecm.web.resources.api";version="0.0.0"
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.nuxeo.ecm.
+ web.resources.api
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

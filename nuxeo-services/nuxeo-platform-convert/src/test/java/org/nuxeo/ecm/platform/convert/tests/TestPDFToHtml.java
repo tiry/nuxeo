@@ -20,53 +20,22 @@
 
 package org.nuxeo.ecm.platform.convert.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
-
-import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
-import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
-import org.nuxeo.ecm.core.convert.api.ConversionService;
 import org.nuxeo.ecm.core.convert.api.ConverterCheckResult;
 import org.nuxeo.ecm.platform.commandline.executor.api.CommandAvailability;
 import org.nuxeo.ecm.platform.commandline.executor.api.CommandLineExecutorService;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
-public class TestPDFToHtml extends NXRuntimeTestCase {
+public class TestPDFToHtml extends BaseConverterTest {
 
-    protected ConversionService cs;
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployBundle("org.nuxeo.ecm.core.api");
-        deployBundle("org.nuxeo.ecm.core.convert.api");
-        deployBundle("org.nuxeo.ecm.core.convert");
-        deployBundle("org.nuxeo.ecm.platform.commandline.executor");
-        deployBundle("org.nuxeo.ecm.platform.convert");
-
-        cs = Framework.getLocalService(ConversionService.class);
-        assertNotNull(cs);
-    }
-
-    protected static BlobHolder getBlobFromPath(String path) throws IOException {
-        File file = FileUtils.getResourceFileFromContext(path);
-        assertTrue(file.length() > 0);
-        return new SimpleBlobHolder(Blobs.createBlob(file));
-    }
+    private static final Log log = LogFactory.getLog(TestPDFToHtml.class);
 
     @Test
     public void testConverter() throws Exception {
@@ -104,12 +73,12 @@ public class TestPDFToHtml extends NXRuntimeTestCase {
 
         String htmlContent = mainBlob.getString();
         assertTrue(htmlContent.contains("Hello"));
-        
+
         pdfBH = getBlobFromPath("test-docs/test-copy-text-restricted.pdf");
 
         result = cs.convert(converterName, pdfBH, null);
         assertNotNull(result);
-        
+
         blobs = result.getBlobs();
         assertNotNull(blobs);
         assertEquals(10, blobs.size());

@@ -50,8 +50,7 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.runtime.management", //
-        "org.nuxeo.ecm.core.management", //
+@Deploy({ "org.nuxeo.ecm.core.management", //
         "org.nuxeo.ecm.core.management.test" })
 public class TestAdministrativeStatusService {
 
@@ -77,11 +76,13 @@ public class TestAdministrativeStatusService {
         assertNotNull(localManager);
 
         // global manager lookup
-        GlobalAdministrativeStatusManager globalManager = Framework.getLocalService(GlobalAdministrativeStatusManager.class);
+        GlobalAdministrativeStatusManager globalManager = Framework
+                .getLocalService(GlobalAdministrativeStatusManager.class);
         assertNotNull(globalManager);
 
         // ensure that local manager is a singleton
-        AdministrativeStatusManager localManager2 = globalManager.getStatusManager(globalManager.getLocalNuxeoInstanceIdentifier());
+        AdministrativeStatusManager localManager2 = globalManager
+                .getStatusManager(globalManager.getLocalNuxeoInstanceIdentifier());
         assertEquals(localManager, localManager2);
 
         ProbeManager pm = Framework.getLocalService(ProbeManager.class);
@@ -144,7 +145,8 @@ public class TestAdministrativeStatusService {
     public void testGlobalManager() {
         final String serviceId = "org.nuxeo.ecm.administrator.message";
 
-        GlobalAdministrativeStatusManager globalManager = Framework.getLocalService(GlobalAdministrativeStatusManager.class);
+        GlobalAdministrativeStatusManager globalManager = Framework
+                .getLocalService(GlobalAdministrativeStatusManager.class);
         assertNotNull(globalManager);
 
         // check that we only have on Nuxeo instance for now
@@ -171,8 +173,8 @@ public class TestAdministrativeStatusService {
         // update status on the same service on both nodes
         globalManager.setStatus(serviceId, AdministrativeStatus.ACTIVE, "Yo Man", "system");
 
-        AdministrativeStatus statusNode1 = globalManager.getStatusManager(
-                globalManager.getLocalNuxeoInstanceIdentifier()).getStatus(serviceId);
+        AdministrativeStatus statusNode1 = globalManager
+                .getStatusManager(globalManager.getLocalNuxeoInstanceIdentifier()).getStatus(serviceId);
         assertNotNull(statusNode1);
         assertEquals("Yo Man", statusNode1.getMessage());
 

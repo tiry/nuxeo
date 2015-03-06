@@ -21,9 +21,9 @@
 
 package org.nuxeo.ecm.platform.ui.web.restAPI;
 
-import java.io.Serializable;
-
 import static org.jboss.seam.ScopeType.EVENT;
+
+import java.io.Serializable;
 
 import org.dom4j.Element;
 import org.dom4j.dom.DOMDocument;

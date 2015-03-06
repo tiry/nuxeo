@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-web-resources-wro.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-web-resources-wro.test
+ s
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-web-resources-wro
+Import-Package: javax.inject,javax.servlet;version="[3.0,4)",javax.servl
+ et.http;version="[3.0,4)",org.junit,org.junit.runner,org.mockito,org.mo
+ ckito.stubbing,org.nuxeo.common.utils;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.test,org.nuxeo.ecm.web.resources.api.service;version="[0.0,1)",org.
+ nuxeo.ecm.web.resources.wro.factory,org.nuxeo.ecm.web.resources.wro.pro
+ cessor,org.nuxeo.ecm.web.resources.wro.provider,org.nuxeo.runtime.test.
+ mockito,org.nuxeo.runtime.test.runner,ro.isdc.wro.cache,ro.isdc.wro.cac
+ he.factory,ro.isdc.wro.config,ro.isdc.wro.config.jmx,ro.isdc.wro.manage
+ r,ro.isdc.wro.manager.factory,ro.isdc.wro.model,ro.isdc.wro.model.facto
+ ry,ro.isdc.wro.model.group,ro.isdc.wro.model.group.processor,ro.isdc.wr
+ o.model.resource,ro.isdc.wro.model.resource.locator,ro.isdc.wro.model.r
+ esource.locator.factory,ro.isdc.wro.model.resource.processor,ro.isdc.wr
+ o.model.resource.processor.factory,ro.isdc.wro.model.resource.processor
+ .impl.css,ro.isdc.wro.model.resource.processor.impl.js,ro.isdc.wro.util
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: css,org.nuxeo.ecm.web.resources.wro,scripts,themes.css,
+ themes.palettes,themes.sass,wro
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<component name="org.nuxeo.runtime.urlstreamhandlers" version="1.0">
+	<implementation class="org.nuxeo.runtime.services.url.URLStreamHandlersComponent" />
+
+	<service>
+		<provide interface="org.nuxeo.runtime.services.url.URLStreamHandlers" />
+	</service>
+
+	<extension-point name="handlers">
+		<object class="org.nuxeo.runtime.services.url.URLStreamHandlersComponent$Contribution" />
+	</extension-point>
+
+
+</component>
+

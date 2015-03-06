@@ -23,7 +23,6 @@ package org.nuxeo.runtime.api.login;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -48,15 +47,15 @@ public class SystemLoginModule implements LoginModule {
 
     protected CallbackHandler callbackHandler;
 
-    protected Map<String, Object> sharedState = new HashMap<>();
+    protected Map<String,Object> sharedState;
 
     protected boolean trace;
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
-    public void initialize(Subject subject, CallbackHandler callbackHandler,
-            Map<String, ?> sharedState, Map<String, ?> options) {
+    public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String,?> sharedState, Map<String,?> options) {
         this.subject = subject;
-        this.sharedState.putAll(sharedState);
+        this.sharedState = (Map)sharedState;
         this.callbackHandler = callbackHandler;
         trace = log.isTraceEnabled();
     }

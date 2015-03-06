@@ -20,12 +20,6 @@
 package org.nuxeo.ecm.platform.ui.web.auth;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.ecm.platform.ui.web.auth.service.LoginScreenConfig;
@@ -40,13 +34,16 @@ public class TestLoginScreenConfig extends NXRuntimeTestCase {
 
     private static final String WEB_BUNDLE_TEST = "org.nuxeo.ecm.platform.web.common.test";
 
+    AutoCloseable infos;
+
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
 
         deployContrib(WEB_BUNDLE, "OSGI-INF/authentication-framework.xml");
         deployContrib(WEB_BUNDLE, "OSGI-INF/authentication-contrib.xml");
-        deployContrib(WEB_BUNDLE_TEST, "OSGI-INF/test-loginscreenconfig.xml");
+        infos = deployContrib(WEB_BUNDLE_TEST, "OSGI-INF/test-loginscreenconfig.xml");
     }
 
     private PluggableAuthenticationService getAuthService() {
@@ -135,7 +132,7 @@ public class TestLoginScreenConfig extends NXRuntimeTestCase {
         LoginScreenConfig config = authService.getLoginScreenConfig();
         assertNotNull(config);
 
-        undeployContrib(WEB_BUNDLE_TEST, "OSGI-INF/test-loginscreenconfig.xml");
+        infos.close();
 
         config = authService.getLoginScreenConfig();
         assertNull(config);

@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -64,16 +63,6 @@ public class TestLDAPSessionWithUpperId extends LDAPDirectoryTestCase {
             getLDAPDirectory("userDirectory").setTestServer(server);
             getLDAPDirectory("groupDirectory").setTestServer(server);
         }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        if (USE_EXTERNAL_TEST_LDAP_SERVER) {
-        } else {
-            runtimeHarness.undeployContrib("org.nuxeo.ecm.directory.ldap.tests", INTERNAL_SERVER_SETUP_UPPER_ID);
-        }
-        super.tearDown();
     }
 
     // override tests to get specific use cases

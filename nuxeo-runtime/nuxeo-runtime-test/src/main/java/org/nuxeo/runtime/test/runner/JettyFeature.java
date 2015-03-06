@@ -21,9 +21,14 @@ package org.nuxeo.runtime.test.runner;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.net.URL;
+import java.util.Properties;
 
+import org.mortbay.jetty.Connector;
+import org.nuxeo.common.Environment;
 import org.nuxeo.common.utils.FileUtils;
+import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.WorkingDirectoryConfigurator;
 
 /**
@@ -45,36 +50,42 @@ public class JettyFeature extends SimpleFeature implements WorkingDirectoryConfi
     }
 
     protected void configureJetty(Jetty jetty) {
+        Properties env = Environment.getDefault().getProperties();
         int p = jetty.port();
         try {
-            String s = System.getenv("JETTY_PORT");
+            String s = env.getProperty("JETTY_PORT");
             if (s != null) {
                 p = Integer.parseInt(s);
             }
         } catch (Exception e) {
             // do nothing ; the jetty.port
         }
-        if (p > 0) {
-            System.setProperty("jetty.port", Integer.toString(p));
+        if (p == 0) {
+            try (ServerSocket socket = new ServerSocket(0)) {
+                p = socket.getLocalPort();
+            } catch (IOException cause) {
+                throw new AssertionError("Cannot allocate port for jetty", cause);
+            }
         }
+        env.setProperty("org.nuxeo.jetty.port", Integer.toString(p));
 
-        String host = System.getenv("JETTY_HOST");
+        String host = env.getProperty("JETTY_HOST");
         if (host == null) {
             host = jetty.host();
         }
         if (host.length() > 0) {
-            System.setProperty("jetty.host", host);
+            env.setProperty("org.nuxeo.jetty.host", host);
         }
 
-        String config = System.getenv("JETTY_CONFIG");
+        String config = env.getProperty("JETTY_CONFIG");
         if (config == null) {
             config = jetty.config();
         }
         if (config.length() > 0) {
-            System.setProperty("org.nuxeo.jetty.config", config);
+            env.setProperty("org.nuxeo.jetty.config", config);
         }
 
-        System.setProperty("org.nuxeo.jetty.propagateNaming", Boolean.toString(jetty.propagateNaming()));
+        env.setProperty("org.nuxeo.jetty.propagateNaming", Boolean.toString(jetty.propagateNaming()));
     }
 
     @Override
@@ -97,6 +108,11 @@ public class JettyFeature extends SimpleFeature implements WorkingDirectoryConfi
         } finally {
             in.close();
         }
+    }
+
+    public String getConnectionURL(String path) {
+        Connector connector = Framework.getRuntime().getService(org.mortbay.jetty.Connector.class);
+        return String.format("http://%s:%d%s", connector.getHost(), connector.getPort(), path);
     }
 
     private static URL getResource(String resource) {

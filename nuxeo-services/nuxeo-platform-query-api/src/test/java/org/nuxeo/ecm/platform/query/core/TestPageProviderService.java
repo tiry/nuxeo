@@ -57,8 +57,8 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({"org.nuxeo.ecm.platform.query.api"})
-@LocalDeploy("org.nuxeo.ecm.platform.query.api.test:test-pageprovider-contrib.xml")
+@Deploy({ "org.nuxeo.ecm.platform.query.api" })
+@LocalDeploy("org.nuxeo.ecm.platform.query.api:test-pageprovider-contrib.xml")
 public class TestPageProviderService {
 
     private static final String CURRENT_DOCUMENT_CHILDREN = "CURRENT_DOCUMENT_CHILDREN";
@@ -113,8 +113,8 @@ public class TestPageProviderService {
         assertEquals("File", def.getSearchDocumentType());
 
         // test override
-        harness.deployContrib("org.nuxeo.ecm.platform.query.api.test", "test-pageprovider-override-contrib.xml");
-        try {
+        try (AutoCloseable context = harness.deployTestContrib("org.nuxeo.ecm.platform.query.api",
+                "test-pageprovider-override-contrib.xml")) {
             def = service.getPageProviderDefinition("CURRENT_DOCUMENT_CHILDREN_WITH_SEARCH_DOCUMENT");
             assertNotNull(def);
             assertEquals("CURRENT_DOCUMENT_CHILDREN_WITH_SEARCH_DOCUMENT", def.getName());
@@ -123,8 +123,6 @@ public class TestPageProviderService {
             assertEquals("dc:description", def.getSortInfos().get(0).getSortColumn());
             assertFalse(def.getSortInfos().get(0).getSortAscending());
             assertEquals("File2", def.getSearchDocumentType());
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.query.api.test", "test-pageprovider-override-contrib.xml");
         }
     }
 
@@ -147,23 +145,18 @@ public class TestPageProviderService {
         assertEquals(2, def.getPageSize());
 
         // test override when disabling page provider
-        harness.deployContrib("org.nuxeo.ecm.platform.query.api.test", "test-pageprovider-override-contrib.xml");
-        try {
+        try (AutoCloseable override = harness.deployTestContrib("org.nuxeo.ecm.platform.query.api",
+                "test-pageprovider-override-contrib.xml")) {
             def = service.getPageProviderDefinition(CURRENT_DOCUMENT_CHILDREN);
             assertNull(def);
 
             // test override again after, changed page size
-            harness.deployContrib("org.nuxeo.ecm.platform.query.api.test", "test-pageprovider-override-contrib2.xml");
-            try {
+            try (AutoCloseable override2 = harness.deployTestContrib("org.nuxeo.ecm.platform.query.api",
+                    "test-pageprovider-override-contrib2.xml")) {
                 def = service.getPageProviderDefinition(CURRENT_DOCUMENT_CHILDREN);
                 assertEquals(CURRENT_DOCUMENT_CHILDREN, def.getName());
                 assertEquals(20, def.getPageSize());
-            } finally {
-                harness.undeployContrib("org.nuxeo.ecm.platform.query.api.test",
-                        "test-pageprovider-override-contrib2.xml");
             }
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.query.api.test", "test-pageprovider-override-contrib.xml");
         }
     }
 

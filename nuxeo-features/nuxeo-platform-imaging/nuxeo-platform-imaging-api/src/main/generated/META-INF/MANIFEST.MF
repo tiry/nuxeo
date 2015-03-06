@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Platform Imaging API
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-imaging-api
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: true
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.picture.api;uses:="org.nuxeo.common.xmap.annotation,org.n
+ uxeo.ecm.core.api";version="0.0.0",org.nuxeo.ecm.platform.picture.api.a
+ dapters;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.core.api.adapter,or
+ g.nuxeo.ecm.core.api.blobholder,org.nuxeo.ecm.core.convert.api,org.nuxe
+ o.ecm.platform.picture.api";version="0.0.0"
+Import-Package: org.apache.commons.lang.builder;version="[2.6,3)",org.ap
+ ache.commons.logging;version="[1.2,2)",org.nuxeo.common.xmap.annotation
+ ;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.e
+ cm.core.api.adapter;version="[0.0,1)",org.nuxeo.ecm.core.api.blobholder
+ ;version="[0.0,1)",org.nuxeo.ecm.core.api.model;version="[0.0,1)",org.n
+ uxeo.ecm.core.convert.api;version="[0.0,1)",org.nuxeo.ecm.platform.pict
+ ure.api,org.nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/picture-adapter-contrib.xml,OSGI-INF/picture-b
+ lobholder-contrib.xml, OSGI-INF/picture-metadata-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

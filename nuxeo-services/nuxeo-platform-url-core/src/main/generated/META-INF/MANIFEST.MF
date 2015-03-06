@@ -1,0 +1,40 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: web,stateless
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo URL Core
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-url-core
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.url.codec;version="0.0.0";uses:="org.nuxeo.ecm.platform.u
+ rl.api,org.nuxeo.ecm.platform.url.service",org.nuxeo.ecm.platform.url.c
+ odec.descriptor;uses:="org.nuxeo.common.xmap.annotation";version="0.0.0
+ ",org.nuxeo.ecm.platform.url.io;uses:="org.codehaus.jackson,org.nuxeo.e
+ cm.core.api,org.nuxeo.ecm.core.io.marshallers.json.enrichers,org.nuxeo.
+ ecm.core.io.registry.reflect";version="0.0.0",org.nuxeo.ecm.platform.ur
+ l.service;version="0.0.0";uses:="org.nuxeo.ecm.platform.url.api,org.nux
+ eo.ecm.platform.url.codec.api,org.nuxeo.ecm.platform.url.codec.descript
+ or,org.nuxeo.runtime.model"
+Import-Package: javax.inject,org.apache.commons.lang;version="[2.6,3)",o
+ rg.apache.commons.logging;version="[1.2,2)",org.codehaus.jackson;versio
+ n="[1.8,2)",org.nuxeo.common.utils;version="[0.0,1)",org.nuxeo.common.x
+ map.annotation;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1
+ )",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",org.nuxeo.ecm.core.io.
+ marshallers.json.enrichers;version="[0.0,1)",org.nuxeo.ecm.core.io.regi
+ stry.context;version="[0.0,1)",org.nuxeo.ecm.core.io.registry.reflect;v
+ ersion="[0.0,1)",org.nuxeo.ecm.platform.types.adapter;version="[0.0,1)"
+ ,org.nuxeo.ecm.platform.url;version="[0.0,1)",org.nuxeo.ecm.platform.ur
+ l.api;version="[0.0,1)",org.nuxeo.ecm.platform.url.codec.api;version="[
+ 0.0,1)",org.nuxeo.ecm.platform.url.codec.descriptor,org.nuxeo.ecm.platf
+ orm.url.service;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0
+ ,1)"
+Nuxeo-Component: OSGI-INF/docviewurlservice-framework.xml,OSGI-INF/docvi
+ ewurlservice-contrib.xml,OSGI-INF/marshallers-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Platform Seam Debug
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-seam-debug
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: WEB.lib;version="0.0.0",doc;version="0.0.0",doc-parent;v
+ ersion="0.0.0"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

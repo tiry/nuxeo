@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Contributors:
  *     Stephane Lacoin
  */
@@ -21,12 +21,11 @@ package org.nuxeo.runtime.test.protocols.inline;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLStreamHandler;
 
-public class InlineURLStreamHandler extends URLStreamHandler {
+public class InlineURLStreamHandler implements org.nuxeo.runtime.services.url.URLStreamHandlers.Handler {
 
     @Override
-    protected URLConnection openConnection(URL u) throws IOException {
+    public URLConnection openConnection(URL u) throws IOException {
         return new InlineURLConnection(u);
     }
 

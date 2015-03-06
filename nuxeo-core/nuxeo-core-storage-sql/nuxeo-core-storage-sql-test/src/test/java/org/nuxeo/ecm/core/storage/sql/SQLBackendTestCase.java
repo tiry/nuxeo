@@ -23,6 +23,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.nuxeo.ecm.core.blob.BlobManager;
 import org.nuxeo.ecm.core.blob.BlobManagerComponent;
 import org.nuxeo.ecm.core.blob.BlobProviderDescriptor;
@@ -32,10 +34,23 @@ import org.nuxeo.ecm.core.storage.sql.RepositoryDescriptor.FieldDescriptor;
 import org.nuxeo.ecm.core.storage.sql.coremodel.SQLRepositoryService;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
 /**
  * @author Florent Guillaume
  */
+@Deploy({ "org.nuxeo.ecm.core.schema", //
+        "org.nuxeo.ecm.core.query", //
+        "org.nuxeo.ecm.core.api", //
+        "org.nuxeo.ecm.core.event", //
+        "org.nuxeo.ecm.core", //
+        "org.nuxeo.ecm.core.mimetype", //
+        "org.nuxeo.ecm.core.convert", //
+        "org.nuxeo.ecm.core.convert.plugins", //
+        "org.nuxeo.ecm.core.storage", //
+        "org.nuxeo.ecm.core.storage.sql", //
+})
 public abstract class SQLBackendTestCase extends NXRuntimeTestCase {
 
     private static final String REPOSITORY_NAME = "test";
@@ -46,17 +61,24 @@ public abstract class SQLBackendTestCase extends NXRuntimeTestCase {
 
     public Repository repository2;
 
+    @Inject FeaturesRunner runner;
+
+    /** Set to false for client unit tests */
+    public boolean initDatabase() {
+        return true;
+    }
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        deployBundle("org.nuxeo.runtime.jtajca");
-        deployBundle("org.nuxeo.ecm.core.api");
-        deployBundle("org.nuxeo.ecm.core");
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployBundle("org.nuxeo.ecm.core.event");
-        deployBundle("org.nuxeo.ecm.core.storage");
-        deployBundle("org.nuxeo.ecm.core.storage.sql");
-        DatabaseHelper.DATABASE.setUp();
+        if (initDatabase()) {
+            DatabaseHelper.DATABASE.setUp(runner);
+        }
+        BlobProviderDescriptor blobProviderDescriptor = new BlobProviderDescriptor();
+        blobProviderDescriptor.name = DatabaseHelper.getProperty(DatabaseHelper.REPOSITORY_PROPERTY);
+        blobProviderDescriptor.klass = DefaultBinaryManager.class;
+        BlobManagerComponent blobManager = (BlobManagerComponent) Framework.getService(BlobManager.class);
+        blobManager.registerBlobProvider(blobProviderDescriptor);
         repository = newRepository(-1);
     }
 
@@ -78,7 +100,7 @@ public abstract class SQLBackendTestCase extends NXRuntimeTestCase {
             name = REPOSITORY_NAME;
         }
         RepositoryDescriptor descriptor = DatabaseHelper.DATABASE.getRepositoryDescriptor();
-        descriptor.name = name;
+        descriptor.name = name != null ? name : DatabaseHelper.getRepositoryName();
         descriptor.setClusteringEnabled(clusteringDelay != -1);
         descriptor.setClusteringDelay(clusteringDelay);
         FieldDescriptor schemaField1 = new FieldDescriptor();
@@ -110,8 +132,15 @@ public abstract class SQLBackendTestCase extends NXRuntimeTestCase {
 
     @Override
     public void tearDown() throws Exception {
-        closeRepository();
-        super.tearDown();
+        try {
+            closeRepository();
+        } finally {
+            try {
+                DatabaseHelper.DATABASE.tearDown();
+            } finally {
+                super.tearDown();
+            }
+        }
     }
 
     protected void closeRepository() throws Exception {

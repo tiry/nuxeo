@@ -66,7 +66,6 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.LockObtainFailedException;
 import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
-import org.h2.message.DbException;
 import org.h2.store.fs.FileUtils;
 import org.h2.tools.SimpleResultSet;
 import org.h2.util.IOUtils;
@@ -549,8 +548,8 @@ public class H2Fulltext {
                     data = ((Clob) data).getCharacterStream();
                 }
                 return IOUtils.readStringAndClose((Reader) data, -1);
-            } catch (IOException e) {
-                throw DbException.convert(e);
+            } catch (IOException cause) {
+                throw new RuntimeException(cause);
             }
         case Types.VARBINARY:
         case Types.LONGVARBINARY:

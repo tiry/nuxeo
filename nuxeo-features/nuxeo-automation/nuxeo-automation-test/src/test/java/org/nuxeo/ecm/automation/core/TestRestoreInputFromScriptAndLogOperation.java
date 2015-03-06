@@ -20,8 +20,6 @@ package org.nuxeo.ecm.automation.core;
 
 import javax.inject.Inject;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,20 +31,21 @@ import org.nuxeo.ecm.automation.core.operations.LogOperation;
 import org.nuxeo.ecm.automation.core.operations.RestoreDocumentInputFromScript;
 import org.nuxeo.ecm.automation.core.operations.SetInputAsVar;
 import org.nuxeo.ecm.automation.core.operations.document.FetchDocument;
+import org.nuxeo.ecm.automation.test.AutomationFeature;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LogCaptureFeature;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
 /**
  * Testing RestoreDocumentInputFromScript and LogOperation operations.
  */
 @RunWith(FeaturesRunner.class)
-@Features({ CoreFeature.class, LogCaptureFeature.class })
-@Deploy({ "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.features" })
+@Features({ AutomationFeature.class, LogCaptureFeature.class })
 @LogCaptureFeature.FilterWith(TestRestoreInputFromScriptAndLogOperation.MyLogFilter.class)
 public class TestRestoreInputFromScriptAndLogOperation {
     @Inject
@@ -61,7 +60,7 @@ public class TestRestoreInputFromScriptAndLogOperation {
     public static class MyLogFilter implements LogCaptureFeature.Filter {
 
         @Override
-        public boolean accept(LoggingEvent event) {
+        public boolean accept(ILoggingEvent event) {
             if (!event.getLevel().equals(Level.ERROR)) {
                 return false;
             }

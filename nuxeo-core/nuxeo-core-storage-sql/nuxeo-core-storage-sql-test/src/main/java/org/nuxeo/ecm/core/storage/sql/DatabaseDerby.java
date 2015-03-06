@@ -20,13 +20,15 @@
 package org.nuxeo.ecm.core.storage.sql;
 
 import java.io.File;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.nuxeo.common.utils.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
 /**
  * @author Florent Guillaume
@@ -42,14 +44,11 @@ public class DatabaseDerby extends DatabaseHelper {
 
     private static final String DEF_PASSWORD = "";
 
-    private static final String CONTRIB_XML = "OSGI-INF/test-repo-repository-derby-contrib.xml";
-
-    private static final String LOG = "target/test/derby.log";
-
     private static final String DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
 
     protected String url;
 
+    @Override
     protected void setProperties() {
         setProperty(DATABASE_PROPERTY, new File(DIRECTORY).getAbsolutePath());
         setProperty(USER_PROPERTY, DEF_USER);
@@ -61,22 +60,18 @@ public class DatabaseDerby extends DatabaseHelper {
     }
 
     @Override
-    public void setUp() throws SQLException {
-        super.setUp();
-        System.setProperty("derby.stream.error.file", new File(LOG).getAbsolutePath());
-        // newInstance needed after a previous shutdown
-        try {
-            Class.forName(DRIVER).newInstance();
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+    public void setUp(FeaturesRunner runner) throws Exception {
+        super.setUp(runner);
         File dbdir = new File(DIRECTORY);
         File parent = dbdir.getParentFile();
-        FileUtils.deleteTree(dbdir);
+        FileUtils.deleteQuietly(dbdir);
         parent.mkdirs();
         // the following noticeably improves performance
         System.setProperty("derby.system.durability", "test");
         setProperties();
+        try (Connection connection = DriverManager.getConnection(getProperty(URL_PROPERTY))) {
+            ;
+        }
     }
 
     @Override
@@ -101,10 +96,6 @@ public class DatabaseDerby extends DatabaseHelper {
         throw new RuntimeException("Expected Derby shutdown exception instead", ex);
     }
 
-    @Override
-    public String getDeploymentContrib() {
-        return CONTRIB_XML;
-    }
 
     @Override
     public RepositoryDescriptor getRepositoryDescriptor() {

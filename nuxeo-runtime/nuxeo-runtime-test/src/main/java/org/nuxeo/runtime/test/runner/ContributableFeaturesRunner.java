@@ -22,14 +22,14 @@ import org.junit.runners.model.RunnerBuilder;
 
 public class ContributableFeaturesRunner extends Suite {
 
-    public ContributableFeaturesRunner(final Class<?> clazz, final RunnerBuilder builder) throws InitializationError {
-        super(clazz, new RunnerBuilder() {
+    public ContributableFeaturesRunner(final Class<?> otherClass, final RunnerBuilder builder) throws InitializationError {
+        super(otherClass, new RunnerBuilder() {
 
             @Override
             public Runner runnerForClass(Class<?> testClass) throws Throwable {
                 Runner runner = builder.runnerForClass(testClass);
                 if (runner instanceof FeaturesRunner) {
-                    ((FeaturesRunner) runner).loader.loadFeatures(clazz);
+                    ((FeaturesRunner) runner).otherClass = otherClass;
                 }
                 return runner;
             }

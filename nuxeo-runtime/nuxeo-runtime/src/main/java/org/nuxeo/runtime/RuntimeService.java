@@ -21,7 +21,6 @@
 package org.nuxeo.runtime;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,6 +28,7 @@ import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.ComponentManager;
 import org.nuxeo.runtime.model.ComponentName;
 import org.nuxeo.runtime.model.RuntimeContext;
+import org.nuxeo.runtime.model.impl.AbstractRuntimeService;
 import org.osgi.framework.Bundle;
 
 /**
@@ -109,9 +109,16 @@ public interface RuntimeService {
     Properties getProperties();
 
     /**
+     * Set runtime service properties
+     *
+     * @Since 7.2
+     */
+    void setProperties(Properties properties);
+
+    /**
      * Reread all property files loaded at startup.
      */
-    void reloadProperties() throws IOException;
+    void reloadProperties();
 
     /**
      * Gets a runtime service property given its name.
@@ -129,6 +136,13 @@ public interface RuntimeService {
      * @return the property value
      */
     String getProperty(String name, String defaultValue);
+
+    /**
+     * Sets a property value
+     *
+     * @since 7.3
+     */
+    void setProperty(String name, Object value);
 
     /**
      * Replaces any substring in the form <code>${property.name}</code> with the corresponding runtime property value if
@@ -185,6 +199,15 @@ public interface RuntimeService {
      */
     RuntimeContext getContext();
 
+
+    /**
+     * Gets the context of the runtime bundle by name
+     *
+     * @return the context object
+     * @since 7.2
+     */
+    RuntimeContext getContext(String name);
+
     /**
      * Gets the service of type serviceClass if such a service was declared by a resolved runtime component.
      * <p>
@@ -233,8 +256,8 @@ public interface RuntimeService {
     boolean getStatusMessage(StringBuilder msg);
 
     /**
-     * @since 7.4
+     * @since 5.7
      */
-    void setProperty(String name, Object value);
+    void getConfigSummary(StringBuilder msg);
 
 }

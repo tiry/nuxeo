@@ -26,11 +26,14 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.directory.shared.ldap.message.AttributesImpl;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.nuxeo.ecm.directory.DirectoryException;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
 /**
  * @author <a href="mailto:ldoguin@nuxeo.com">Laurent Doguin</a>
  */
+@RunWith(FeaturesRunner.class)
 public class TestFilterMatcher {
 
     @Test

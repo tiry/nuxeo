@@ -149,7 +149,7 @@ public class TestVersioningRemovalPolicy {
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:test-versioning-removal-nullcontrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:test-versioning-removal-nullcontrib.xml")
     public void shouldNotRemoveOrphanVersions() throws Exception {
         DocumentModel doc = session.createDocumentModel("/", "testfile1", "File");
         doc = session.createDocument(doc);
@@ -183,7 +183,7 @@ public class TestVersioningRemovalPolicy {
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:test-versioning-removal-filtercontrib.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:test-versioning-removal-filtercontrib.xml")
     public void shouldRemoveOrphanFileVersionsOnly() throws Exception {
         DocumentModel doc = session.createDocumentModel("/", "testfile1", "File");
         doc = session.createDocument(doc);

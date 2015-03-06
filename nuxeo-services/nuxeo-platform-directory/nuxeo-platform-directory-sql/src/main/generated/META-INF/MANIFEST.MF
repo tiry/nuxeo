@@ -1,0 +1,47 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-BuddyPolicy: dependent
+Bundle-ClassPath: .
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM SQL Directory
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-directory-sql
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-BuddyPolicy: dependent
+Eclipse-LazyStart: true
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.directory.sql;core=split;uses:="javax.sql,javax.transaction,org.ap
+ ache.commons.logging,org.nuxeo.common.xmap.annotation,org.nuxeo.ecm.cor
+ e.api,org.nuxeo.ecm.core.schema.types,org.nuxeo.ecm.core.storage.sql,or
+ g.nuxeo.ecm.core.storage.sql.jdbc,org.nuxeo.ecm.core.storage.sql.jdbc.d
+ b,org.nuxeo.ecm.core.storage.sql.jdbc.dialect,org.nuxeo.ecm.directory,o
+ rg.nuxeo.runtime.model";version="0.0.0",org.nuxeo.ecm.directory.sql.fil
+ ter;uses:="org.nuxeo.ecm.core.storage.sql.jdbc.db,org.nuxeo.ecm.directo
+ ry";version="0.0.0"
+Import-Package: javax.naming,javax.sql,javax.transaction,org.apache.comm
+ ons.csv;version="[1.0,2)",org.apache.commons.lang;version="[2.6,3)",org
+ .apache.commons.lang.builder;version="[2.6,3)",org.apache.commons.loggi
+ ng;version="[1.2,2)",org.nuxeo.common.utils;version="[0.0,1)",org.nuxeo
+ .common.xmap.annotation;version="[0.0,1)",org.nuxeo.ecm.core.api;versio
+ n="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",org.nuxeo.ecm
+ .core.api.local;version="[0.0,1)",org.nuxeo.ecm.core.schema;version="[0
+ .0,1)",org.nuxeo.ecm.core.schema.types;version="[0.0,1)",org.nuxeo.ecm.
+ core.storage.sql;version="[0.0,1)",org.nuxeo.ecm.core.storage.sql.jdbc;
+ version="[0.0,1)",org.nuxeo.ecm.core.storage.sql.jdbc.db;version="[0.0,
+ 1)",org.nuxeo.ecm.core.storage.sql.jdbc.dialect;version="[0.0,1)",org.n
+ uxeo.ecm.core.utils;version="[0.0,1)",org.nuxeo.ecm.directory;version="
+ [0.0,1)",org.nuxeo.ecm.directory.api;version="[0.0,1)",org.nuxeo.ecm.di
+ rectory.sql.filter,org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runtim
+ e.api;version="[0.0,1)",org.nuxeo.runtime.datasource;version="[0.0,1)",
+ org.nuxeo.runtime.model;version="[0.0,1)",org.nuxeo.runtime.transaction
+ ;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/SQLDirectoryFactory.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Private-Package: .
+Require-Bundle: org.nuxeo.ecm.directory.api;visibility:=reexport
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

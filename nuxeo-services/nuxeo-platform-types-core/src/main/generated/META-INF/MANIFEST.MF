@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: web,stateless
+Bundle-ClassPath: .
+Bundle-Localization: bundle
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Type Manager
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-types-core
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: true
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.types;api=split;version="0.0.0";uses:="org.nuxeo.ecm.core
+ .api,org.nuxeo.ecm.platform.types.localconfiguration,org.nuxeo.runtime.
+ model",org.nuxeo.ecm.platform.types.localconfiguration;version="0.0.0";
+ uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.core.api.adapter,org.nuxeo.
+ ecm.core.api.localconfiguration,org.nuxeo.ecm.core.event,org.nuxeo.ecm.
+ platform.types",schemas;version="0.0.0"
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.nuxeo.e
+ cm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.adapter;version="[
+ 0.0,1)",org.nuxeo.ecm.core.api.localconfiguration;version="[0.0,1)",org
+ .nuxeo.ecm.core.event;version="[0.0,1)",org.nuxeo.ecm.core.event.impl;v
+ ersion="[0.0,1)",org.nuxeo.ecm.core.schema;version="[0.0,1)",org.nuxeo.
+ ecm.core.schema.types;version="[0.0,1)",org.nuxeo.ecm.platform.types;ve
+ rsion="[0.0,1)",org.nuxeo.ecm.platform.types.localconfiguration;version
+ ="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.mo
+ del;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/nxtypes-framework.xml,OSGI-INF/ui-types-local-
+ configuration.xml,OSGI-INF/contentview-local-configuration.xml,OSGI-INF
+ /listeners-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Bundle: org.nuxeo.ecm.platform.types.api;visibility:=reexport
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

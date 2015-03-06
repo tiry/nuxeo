@@ -19,6 +19,7 @@
 package org.nuxeo.ecm.automation.test.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener.DISABLE_DUBLINCORE_LISTENER;
 
 import java.io.File;
 
@@ -26,27 +27,16 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.node.ArrayNode;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.io.marshallers.json.JsonAssert;
-import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.ecm.core.test.annotations.Granularity;
-import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @since 5.7.3
  */
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.automation.io", "org.nuxeo.ecm.actions" })
 @LocalDeploy("org.nuxeo.ecm.automation.io:testrestcontrib.xml")
 public class RestServiceTest extends BaseRestTest {
 
@@ -57,7 +47,8 @@ public class RestServiceTest extends BaseRestTest {
         for (int i = 0; i < 3; i++) {
             doc = session.createDocumentModel("/folder1", "doc" + i, "Note");
             doc.setPropertyValue("dc:title", "Note " + i);
-            session.createDocument(doc);
+            doc.putContextData(DISABLE_DUBLINCORE_LISTENER, true);
+            doc = session.createDocument(doc);
         }
         session.save();
     }

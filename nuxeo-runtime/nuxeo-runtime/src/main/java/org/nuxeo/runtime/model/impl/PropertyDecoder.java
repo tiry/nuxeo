@@ -27,16 +27,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.api.Framework;
 
 /**
  * @author Bogdan Stefanescu
  */
 public abstract class PropertyDecoder {
-
-    private static final Log log = LogFactory.getLog(PropertyDecoder.class);
 
     private static final Map<String, PropertyDecoder> decoders = new HashMap<String, PropertyDecoder>();
 
@@ -48,9 +45,8 @@ public abstract class PropertyDecoder {
         PropertyDecoder decoder = decoders.get(type);
         try {
             return decoder == null ? value : decoder.decode(value);
-        } catch (IllegalArgumentException t) {
-            log.error(t);
-            return null;
+        } catch (Throwable t) {
+            throw new RuntimeServiceException("Cannot decode '" + value + "' of type '" + type, t);
         }
     }
 

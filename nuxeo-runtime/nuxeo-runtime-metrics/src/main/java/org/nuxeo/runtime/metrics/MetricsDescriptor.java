@@ -33,14 +33,11 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.LogManager;
-
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.xmap.annotation.XNode;
 import org.nuxeo.common.xmap.annotation.XObject;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.management.ServerLocator;
-
 import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.JmxAttributeGauge;
 import com.codahale.metrics.JmxReporter;
@@ -54,7 +51,6 @@ import com.codahale.metrics.jvm.FileDescriptorRatioGauge;
 import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
 import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
 import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
-import com.codahale.metrics.log4j.InstrumentedAppender;
 
 @XObject("metrics")
 public class MetricsDescriptor implements Serializable {
@@ -66,7 +62,6 @@ public class MetricsDescriptor implements Serializable {
         graphiteReporter = new GraphiteDescriptor();
         csvReporter = new CsvDescriptor();
         tomcatInstrumentation = new TomcatInstrumentationDescriptor();
-        log4jInstrumentation = new Log4jInstrumentationDescriptor();
     }
 
     @XObject(value = "graphiteReporter")
@@ -210,43 +205,6 @@ public class MetricsDescriptor implements Serializable {
 
     }
 
-    @XObject(value = "log4jInstrumentation")
-    public static class Log4jInstrumentationDescriptor {
-
-        public static final String ENABLED_PROPERTY = "metrics.log4j.enabled";
-
-        @XNode("@enabled")
-        protected boolean enabled = Boolean.getBoolean(Framework.getProperty(ENABLED_PROPERTY, "false"));
-
-        private InstrumentedAppender appender;
-
-        @Override
-        public String toString() {
-            return String.format("log4jInstrumentation %s", enabled ? "enabled" : "disabled");
-        }
-
-        public void enable(MetricRegistry registry) {
-            if (!enabled) {
-                return;
-            }
-            LogFactory.getLog(MetricsServiceImpl.class).info(this);
-            appender = new InstrumentedAppender(registry);
-            LogManager.getRootLogger().addAppender(appender);
-        }
-
-        public void disable(MetricRegistry registry) {
-            if (appender == null) {
-                return;
-            }
-            try {
-                LogManager.getRootLogger().removeAppender(appender);
-            } finally {
-                appender = null;
-            }
-        }
-
-    }
-
     @XObject(value = "tomcatInstrumentation")
     public static class TomcatInstrumentationDescriptor {
 
@@ -347,9 +305,6 @@ public class MetricsDescriptor implements Serializable {
     @XNode("csvReporter")
     public CsvDescriptor csvReporter = new CsvDescriptor();
 
-    @XNode("log4jInstrumentation")
-    public Log4jInstrumentationDescriptor log4jInstrumentation = new Log4jInstrumentationDescriptor();
-
     @XNode("tomcatInstrumentation")
     public TomcatInstrumentationDescriptor tomcatInstrumentation = new TomcatInstrumentationDescriptor();
 
@@ -363,7 +318,6 @@ public class MetricsDescriptor implements Serializable {
         jmxReporter.start();
         graphiteReporter.enable(registry);
         csvReporter.enable(registry);
-        log4jInstrumentation.enable(registry);
         tomcatInstrumentation.enable(registry);
         jvmInstrumentation.enable(registry);
     }
@@ -372,7 +326,6 @@ public class MetricsDescriptor implements Serializable {
         try {
             graphiteReporter.disable(registry);
             csvReporter.disable(registry);
-            log4jInstrumentation.disable(registry);
             tomcatInstrumentation.disable(registry);
             jvmInstrumentation.disable(registry);
             jmxReporter.stop();

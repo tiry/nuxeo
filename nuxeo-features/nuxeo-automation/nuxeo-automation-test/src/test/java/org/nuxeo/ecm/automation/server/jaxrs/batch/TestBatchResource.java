@@ -35,7 +35,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.automation.client.Session;
@@ -48,7 +47,7 @@ import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.Jetty;
+import org.nuxeo.runtime.test.runner.JettyFeature;
 import org.nuxeo.runtime.test.runner.RuntimeHarness;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 import org.nuxeo.transientstore.test.TransientStoreFeature;
@@ -65,7 +64,6 @@ import org.nuxeo.transientstore.test.TransientStoreFeature;
 @Deprecated
 @RunWith(FeaturesRunner.class)
 @Features({ TransientStoreFeature.class, EmbeddedAutomationServerFeature.class })
-@Jetty(port = 18080)
 public class TestBatchResource {
 
     @Inject
@@ -77,27 +75,12 @@ public class TestBatchResource {
     @Inject
     protected Session clientSession;
 
-    protected ObjectMapper mapper;
-
-    protected String uploadURL = "http://localhost:18080/automation/batch/upload";
-
-    protected String fileIndex = "0";
-
-    protected String fileName = "New file.txt";
-
-    protected String mimeType = "text/plain";
-
-    protected String content = "This is the content of a new file.";
-
-    @Before
-    public void doBefore() throws Exception {
-        mapper = new ObjectMapper();
-    }
+    @Inject
+    JettyFeature jetty;
 
     @Test(expected = NuxeoException.class)
     public void testBatchUploadClientGeneratedIdNotAllowed() throws IOException {
-        String batchId = UUID.randomUUID().toString();
-        batchUpload(uploadURL, batchId, fileIndex, fileName, mimeType, content);
+        batchUpload(UUID.randomUUID().toString());
     }
 
     @Test
@@ -105,16 +88,14 @@ public class TestBatchResource {
         harness.deployContrib("org.nuxeo.ecm.automation.test.test",
                 "test-batchmanager-client-generated-id-allowed-contrib.xml");
         String batchId = UUID.randomUUID().toString();
-        String responseBatchId = batchUpload(uploadURL, batchId, fileIndex, fileName, mimeType, content);
+        String responseBatchId = batchUpload(batchId);
         assertEquals(batchId, responseBatchId);
-        harness.undeployContrib("org.nuxeo.ecm.automation.test.test",
-                "test-batchmanager-client-generated-id-allowed-contrib.xml");
     }
 
     @Test
     public void testBatchUploadServerGeneratedId() throws IOException {
         String batchId = Framework.getService(BatchManager.class).initBatch();
-        assertEquals(batchId, batchUpload(uploadURL, batchId, fileIndex, fileName, mimeType, content));
+        assertEquals(batchId, batchUpload(batchId));
     }
 
     @Test
@@ -126,17 +107,24 @@ public class TestBatchResource {
         TransactionHelper.commitOrRollbackTransaction();
         TransactionHelper.startTransaction();
 
-        // Upload a blob and attach it to the document
-        String executeURL = "http://localhost:18080/automation/batch/execute";
-        String docPath = file.getPathAsString();
-        String batchId = batchUpload(uploadURL, null, fileIndex, fileName, mimeType, content);
-        batchExecuteAttachBlob(executeURL, batchId, fileIndex, docPath);
+        String batchId = Framework.getService(BatchManager.class).initBatch();
+        batchUpload(batchId);
+        batchExecute(batchId, file);
 
         // Get blob from document and check its content
         Blob blob = (Blob) clientSession.newRequest(GetDocumentBlob.ID).setInput(file.getPathAsString()).execute();
         assertNotNull(blob);
         String blobString = new String(IOUtils.toByteArray(blob.getStream()));
         assertEquals("This is the content of a new file.", blobString);
+    }
+
+    String batchUpload(String id) throws IOException {
+        String uploadURL = jetty.getConnectionURL("/automation/batch/upload");
+        String fileIndex = "0";
+        String fileName = "New file.txt";
+        String mimeType = "text/plain";
+        String content = "This is the content of a new file.";
+        return batchUpload(uploadURL, id, fileIndex, fileName, mimeType, content);
     }
 
     protected String batchUpload(String urlStr, String batchId, String fileIndex, String fileName, String mimeType,
@@ -167,12 +155,18 @@ public class TestBatchResource {
             }
             // Read response and return batch id
             try (InputStream is = conn.getInputStream()) {
-                JsonNode node = mapper.readTree(is);
+                JsonNode node = new ObjectMapper().readTree(is);
                 return node.get("batchId").getValueAsText();
             }
         } finally {
             conn.disconnect();
         }
+    }
+
+    boolean batchExecute(String id, DocumentModel file) throws IOException {
+        String executeURL = jetty.getConnectionURL("/automation/batch/execute");
+        String fileIndex = "0";
+        return batchExecuteAttachBlob(executeURL, id, fileIndex, file.getPathAsString());
     }
 
     protected boolean batchExecuteAttachBlob(String urlStr, String batchId, String fileIndex, String docPath)

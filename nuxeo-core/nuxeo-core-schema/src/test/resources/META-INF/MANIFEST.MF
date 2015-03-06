@@ -1,3 +1,4 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-SymbolicName: org.nuxeo.ecm.core.schema.tests
+Fragment-Host: org.nuxeo.ecm.core.schema

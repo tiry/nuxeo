@@ -71,8 +71,8 @@ public class PostCommitEventListenerTest {
 
     @Test
     @ConditionalIgnoreRule.Ignore(condition = ConditionalIgnoreRule.IgnoreIsolated.class)
+    @LocalDeploy("org.nuxeo.ecm.core.test:test-PostCommitListeners.xml")
     public void testScripts() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.core.test.tests", "test-PostCommitListeners.xml");
 
         assertEquals(0, SCRIPT_CNT);
 
@@ -91,30 +91,22 @@ public class PostCommitEventListenerTest {
         service.fireEvent("some-event", customContext);
         assertEquals(0, SCRIPT_CNT);
 
-        session.save();
-
         nextTransaction();
 
         assertEquals(2, SCRIPT_CNT);
 
-        harness.undeployContrib("org.nuxeo.ecm.core.test.tests", "test-PostCommitListeners.xml");
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.ecm.core.test.tests:test-ShallowFilteringPostCommitListeners.xml")
+    @LocalDeploy("org.nuxeo.ecm.core.test:test-ShallowFilteringPostCommitListeners.xml")
     public void testShallowFiltering() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.core.test.tests", "test-ShallowFilteringPostCommitListeners.xml");
-
         DocumentModel doc = session.createDocumentModel("/", "empty", "Document");
         doc = session.createDocument(doc);
         ShallowFilterPostCommitEventListener.handledCount = 0;
-        session.save();
 
         nextTransaction();
 
         assertEquals(1, ShallowFilterPostCommitEventListener.handledCount);
-
-        harness.undeployContrib("org.nuxeo.ecm.core.test.tests", "test-ShallowFilteringPostCommitListeners.xml");
     }
 
 }

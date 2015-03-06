@@ -46,8 +46,8 @@ public class ContributionLocation extends AbstractContribution {
 
     @Override
     public String getContent() {
-        try {
-            return IOUtils.toString(location.openStream(), Charsets.UTF_8);
+        try (InputStream in = location.openStream()) {
+            return IOUtils.toString(in, Charsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException("Cannot get '".concat(name).concat("' content"), e);
         }

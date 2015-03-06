@@ -21,8 +21,10 @@ package org.nuxeo.ecm.platform.uidgen;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -48,7 +50,14 @@ public class JPAUIDSequencerImpl extends AbstractUIDSequencer {
     private static volatile PersistenceProvider persistenceProvider;
 
     protected ThreadPoolExecutor tpe = new ThreadPoolExecutor(1, 2, 10, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<Runnable>(1000));
+            new LinkedBlockingQueue<Runnable>(1000), new ThreadFactory() {
+                AtomicInteger count = new AtomicInteger(1);
+
+                @Override
+                public Thread newThread(Runnable r) {
+                    return new Thread(r, String.format("uid-sequencer-" + count.getAndIncrement()));
+                }
+            });
 
     public JPAUIDSequencerImpl() {
     }
@@ -83,7 +92,8 @@ public class JPAUIDSequencerImpl extends AbstractUIDSequencer {
         ClassLoader last = thread.getContextClassLoader();
         try {
             thread.setContextClassLoader(PersistenceProvider.class.getClassLoader());
-            PersistenceProviderFactory persistenceProviderFactory = Framework.getLocalService(PersistenceProviderFactory.class);
+            PersistenceProviderFactory persistenceProviderFactory = Framework
+                    .getLocalService(PersistenceProviderFactory.class);
             persistenceProvider = persistenceProviderFactory.newProvider("NXUIDSequencer");
             persistenceProvider.openPersistenceUnit();
         } finally {
@@ -167,7 +177,9 @@ public class JPAUIDSequencerImpl extends AbstractUIDSequencer {
     protected int getNext(EntityManager em, String key) {
         UIDSequenceBean seq;
         try {
-            seq = (UIDSequenceBean) em.createNamedQuery("UIDSequence.findByKey").setParameter("key", key).getSingleResult();
+            seq = (UIDSequenceBean) em.createNamedQuery("UIDSequence.findByKey")
+                    .setParameter("key", key)
+                    .getSingleResult();
             // createQuery("FROM UIDSequenceBean seq WHERE seq.key = :key")
         } catch (NoResultException e) {
             seq = new UIDSequenceBean(key);

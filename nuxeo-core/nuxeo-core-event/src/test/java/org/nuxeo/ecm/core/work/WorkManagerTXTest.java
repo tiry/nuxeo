@@ -18,8 +18,6 @@
  */
 package org.nuxeo.ecm.core.work;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.nuxeo.ecm.core.work.api.Work.State.CANCELED;
 import static org.nuxeo.ecm.core.work.api.Work.State.COMPLETED;
 import static org.nuxeo.ecm.core.work.api.Work.State.RUNNING;

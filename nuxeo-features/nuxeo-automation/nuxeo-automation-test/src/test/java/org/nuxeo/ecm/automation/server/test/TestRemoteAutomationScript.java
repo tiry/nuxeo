@@ -40,10 +40,9 @@ import org.nuxeo.ecm.automation.core.operations.document.FetchDocument;
 import org.nuxeo.ecm.automation.test.EmbeddedAutomationServerFeature;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.ConditionalIgnoreRule;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.Jetty;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
@@ -51,10 +50,9 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  */
 @RunWith(FeaturesRunner.class)
 @Features({ EmbeddedAutomationServerFeature.class })
-@Deploy({ "org.nuxeo.ecm.automation.scripting" })
 @LocalDeploy({ "org.nuxeo.ecm.automation.test:operation-contrib.xml" })
-@Jetty(port = 18080)
 @RepositoryConfig(cleanup = Granularity.METHOD)
+@ConditionalIgnoreRule.Ignore(cause="system out side effects", condition=ConditionalIgnoreRule.IgnoreIsolated.class)
 public class TestRemoteAutomationScript {
 
     ByteArrayOutputStream outContent = new ByteArrayOutputStream();

@@ -63,6 +63,9 @@ public class JavaUtilLoggingHelper {
         }
         try {
             Logger rootLogger = LogManager.getLogManager().getLogger("");
+            while (rootLogger.getParent() != null) {
+                rootLogger = rootLogger.getParent();
+            }
             for (Handler handler : rootLogger.getHandlers()) {
                 rootLogger.removeHandler(handler);
             }

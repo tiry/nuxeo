@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateless
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Publisher Service task
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-publisher-tas
+ k
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.publisher.task;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ec
+ m.core.api.security,org.nuxeo.ecm.platform.publisher.api,org.nuxeo.ecm.
+ platform.publisher.impl.core,org.nuxeo.ecm.platform.publisher.rules,org
+ .nuxeo.ecm.platform.task";version="0.0.0"
+Import-Package: org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.api.security;version="[0.0,1)",org.nuxeo.ecm.core.event;version="[0
+ .0,1)",org.nuxeo.ecm.core.event.impl;version="[0.0,1)",org.nuxeo.ecm.pl
+ atform.publisher.api;version="[0.0,1)",org.nuxeo.ecm.platform.publisher
+ .impl.core;version="[0.0,1)",org.nuxeo.ecm.platform.publisher.rules;ver
+ sion="[0.0,1)",org.nuxeo.ecm.platform.task;version="[0.0,1)",org.nuxeo.
+ ecm.platform.usermanager;version="[0.0,1)",org.nuxeo.runtime.api;versio
+ n="[0.0,1)"
+Nuxeo-Component: OSGI-INF/publisher-task-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.publisher.core
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

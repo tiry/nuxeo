@@ -152,6 +152,8 @@ public class LocalSession extends AbstractSession implements Synchronization {
 
     @Override
     public void afterCompletion(int status) {
+       // insure the connection is closed after rollback
+        closeInThisThread();
     }
 
     protected void closeInThisThread() {

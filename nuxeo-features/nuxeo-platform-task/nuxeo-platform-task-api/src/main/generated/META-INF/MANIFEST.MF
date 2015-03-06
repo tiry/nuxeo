@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM task API
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-task-api
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.task;uses:="org.nuxeo.common.xmap.annotation,org.nuxeo.ec
+ m.core.api,org.nuxeo.ecm.core.api.adapter,org.nuxeo.ecm.core.event";ver
+ sion="0.0.0",org.nuxeo.ecm.platform.task.dashboard;uses:="net.sf.json,o
+ rg.apache.commons.logging,org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform
+ .task";version="0.0.0",org.nuxeo.ecm.platform.task.providers;uses:="org
+ .nuxeo.ecm.core.api,org.nuxeo.ecm.platform.query.api,org.nuxeo.ecm.plat
+ form.task.dashboard";version="0.0.0"
+Import-Package: net.sf.json,org.apache.commons.logging;version="[1.2,2)"
+ ,org.nuxeo.common.utils.i18n;version="[0.0,1)",org.nuxeo.common.xmap.an
+ notation;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org
+ .nuxeo.ecm.core.api.adapter;version="[0.0,1)",org.nuxeo.ecm.core.api.im
+ pl;version="[0.0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",org.nux
+ eo.ecm.core.query.sql;version="[0.0,1)",org.nuxeo.ecm.core.schema.utils
+ ;version="[0.0,1)",org.nuxeo.ecm.platform.query.api;version="[0.0,1)",o
+ rg.nuxeo.ecm.platform.task,org.nuxeo.ecm.platform.task.dashboard,org.nu
+ xeo.ecm.platform.types.adapter;version="[0.0,1)",org.nuxeo.ecm.platform
+ .url;version="[0.0,1)",org.nuxeo.ecm.platform.url.api;version="[0.0,1)"
+ ,org.nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.core.api
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

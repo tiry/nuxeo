@@ -31,8 +31,11 @@ import org.nuxeo.ecm.core.io.marshallers.json.AbstractJsonWriterTest;
 import org.nuxeo.ecm.core.io.marshallers.json.JsonAssert;
 import org.nuxeo.ecm.core.io.marshallers.json.document.DocumentModelJsonWriter;
 import org.nuxeo.ecm.core.io.registry.context.RenderingContext.CtxBuilder;
+import org.nuxeo.ecm.webapp.WebappFeature;
 import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
 
+@Features(WebappFeature.class)
 @Deploy({ "org.nuxeo.ecm.platform.commandline.executor", "org.nuxeo.ecm.platform.convert",
         "org.nuxeo.ecm.core.mimetype", "org.nuxeo.ecm.platform.preview", "org.nuxeo.ecm.platform.dublincore" })
 public class PreviewJsonEnricherTest extends AbstractJsonWriterTest.External<DocumentModelJsonWriter, DocumentModel> {

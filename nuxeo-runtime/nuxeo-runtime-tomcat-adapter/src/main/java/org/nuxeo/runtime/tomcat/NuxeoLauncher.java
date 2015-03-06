@@ -19,52 +19,29 @@
 package org.nuxeo.runtime.tomcat;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-
-import javax.management.JMException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.apache.catalina.Container;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.Loader;
 import org.apache.catalina.core.ContainerBase;
-import org.apache.catalina.util.ServerInfo;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.nuxeo.osgi.application.FrameworkBootstrap;
-import org.nuxeo.osgi.application.MutableClassLoader;
-import org.nuxeo.runtime.tomcat.dev.DevFrameworkBootstrap;
-import org.nuxeo.runtime.tomcat.dev.NuxeoDevWebappClassLoader;
+import org.apache.catalina.core.StandardContext;
+import org.apache.naming.ContextAccessController;
+import org.apache.naming.resources.DirContextURLStreamHandler;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
 public class NuxeoLauncher implements LifecycleListener {
 
-    public static final String DEV_BUNDLES_NAME = "org.nuxeo:type=sdk,name=dev-bundles";
+    protected String home = "${catalina.base}/nxserver";
 
-    public static final String WEB_RESOURCES_NAME = "org.nuxeo:type=sdk,name=web-resources";
+    protected static NuxeoLauncher self;
 
-    static final Log log = LogFactory.getLog(NuxeoLauncher.class);
+    protected File homedir;
 
-    protected boolean shared; // TODO
-
-    protected String home = "nxserver";
-
-    protected boolean automaticReload = true;
-
-    protected FrameworkBootstrap bootstrap;
-
-    public void setShared(boolean shared) {
-        this.shared = shared;
-    }
-
-    public boolean isShared() {
-        return shared;
+    public NuxeoLauncher() {
+        self = this;
     }
 
     public void setHome(String home) {
@@ -75,13 +52,6 @@ public class NuxeoLauncher implements LifecycleListener {
         return home;
     }
 
-    public void setAutomaticReload(boolean value) {
-        automaticReload = value;
-    }
-
-    public boolean getAutomaticReload() {
-        return automaticReload;
-    }
 
     @Override
     public void lifecycleEvent(LifecycleEvent event) {
@@ -96,36 +66,24 @@ public class NuxeoLauncher implements LifecycleListener {
 
     protected void handleEvent(NuxeoWebappLoader loader, LifecycleEvent event) {
         String type = event.getType();
-        try {
-            MutableClassLoader cl = (MutableClassLoader) loader.getClassLoader();
-            boolean devMode = cl instanceof NuxeoDevWebappClassLoader;
-            if (type == Lifecycle.CONFIGURE_START_EVENT) {
-                File homeDir = resolveHomeDirectory(loader);
-                if (devMode) {
-                    bootstrap = new DevFrameworkBootstrap(cl, homeDir);
-                    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-                    server.registerMBean(bootstrap, new ObjectName(DEV_BUNDLES_NAME));
-                    server.registerMBean(cl, new ObjectName(WEB_RESOURCES_NAME));
-                    ((NuxeoDevWebappClassLoader) cl).setBootstrap((DevFrameworkBootstrap) bootstrap);
-                } else {
-                    bootstrap = new FrameworkBootstrap(cl, homeDir);
-                }
-                bootstrap.setHostName("Tomcat");
-                bootstrap.setHostVersion(ServerInfo.getServerNumber());
-                bootstrap.initialize();
-            } else if (type == Lifecycle.START_EVENT) {
-                bootstrap.start();
-            } else if (type == Lifecycle.STOP_EVENT) {
-                bootstrap.stop();
-                if (devMode) {
-                    MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-                    server.unregisterMBean(new ObjectName(DEV_BUNDLES_NAME));
-                    server.unregisterMBean(new ObjectName(WEB_RESOURCES_NAME));
-                }
-            }
-        } catch (IOException | JMException | ReflectiveOperationException e) {
-            log.error("Failed to handle event: " + type, e);
+        if (type == Lifecycle.BEFORE_START_EVENT) {
+            homedir = resolveHomeDirectory(loader);
+        } else if (type == Lifecycle.CONFIGURE_START_EVENT) {
+            DirContextURLStreamHandler.bind(loader.getClassLoader(), loader.getContainer().getResources());
         }
+        // else if (type == Lifecycle.START_EVENT) {
+        // loader.getClassLoader().bootstrap.start();
+        // } else if (type == Lifecycle.STOP_EVENT) {
+        // loader.getClassLoader().bootstrap.stop();
+        // }
+        return;
+    }
+
+    protected void grabContextSecurity(NuxeoWebappLoader loader, LifecycleEvent event) {
+        final Object token = event.getLifecycle();
+        final StandardContext source = (StandardContext) event.getSource();
+        String name = "/" + source.getDomain() + "/" + source.getHostname() + source.getPath();
+        ContextAccessController.setWritable(name, token);
     }
 
     protected File resolveHomeDirectory(NuxeoWebappLoader loader) {

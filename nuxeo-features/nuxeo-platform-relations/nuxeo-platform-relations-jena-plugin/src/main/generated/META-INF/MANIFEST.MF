@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ClassPath: lib/antlr-2.7.5.jar,lib/arq.jar,lib/commons-logging.ja
+ r,lib/concurrent.jar,lib/icu4j_3_4.jar,lib/iri.jar,lib/jena.jar,lib/jen
+ atest.jar,lib/json.jar,lib/junit.jar,lib/log4j-1.2.12.jar,lib/stax-api-
+ 1.0.jar,lib/wstx-asl-2.8.jar,lib/xercesImpl.jar,lib/xml-apis.jar
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Relations Jena Plugin
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-relations-jen
+ a-plugin
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.relations.jena;uses:="com.hp.hpl.jena.rdf.model,org.nuxeo
+ .ecm.core.api,org.nuxeo.ecm.platform.relations.api";version="0.0.0"
+Import-Package: com.hp.hpl.jena.datatypes,com.hp.hpl.jena.db,com.hp.hpl.
+ jena.db.impl,com.hp.hpl.jena.graph,com.hp.hpl.jena.graph.impl,com.hp.hp
+ l.jena.query,com.hp.hpl.jena.rdf.model,com.hp.hpl.jena.shared,com.hp.hp
+ l.jena.util.iterator,javax.naming,javax.sql,org.apache.commons.logging;
+ version="[1.2,2)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ec
+ m.platform.relations;version="[0.0,1)",org.nuxeo.ecm.platform.relations
+ .api;version="[0.0,1)",org.nuxeo.ecm.platform.relations.api.impl;versio
+ n="[0.0,1)",org.nuxeo.ecm.platform.relations.services;version="[0.0,1)"
+ ,org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runtime.api;version="[0.
+ 0,1)",org.nuxeo.runtime.datasource;version="[0.0,1)",org.nuxeo.runtime.
+ model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/nxrelations-jena-plugin.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.relations
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

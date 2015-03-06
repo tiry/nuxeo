@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.theme.nuxeo-theme-styling.tests
+Bundle-SymbolicName: org.nuxeo.theme.nuxeo-theme-styling.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.theme.nuxeo-theme-styling
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.api.localconfiguration;vers
+ ion="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.core.test.annotatio
+ ns,org.nuxeo.ecm.web.resources.api;version="[0.0,1)",org.nuxeo.ecm.web.
+ resources.api.service;version="[0.0,1)",org.nuxeo.runtime.api;version="
+ [0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.nuxeo.runtime.te
+ st,org.nuxeo.runtime.test.runner,org.nuxeo.theme.localconfiguration,org
+ .nuxeo.theme.styling.negotiation,org.nuxeo.theme.styling.service,org.nu
+ xeo.theme.styling.service.descriptors
+Nuxeo-Component: OSGI-INF/theme-local-configuration.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.theme.styling.tests,org.nuxeo.theme.test.loca
+ lconfiguration,themes.css,themes.palettes
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

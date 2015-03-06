@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: NuxeoWeb Tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-webapp-base.t
+ ests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-webapp-base
+Import-Package: javax.inject,org.junit,org.junit.runner,org.mockito,org.
+ mockito.stubbing,org.nuxeo.common.collections;version="[0.0,1)",org.nux
+ eo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="
+ [0.0,1)",org.nuxeo.ecm.core.api.model;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.event;version="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.core.
+ test.annotations,org.nuxeo.ecm.platform.actions;version="[0.0,1)",org.n
+ uxeo.ecm.platform.actions.ejb;version="[0.0,1)",org.nuxeo.ecm.platform.
+ types;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.api;version="[0.0
+ ,1)",org.nuxeo.ecm.platform.ui.web.jsf,org.nuxeo.ecm.platform.usermanag
+ er;version="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.
+ runtime.model;version="[0.0,1)",org.nuxeo.runtime.test,org.nuxeo.runtim
+ e.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.webapp,org.nuxeo.ecm.webapp.bulkedit,org.
+ nuxeo.ecm.webapp.clipboard,org.nuxeo.ecm.webapp.localconfiguration.sear
+ ch,org.nuxeo.ecm.webapp.security,org.nuxeo.ecm.webapp.tree,org.nuxeo.ec
+ m.webapp.tree.nav
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

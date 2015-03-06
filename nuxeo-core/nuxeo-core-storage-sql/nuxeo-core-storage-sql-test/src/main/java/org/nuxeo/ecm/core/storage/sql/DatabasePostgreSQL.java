@@ -20,8 +20,6 @@
 package org.nuxeo.ecm.core.storage.sql;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,47 +41,26 @@ public class DatabasePostgreSQL extends DatabaseHelper {
 
     private static final String DEF_PASSWORD = "nuxeo";
 
-    private static final String CONTRIB_XML = "OSGI-INF/test-repo-repository-postgresql-contrib.xml";
-
     private static final String DRIVER = "org.postgresql.Driver";
 
+    @Override
     protected void setProperties() {
-        String db = setProperty(DATABASE_PROPERTY, databaseName);
-        String server = setProperty(SERVER_PROPERTY, DEF_SERVER);
-        String port = setProperty(PORT_PROPERTY, DEF_PORT);
-        String user = setProperty(USER_PROPERTY, DEF_USER);
-        String password = setProperty(PASSWORD_PROPERTY, DEF_PASSWORD);
-        // for sql directory tests
-        String driver = setProperty(DRIVER_PROPERTY, DRIVER);
-        String url = String.format("jdbc:postgresql://%s:%s/%s", server, port, db);
-        setProperty(URL_PROPERTY, url);
+        setProperty(DATABASE_PROPERTY, DEFAULT_DATABASE_NAME);
+        setProperty(SERVER_PROPERTY, DEF_SERVER);
+        setProperty(PORT_PROPERTY, DEF_PORT);
+        setProperty(USER_PROPERTY, DEF_USER);
+        setProperty(PASSWORD_PROPERTY, DEF_PASSWORD);
+        setProperty(DRIVER_PROPERTY, DRIVER);
+        setProperty(URL_PROPERTY, "jdbc:postgresql://%s:%s/%s", SERVER_PROPERTY, PORT_PROPERTY, DATABASE_PROPERTY);
         setProperty(ID_TYPE_PROPERTY, DEF_ID_TYPE);
     }
 
     @Override
-    public void setUp() throws SQLException {
-        super.setUp();
-        try {
-            Class.forName(DRIVER);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-        setProperties();
-        Connection connection = DriverManager.getConnection(Framework.getProperty(URL_PROPERTY),
-                Framework.getProperty(USER_PROPERTY), Framework.getProperty(PASSWORD_PROPERTY));
-        try {
-            doOnAllTables(connection, null, "public", "DROP TABLE \"%s\" CASCADE");
-            Statement st = connection.createStatement();
+    public void initDatabase(Connection connection) throws Exception {
+        doOnAllTables(connection, null, "public", "DROP TABLE \"%s\" CASCADE");
+        try (Statement st = connection.createStatement()) {
             executeSql(st, "DROP SEQUENCE IF EXISTS hierarchy_seq");
-            st.close();
-        } finally {
-            connection.close();
         }
-    }
-
-    @Override
-    public String getDeploymentContrib() {
-        return CONTRIB_XML;
     }
 
     @Override

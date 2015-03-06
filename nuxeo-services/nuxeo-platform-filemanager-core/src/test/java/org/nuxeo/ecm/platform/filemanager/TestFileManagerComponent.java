@@ -23,46 +23,27 @@ package org.nuxeo.ecm.platform.filemanager;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.After;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import javax.inject.Inject;
 
+import org.junit.Test;
+import org.nuxeo.ecm.platform.filemanager.api.FileManager;
 import org.nuxeo.ecm.platform.filemanager.service.FileManagerService;
 import org.nuxeo.ecm.platform.filemanager.service.extension.FileImporter;
-import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
+@Deploy({"org.nuxeo.ecm.core.mimetype", "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.platform.filemanager.core"})
+@LocalDeploy("org.nuxeo.ecm.platform.filemanager.core:nxfilemanager-test-contribs.xml")
 public class TestFileManagerComponent extends NXRuntimeTestCase {
 
-    private FileManagerService filemanagerService;
+    @Inject
+    private FileManager fm;
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        deployBundle(FileManagerUTConstants.MIMETYPE_BUNDLE);
-        deployContrib(FileManagerUTConstants.FILEMANAGER_BUNDLE, "OSGI-INF/nxfilemanager-service.xml");
-
-        deployContrib(FileManagerUTConstants.FILEMANAGER_TEST_BUNDLE, "nxfilemanager-test-contribs.xml");
-
-        filemanagerService = (FileManagerService) Framework.getRuntime().getComponent(FileManagerService.NAME);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        filemanagerService = null;
-
-        undeployContrib(FileManagerUTConstants.FILEMANAGER_TEST_BUNDLE, "nxfilemanager-test-contribs.xml");
-
-        undeployContrib(FileManagerUTConstants.FILEMANAGER_BUNDLE, "OSGI-INF/nxfilemanager-service.xml");
-
-        super.tearDown();
-    }
 
     @Test
     public void testPlugins() {
-        FileImporter testPlu = filemanagerService.getPluginByName("plug");
+        FileImporter testPlu = ((FileManagerService)fm).getPluginByName("plug");
         List<String> filters = testPlu.getFilters();
         assertEquals(2, filters.size());
     }

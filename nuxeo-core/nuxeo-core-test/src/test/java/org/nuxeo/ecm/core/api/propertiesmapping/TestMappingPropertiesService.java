@@ -39,13 +39,13 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.model.PropertyNotFoundException;
 import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
-@Deploy({ "org.nuxeo.ecm.core.test.tests:test-CoreExtensions.xml",
-        "org.nuxeo.ecm.core.test.tests:test-propertiesmapping-contrib.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.core.test:test-CoreExtensions.xml",
+        "org.nuxeo.ecm.core.test:test-propertiesmapping-contrib.xml" })
 @Features(CoreFeature.class)
 public class TestMappingPropertiesService {
 

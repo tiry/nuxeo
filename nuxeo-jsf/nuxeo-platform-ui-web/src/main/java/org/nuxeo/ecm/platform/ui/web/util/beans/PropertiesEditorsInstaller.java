@@ -45,6 +45,9 @@ public class PropertiesEditorsInstaller {
 
     protected void uninstallEditor(Class<?> targetType, Class<?> editorClass) {
         PropertyEditor editor = PropertyEditorManager.findEditor(targetType);
+        if (editor == null) {
+            return;
+        }
         if (!editorClass.equals(editor.getClass())) {
             return;
         }

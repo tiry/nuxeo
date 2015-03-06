@@ -43,7 +43,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @Features(CoreFeature.class)
 @RepositoryConfig(init = RepositoryInit.class)
 @Deploy({ "org.nuxeo.ecm.platform.types.api", "org.nuxeo.ecm.platform.types.core",
-        "org.nuxeo.ecm.platform.filemanager.api", "org.nuxeo.ecm.platform.filemanager.core",
+    "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.platform.filemanager.api", "org.nuxeo.ecm.platform.filemanager.core",
         "org.nuxeo.ecm.platform.versioning.api", "org.nuxeo.ecm.platform.versioning" })
 @LocalDeploy("org.nuxeo.ecm.platform.filemanager.core:ecm-types-test-contrib.xml")
 public class TestVersionning {

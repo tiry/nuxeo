@@ -1,0 +1,39 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: runtime
+Bundle-ClassPath: .
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo CommandLine Executor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-commandline-e
+ xecutor
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.commandline.executor.api;version="0.0.0",org.nuxeo.ecm.pl
+ atform.commandline.executor.service;uses:="org.nuxeo.common.xmap.annota
+ tion,org.nuxeo.ecm.platform.commandline.executor.api,org.nuxeo.ecm.plat
+ form.commandline.executor.service.cmdtesters,org.nuxeo.ecm.platform.com
+ mandline.executor.service.executors,org.nuxeo.runtime.model";version="0
+ .0.0",org.nuxeo.ecm.platform.commandline.executor.service.cmdtesters;us
+ es:="org.nuxeo.ecm.platform.commandline.executor.service";version="0.0.
+ 0",org.nuxeo.ecm.platform.commandline.executor.service.executors;uses:=
+ "org.nuxeo.ecm.platform.commandline.executor.api,org.nuxeo.ecm.platform
+ .commandline.executor.service";version="0.0.0"
+Import-Package: org.apache.commons.io;version="[1.4,2)",org.apache.commo
+ ns.lang;version="[2.6,3)",org.apache.commons.lang.builder;version="[2.6
+ ,3)",org.apache.commons.lang3;version="[3.3,4)",org.apache.commons.logg
+ ing;version="[1.2,2)",org.nuxeo.common.utils;version="[0.0,1)",org.nuxe
+ o.common.xmap.annotation;version="[0.0,1)",org.nuxeo.ecm.platform.comma
+ ndline.executor.api,org.nuxeo.ecm.platform.commandline.executor.service
+ ,org.nuxeo.ecm.platform.commandline.executor.service.cmdtesters,org.nux
+ eo.ecm.platform.commandline.executor.service.executors,org.nuxeo.runtim
+ e.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/commandline-framework.xml,OSGI-INF/commandline
+ -default-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

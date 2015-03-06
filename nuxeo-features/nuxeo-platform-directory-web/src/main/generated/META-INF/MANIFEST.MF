@@ -1,0 +1,39 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: stateless
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Directory Web
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-directory-web
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.directory.api.ui;version="5.3.2.SNAPSHOT";uses:="org.nuxeo.common.
+ xmap.annotation,org.nuxeo.ecm.directory,org.nuxeo.ecm.directory.api",or
+ g.nuxeo.ecm.directory.ui;version="5.3.2.SNAPSHOT";uses:="org.nuxeo.ecm.
+ directory.api.ui,org.nuxeo.runtime.model",org.nuxeo.ecm.webapp.director
+ y;version="0.0.0";uses:="org.jboss.seam,org.jboss.seam.annotations,org.
+ jboss.seam.annotations.intercept,org.jboss.seam.faces,org.nuxeo.ecm.cor
+ e.api,org.nuxeo.ecm.directory.api,org.nuxeo.ecm.directory.api.ui,org.nu
+ xeo.ecm.platform.actions,org.nuxeo.ecm.platform.actions.ejb"
+Import-Package: javax.faces.context;version="[2.2,3)",org.apache.commons
+ .logging;version="[1.2,2)",org.jboss.seam,org.jboss.seam.annotations,or
+ g.jboss.seam.annotations.intercept,org.jboss.seam.core,org.jboss.seam.f
+ aces,org.jboss.seam.international,org.nuxeo.common.xmap.annotation;vers
+ ion="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.co
+ re.api.impl;version="[0.0,1)",org.nuxeo.ecm.directory;version="[0.0,1)"
+ ,org.nuxeo.ecm.directory.api;version="[0.0,1)",org.nuxeo.ecm.directory.
+ api.ui;version="[5.3,6)",org.nuxeo.ecm.platform.actions;version="[0.0,1
+ )",org.nuxeo.ecm.platform.actions.ejb;version="[0.0,1)",org.nuxeo.ecm.p
+ latform.actions.jsf;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.dir
+ ectory;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.util;version="[0
+ .0,1)",org.nuxeo.runtime.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/directory-ui-framework.xml,OSGI-INF/actions-co
+ ntrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"
+Tool: Bnd-0.0.394

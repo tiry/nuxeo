@@ -22,6 +22,9 @@ package org.nuxeo.ecm.platform.preview.seam;
 
 import java.io.Serializable;
 
+import javax.faces.context.FacesContext;
+import javax.servlet.ServletRequest;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.seam.ScopeType;
@@ -51,9 +54,6 @@ import org.nuxeo.ecm.platform.url.api.DocumentView;
 import org.nuxeo.ecm.platform.web.common.vh.VirtualHostHelper;
 import org.nuxeo.ecm.webapp.helpers.EventNames;
 import org.nuxeo.runtime.api.Framework;
-
-import javax.faces.context.FacesContext;
-import javax.servlet.ServletRequest;
 
 /**
  * Seam Action bean to handle the preview tabs and associated actions.

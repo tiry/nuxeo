@@ -55,7 +55,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @Ignore
 @RunWith(FeaturesRunner.class)
 @Features(ExternalLDAPDirectoryFeature.class)
-@LocalDeploy("org.nuxeo.ecm.directory.ldap.tests:ldap-directories-external-security.xml")
+@LocalDeploy("org.nuxeo.ecm.directory.ldap:ldap-directories-external-security.xml")
 public class TestExternalLDAPSessionSecurity {
 
     public static final String READER_USER = "readerUser";

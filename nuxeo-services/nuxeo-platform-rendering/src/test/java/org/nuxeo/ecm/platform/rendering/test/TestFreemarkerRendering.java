@@ -21,14 +21,14 @@
 
 package org.nuxeo.ecm.platform.rendering.test;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Before;
@@ -41,17 +41,27 @@ import org.nuxeo.ecm.core.api.impl.DocumentModelImpl;
 import org.nuxeo.ecm.core.api.impl.blob.URLBlob;
 import org.nuxeo.ecm.core.api.model.DocumentPart;
 import org.nuxeo.ecm.core.schema.Prefetch;
+import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.ecm.platform.rendering.fm.FreemarkerComponent;
 import org.nuxeo.ecm.platform.rendering.fm.FreemarkerEngine;
 import org.nuxeo.ecm.platform.rendering.wiki.WikiTransformer;
 import org.nuxeo.ecm.platform.rendering.wiki.extensions.FreemarkerMacro;
 import org.nuxeo.ecm.platform.rendering.wiki.extensions.PatternFilter;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
+@Features(CoreFeature.class)
+@Deploy("org.nuxeo.ecm.platform.rendering")
+@LocalDeploy("org.nuxeo.ecm.platform.rendering:OSGI-INF/test-schema.xml")
 public class TestFreemarkerRendering extends NXRuntimeTestCase {
 
+    @Inject
+    FreemarkerComponent component;
     FreemarkerEngine engine;
 
     @Override
@@ -59,10 +69,7 @@ public class TestFreemarkerRendering extends NXRuntimeTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployContrib("org.nuxeo.ecm.platform.rendering.tests", "OSGI-INF/test-schema.xml");
-
-        engine = new FreemarkerEngine();
+        engine = component.newEngine();
         engine.setResourceLocator(new MyResourceLocator());
 
         WikiTransformer tr = new WikiTransformer();

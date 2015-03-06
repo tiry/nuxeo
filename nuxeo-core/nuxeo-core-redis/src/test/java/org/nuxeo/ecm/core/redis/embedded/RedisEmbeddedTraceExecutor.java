@@ -47,7 +47,7 @@ public class RedisEmbeddedTraceExecutor implements RedisExecutor {
 
     @Override
     public boolean supportPipelined() {
-        return false;
+        return delegate.supportPipelined();
     }
 
 }

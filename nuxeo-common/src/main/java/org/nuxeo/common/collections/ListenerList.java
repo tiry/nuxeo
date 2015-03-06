@@ -18,6 +18,7 @@
  */
 package org.nuxeo.common.collections;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -31,7 +32,7 @@ import java.util.Comparator;
  *
  * @see http://www.eclipse.org
  */
-public class ListenerList {
+public class ListenerList<T> {
 
     /**
      * Mode constant (value 0) indicating that listeners should be compared using equality.
@@ -44,11 +45,6 @@ public class ListenerList {
     public static final int IDENTITY = 1;
 
     /**
-     * The empty array singleton instance.
-     */
-    private static final Object[] EMPTY_ARRAY = new Object[0];
-
-    /**
      * Indicates the comparison mode used to determine if two listeners are equivalent.
      */
     private final int compareMode;
@@ -57,30 +53,34 @@ public class ListenerList {
      * The list of listeners. Initially <code>null</code> but initialized to an array of size capacity the first time a
      * listener is added. Maintains invariant: <code>listeners != null</code>.
      */
-    private volatile Object[] listeners = EMPTY_ARRAY;
+    private volatile T[] listeners;
+
+    private final Class<T> typeof;
 
     /**
      * Used to order listeners
      */
-    private final Comparator<?> comparator;
+    private final Comparator<T> comparator;
 
     /**
      * Creates a listener list.
      */
-    public ListenerList() {
-        this(EQUALITY, null);
+    public ListenerList(Class<T> typeof) {
+        this(typeof, EQUALITY, null);
     }
 
-    public ListenerList(Comparator<?> comparator) {
-        this(EQUALITY, comparator);
+    public ListenerList(Class<T> typeof, Comparator<T> comparator) {
+        this(typeof, EQUALITY, comparator);
     }
 
     /**
      * Creates a listener list using the provided comparison mode.
      */
-    public ListenerList(int mode, Comparator<?> comparator) {
-        compareMode = mode;
+    public ListenerList(Class<T> typeof, int compareMode, Comparator<T> comparator) {
+        this.typeof = typeof;
+        this.compareMode = compareMode;
         this.comparator = comparator;
+        this.listeners = newArray(0);
     }
 
     /**
@@ -91,7 +91,7 @@ public class ListenerList {
      *
      * @param listener the listener to add
      */
-    public synchronized void add(Object listener) {
+    public synchronized void add(T listener) {
         // check for duplicates
         final int oldSize = listeners.length;
         for (int i = 0; i < oldSize; ++i) {
@@ -100,11 +100,11 @@ public class ListenerList {
             }
         }
         // Thread safety: create new array to avoid affecting concurrent readers
-        Object[] newListeners = new Object[oldSize + 1];
+        T[] newListeners = newArray(oldSize+1);
         System.arraycopy(listeners, 0, newListeners, 0, oldSize);
         newListeners[oldSize] = listener;
         if (comparator != null) {
-            Arrays.sort(newListeners, (Comparator<Object>) comparator);
+            Arrays.sort(newListeners, comparator);
         }
         // atomic assignment
         listeners = newListeners;
@@ -120,12 +120,12 @@ public class ListenerList {
      *
      * @return the list of registered listeners
      */
-    public Object[] getListeners() {
+    public T[] getListeners() {
         return listeners;
     }
 
-    public synchronized Object[] getListenersCopy() {
-        Object[] tmp = new Object[listeners.length];
+    public synchronized T[] getListenersCopy() {
+        T[] tmp = newArray(listeners.length);
         System.arraycopy(listeners, 0, tmp, 0, listeners.length);
         return tmp;
     }
@@ -147,15 +147,15 @@ public class ListenerList {
      *
      * @param listener the listener
      */
-    public synchronized void remove(Object listener) {
+    public synchronized void remove(T listener) {
         int oldSize = listeners.length;
         for (int i = 0; i < oldSize; ++i) {
             if (same(listener, listeners[i])) {
                 if (oldSize == 1) {
-                    listeners = EMPTY_ARRAY;
+                    listeners = newArray(0);
                 } else {
                     // Thread safety: create new array to avoid affecting concurrent readers
-                    Object[] newListeners = new Object[oldSize - 1];
+                    T[] newListeners = newArray(oldSize - 1);
                     System.arraycopy(listeners, 0, newListeners, 0, i);
                     System.arraycopy(listeners, i + 1, newListeners, i, oldSize - i - 1);
                     // atomic assignment to field
@@ -181,6 +181,11 @@ public class ListenerList {
      */
     public int size() {
         return listeners.length;
+    }
+
+    @SuppressWarnings("unchecked")
+    T[] newArray(int length)  {
+        return (T[])Array.newInstance(typeof, length);
     }
 
 }

@@ -27,22 +27,23 @@ import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.test.runner.SimpleFeature;
 
 @Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.ecm.core.schema", "org.nuxeo.ecm.directory.types.contrib", "org.nuxeo.ecm.platform.login",
-        "org.nuxeo.ecm.platform.login.test:dummy-client-login-config.xml" })
+@Deploy({ "org.nuxeo.ecm.directory.types.contrib", "org.nuxeo.ecm.platform.login", })
+@LocalDeploy("org.nuxeo.ecm.platform.login:dummy-client-login-config.xml")
 public class ClientLoginFeature extends SimpleFeature {
 
     protected LoginContext logContext = null;
 
     public Principal loginAs(String username) throws LoginException {
-        this.logContext = Framework.login(username, username);
+        logContext = Framework.login(username, username);
         return logContext.getSubject().getPrincipals().iterator().next();
     }
 
     public void logout() throws LoginException {
-        this.logContext.logout();
+        logContext.logout();
     }
 
 }

@@ -149,9 +149,6 @@ public abstract class AbstractAutomationClientTest {
 
     @Test
     public void testGetCreateUpdateAndRemoveDocument() throws Exception {
-        // HttpAutomationClient client = new HttpAutomationClient();
-        // client.connect("http://localhost:18080/automation");
-        // Session cs = client.getSession("Administrator", "Administrator");
 
         Document folder = (Document) session.newRequest(CreateDocument.ID)
                                             .setInput(automationTestFolder)

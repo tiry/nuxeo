@@ -399,7 +399,6 @@ public class RepositoryImpl implements Repository {
         closeAllSessions();
         model = null;
         backend.shutdown();
-
         registry.remove(MetricRegistry.name(RepositoryImpl.class, getName(), "cache-size"));
         registry.remove(MetricRegistry.name(PersistenceContext.class, getName(), "cache-size"));
         registry.remove(MetricRegistry.name(SelectionContext.class, getName(), "cache-size"));

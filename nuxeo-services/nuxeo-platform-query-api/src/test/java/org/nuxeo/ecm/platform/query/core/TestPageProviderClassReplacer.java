@@ -46,9 +46,9 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
 @Deploy("org.nuxeo.ecm.platform.query.api")
-@LocalDeploy({ "org.nuxeo.ecm.platform.query.api.test:test-pageprovider-contrib.xml",
-        "org.nuxeo.ecm.platform.query.api.test:test-pageprovider-classreplacer-contrib.xml",
-        "org.nuxeo.ecm.platform.query.api.test:test-schemas-contrib.xml", })
+@LocalDeploy({ "org.nuxeo.ecm.platform.query.api:test-pageprovider-contrib.xml",
+        "org.nuxeo.ecm.platform.query.api:test-pageprovider-classreplacer-contrib.xml",
+        "org.nuxeo.ecm.platform.query.api:test-schemas-contrib.xml", })
 public class TestPageProviderClassReplacer {
 
     @Inject

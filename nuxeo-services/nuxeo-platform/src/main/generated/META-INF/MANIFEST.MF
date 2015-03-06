@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: web
+Bundle-ClassPath: .
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: NXPlatform
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.util;api=split;version="0.0.0";uses:="org.nuxeo.common.xm
+ ap.annotation,org.nuxeo.runtime.model"
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.nuxeo.c
+ ommon.xmap.annotation;version="[0.0,1)",org.nuxeo.runtime.model;version
+ ="[0.0,1)"
+Nuxeo-Component: OSGI-INF/locationmanager-contrib.xml,OSGI-INF/locationm
+ anager-plugins-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Bundle: org.nuxeo.ecm.platform.api;visibility:=reexport
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

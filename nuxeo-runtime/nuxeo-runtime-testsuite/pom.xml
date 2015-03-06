@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.nuxeo.runtime</groupId>
     <artifactId>nuxeo-runtime-parent</artifactId>
-    <version>5.9.3-SNAPSHOT</version>
+    <version>0.0-reload-SNAPSHOT</version>
   </parent>
 
   <artifactId>nuxeo-runtime-testsuite</artifactId>
@@ -68,9 +68,9 @@
       <artifactId>nuxeo-connect-standalone</artifactId>
     </dependency>
     <dependency>
-      <groupId>junit-extensions</groupId>
-      <artifactId>cpsuite</artifactId>
-      <version>1.2.6</version>
+      <groupId>io.takari.junit</groupId>
+      <artifactId>takari-cpsuite</artifactId>
+      <version>1.2.7</version>
     </dependency>
   </dependencies>
 

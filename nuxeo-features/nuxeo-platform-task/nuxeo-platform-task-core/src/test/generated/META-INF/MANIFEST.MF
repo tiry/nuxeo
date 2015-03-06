@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateful
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM task Test
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-task-core.tes
+ ts
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-task-core
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",
+ org.nuxeo.ecm.core.test,org.nuxeo.ecm.platform.query.api;version="[0.0,
+ 1)",org.nuxeo.ecm.platform.task;version="[0.0,1)",org.nuxeo.ecm.platfor
+ m.task.core.helpers,org.nuxeo.ecm.platform.task.dashboard;version="[0.0
+ ,1)",org.nuxeo.ecm.platform.test,org.nuxeo.ecm.platform.usermanager;ver
+ sion="[0.0,1)",org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.task.core
+Require-Bundle: org.nuxeo.ecm.platform.task.core
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

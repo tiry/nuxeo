@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.Environment;
 import org.nuxeo.runtime.RuntimeService;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.osgi.OSGiRuntimeService;
+import org.nuxeo.runtime.model.impl.AbstractRuntimeService;
 
 /**
  * Servlet for retrieving Nuxeo services running status
@@ -55,7 +55,11 @@ public class StatusServlet extends HttpServlet {
 
     public static final String PARAM_RELOAD = "reload";
 
-    private OSGiRuntimeService runtimeService;
+    // duplicated from org.nuxeo.launcher.config.ConfigurationGenerator to avoid
+    // dependencies on nuxeo-launcher-commons
+    public static final String PARAM_STATUS_KEY = "server.status.key";
+
+    private AbstractRuntimeService runtimeService;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -100,7 +104,7 @@ public class StatusServlet extends HttpServlet {
 
     private RuntimeService getRuntimeService() {
         if (runtimeService == null) {
-            runtimeService = (OSGiRuntimeService) Framework.getRuntime();
+            runtimeService = (AbstractRuntimeService) Framework.getRuntime();
         }
         return runtimeService;
     }

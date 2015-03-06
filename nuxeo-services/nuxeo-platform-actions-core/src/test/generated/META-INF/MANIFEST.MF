@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-actions-core.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-actions-core.
+ tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-actions-core
+Import-Package: org.junit,org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.
+ runtime.model;version="[0.0,1)",org.nuxeo.runtime.test
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.actions
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

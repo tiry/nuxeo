@@ -37,22 +37,25 @@ import org.apache.catalina.loader.WebappLoader;
  */
 public class NuxeoWebappLoader extends WebappLoader {
 
-    protected File baseDir; // the baseDir from the Context (which is private..)
+    File homedir;
 
-    protected void overwriteWar() {
-        // File baseDir = getBaseDir();
-        // remove all files
+    ClassLoader osgiLoader;
+
+    File getBaseDir() throws ReflectiveOperationException {
+        Container container = getContainer();
+        Method method = StandardContext.class.getDeclaredMethod("getBasePath");
+        method.setAccessible(true);
+        String path = (String) method.invoke(container);
+        return new File(path);
     }
 
-    public File getBaseDir() throws ReflectiveOperationException {
-        if (baseDir == null) {
-            Container container = getContainer();
-            Method method = StandardContext.class.getDeclaredMethod("getBasePath");
-            method.setAccessible(true);
-            String path = (String) method.invoke(container);
-            baseDir = new File(path);
+    @Override
+    public ClassLoader getClassLoader() {
+        NuxeoWebappClassLoader loader = (NuxeoWebappClassLoader)super.getClassLoader();
+        if (loader == null){
+            return null;
         }
-        return baseDir;
+        return loader.bootstrap.getOSGiLoader();
     }
 
 }

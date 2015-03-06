@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: nuxeo connect client
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-connect-client-wrapper
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .connect.client;uses:="org.nuxeo.connect,org.nuxeo.connect.update,org.n
+ uxeo.runtime.model";version="0.0.0",webtest.WEB-INF;version="0.0.0"
+Import-Package: org.nuxeo.connect,org.nuxeo.connect.connector,org.nuxeo.
+ connect.downloads,org.nuxeo.connect.packages,org.nuxeo.connect.registra
+ tion,org.nuxeo.connect.update,org.nuxeo.runtime;version="[0.0,1)",org.n
+ uxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.
+ 0,1)"
+Nuxeo-Component: OSGI-INF/connect-client-framework.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

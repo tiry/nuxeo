@@ -6,7 +6,9 @@
   </documentation>
 
   <implementation class="org.nuxeo.ecm.core.persistence.PersistenceComponent" />
-
+  
+  <require>org.nuxeo.runtime.datasource</require>
+  
   <service>
     <provide interface="org.nuxeo.ecm.core.persistence.PersistenceProviderFactory"/>
     <provide interface="org.nuxeo.ecm.core.persistence.HibernateConfigurator"/>

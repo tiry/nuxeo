@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-web-common.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-web-common.te
+ sts
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-web-common
+Import-Package: com.google.common.collect;version="[18.0,19)",javax.serv
+ let;version="[3.0,4)",javax.servlet.http;version="[3.0,4)",org.apache.c
+ ommons.lang;version="[2.6,3)",org.apache.commons.lang3.tuple;version="[
+ 3.3,4)",org.apache.commons.logging;version="[1.2,2)",org.junit,org.juni
+ t.runner,org.mockito,org.mockito.stubbing,org.mockito.verification,org.
+ nuxeo.ecm.core.io.download;version="[0.0,1)",org.nuxeo.ecm.platform.api
+ .login;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.auth.interfaces,
+ org.nuxeo.ecm.platform.ui.web.auth.service,org.nuxeo.ecm.platform.web.c
+ ommon.requestcontroller.filter,org.nuxeo.ecm.platform.web.common.reques
+ tcontroller.service,org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runti
+ me.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.
+ nuxeo.runtime.test,org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.ui.web.auth,org.nuxeo.ecm.platfo
+ rm.ui.web.auth.plugins,org.nuxeo.ecm.platform.ui.web.download,org.nuxeo
+ .ecm.platform.web.common,org.nuxeo.ecm.platform.web.requestcontroller,o
+ rg.nuxeo.ecm.platform.web.requestcontroller.filter
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

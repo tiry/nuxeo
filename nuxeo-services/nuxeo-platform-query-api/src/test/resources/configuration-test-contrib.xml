@@ -1,5 +1,7 @@
 <component name="org.nuxeo.runtime.pp.conf.test">
 
+  <require>org.nuxeo.ecm.platform.query.api.PageProviderService</require>
+  
   <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
 
     <property name="org.nuxeo.query.builder.ignored.chars">&amp;/{}()</property>

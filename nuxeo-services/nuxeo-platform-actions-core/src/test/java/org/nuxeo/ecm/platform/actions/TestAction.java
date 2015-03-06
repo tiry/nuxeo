@@ -21,13 +21,6 @@
 
 package org.nuxeo.ecm.platform.actions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,11 +40,14 @@ public class TestAction extends NXRuntimeTestCase {
 
     ActionService as;
 
+    AutoCloseable context;
+
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        deployContrib("org.nuxeo.ecm.actions", "OSGI-INF/actions-framework.xml");
-        deployContrib("org.nuxeo.ecm.actions.tests", "test-actions-contrib.xml");
+        deployBundle("org.nuxeo.ecm.actions");
+        context = deployContrib("org.nuxeo.ecm.actions.tests", "test-actions-contrib.xml");
         as = (ActionService) runtime.getComponent(ActionService.ID);
     }
 
@@ -285,9 +281,9 @@ public class TestAction extends NXRuntimeTestCase {
         assertEquals("filter defined in action", previewRules[0].types[0]);
 
         // uninstall first, this time
-        undeployContrib("org.nuxeo.ecm.actions.tests", "test-actions-contrib.xml");
+        context.close();
         // deploy override
-        deployContrib("org.nuxeo.ecm.actions.tests", "test-actions-override-innerfilter-contrib.xml");
+        context = deployContrib("org.nuxeo.ecm.actions.tests", "test-actions-override-innerfilter-contrib.xml");
 
         Action opreviewAction = as.getAction("TAB_WITH_LOCAL_FILTER");
         assertNotNull(opreviewAction);

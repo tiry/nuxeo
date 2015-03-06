@@ -34,7 +34,6 @@ import org.w3c.dom.Node;
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */
-@SuppressWarnings({ "SuppressionAnnotation" })
 public class XAnnotatedList extends XAnnotatedMember {
 
     protected static final ElementVisitor elementListVisitor = new ElementVisitor();
@@ -44,7 +43,7 @@ public class XAnnotatedList extends XAnnotatedMember {
     protected static final AttributeValueVisitor attributeVisitor = new AttributeValueVisitor();
 
     // indicates the type of the collection components
-    protected Class componentType;
+    protected Class<?> componentType;
 
     protected boolean isNullByDefault;
 
@@ -61,6 +60,11 @@ public class XAnnotatedList extends XAnnotatedMember {
         valueFactory = xmap.getValueFactory(componentType);
         xao = xmap.register(componentType);
         isNullByDefault = anno.nullByDefault();
+    }
+
+    @Override
+    public Class<?> getType() {
+        return componentType;
     }
 
     @SuppressWarnings("unchecked")
@@ -93,6 +97,7 @@ public class XAnnotatedList extends XAnnotatedMember {
                 }
             } else {
                 try {
+                    @SuppressWarnings("rawtypes")
                     Collection col = (Collection) type.newInstance();
                     col.addAll(values);
                     return col;
@@ -107,6 +112,7 @@ public class XAnnotatedList extends XAnnotatedMember {
         return values;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void toXML(Object instance, Element parent) {
         Object v = accessor.getValue(instance);
@@ -124,6 +130,7 @@ public class XAnnotatedList extends XAnnotatedMember {
             if (objects != null) {
                 if (xao == null) {
                     for (Object o : objects) {
+                        @SuppressWarnings("unchecked")
                         String value = valueFactory.serialize(null, o);
                         if (value != null) {
                             Element e = XMLBuilder.addElement(parent, path);

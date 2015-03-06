@@ -1,0 +1,45 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Platform Site Add On
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-rendering
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.rendering.api;uses:="org.nuxeo.ecm.core.api";version="0.0
+ .0",org.nuxeo.ecm.platform.rendering.fm;uses:="freemarker.cache,freemar
+ ker.template,org.nuxeo.ecm.platform.rendering.api,org.nuxeo.ecm.platfor
+ m.rendering.fm.adapters,org.nuxeo.ecm.platform.rendering.fm.extensions,
+ org.nuxeo.runtime.model";version="0.0.0",org.nuxeo.ecm.platform.renderi
+ ng.fm.adapters;uses:="freemarker.template,org.nuxeo.ecm.core.api,org.nu
+ xeo.ecm.core.api.model,org.nuxeo.ecm.core.api.model.impl,org.nuxeo.ecm.
+ platform.rendering.fm";version="0.0.0",org.nuxeo.ecm.platform.rendering
+ .fm.extensions;uses:="freemarker.core,freemarker.template,org.nuxeo.ecm
+ .platform.rendering.fm.i18n";version="0.0.0",org.nuxeo.ecm.platform.ren
+ dering.fm.i18n;version="0.0.0",org.nuxeo.ecm.platform.rendering.wiki;us
+ es:="freemarker.core,freemarker.template,org.apache.commons.logging,org
+ .nuxeo.ecm.platform.rendering.api,org.wikimodel.wem,org.wikimodel.wem.c
+ ommon";version="0.0.0",org.nuxeo.ecm.platform.rendering.wiki.extensions
+ ;uses:="freemarker.template,org.nuxeo.common.xmap.annotation,org.nuxeo.
+ ecm.platform.rendering.wiki,org.wikimodel.wem";version="0.0.0"
+Import-Package: freemarker.cache;version="[2.3,3)",freemarker.core;versi
+ on="[2.3,3)",freemarker.ext.beans;version="[2.3,3)",freemarker.template
+ ;version="[2.3,3)",org.apache.commons.io;version="[1.4,2)",org.apache.c
+ ommons.logging;version="[1.2,2)",org.nuxeo.common.xmap.annotation;versi
+ on="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.cor
+ e.api.model;version="[0.0,1)",org.nuxeo.ecm.core.api.model.impl;version
+ ="[0.0,1)",org.nuxeo.ecm.core.api.model.impl.primitives;version="[0.0,1
+ )",org.nuxeo.ecm.core.schema.types;version="[0.0,1)",org.nuxeo.ecm.core
+ .schema.types.primitives;version="[0.0,1)",org.nuxeo.ecm.platform.rende
+ ring.api,org.nuxeo.ecm.platform.rendering.fm,org.nuxeo.ecm.platform.ren
+ dering.fm.adapters,org.nuxeo.ecm.platform.rendering.fm.extensions,org.n
+ uxeo.ecm.platform.rendering.fm.i18n,org.nuxeo.ecm.platform.rendering.wi
+ ki,org.nuxeo.ecm.platform.rendering.wiki.extensions,org.nuxeo.runtime.m
+ odel;version="[0.0,1)",org.wikimodel.wem,org.wikimodel.wem.common
+Nuxeo-Component: OSGI-INF/freemarker-engine.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

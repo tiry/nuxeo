@@ -28,10 +28,14 @@ import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.web.resources.api.Processor;
 import org.nuxeo.ecm.web.resources.api.service.WebResourceManager;
 import org.nuxeo.ecm.web.resources.wro.provider.NuxeoConfigurableProvider;
+import org.nuxeo.ecm.web.resources.wro.provider.NuxeoUriLocator;
 
 import ro.isdc.wro.cache.factory.CacheKeyFactory;
 import ro.isdc.wro.manager.factory.ConfigurableWroManagerFactory;
 import ro.isdc.wro.model.factory.WroModelFactory;
+import ro.isdc.wro.model.resource.locator.factory.SimpleUriLocatorFactory;
+import ro.isdc.wro.model.resource.locator.factory.UriLocatorFactory;
+import ro.isdc.wro.model.resource.locator.support.DefaultLocatorProvider;
 import ro.isdc.wro.model.resource.processor.factory.ConfigurableProcessorsFactory;
 
 /**
@@ -43,6 +47,17 @@ import ro.isdc.wro.model.resource.processor.factory.ConfigurableProcessorsFactor
 public class NuxeoWroManagerFactory extends ConfigurableWroManagerFactory {
 
     private static final Log log = LogFactory.getLog(NuxeoWroManagerFactory.class);
+
+    @Override
+    protected UriLocatorFactory newUriLocatorFactory() {
+        return new SimpleUriLocatorFactory() {
+            {
+                addLocator(new NuxeoUriLocator());
+                addLocators(new DefaultLocatorProvider().provideLocators().values());
+            }
+        };
+
+    }
 
     @Override
     protected Properties newConfigProperties() {

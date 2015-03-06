@@ -28,7 +28,6 @@ import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.nuxeo.ecm.automation.AutomationService;
 import org.nuxeo.ecm.automation.OperationChain;
 import org.nuxeo.ecm.automation.OperationContext;
@@ -40,20 +39,11 @@ import org.nuxeo.ecm.automation.core.util.Properties;
 import org.nuxeo.ecm.automation.jaxrs.io.documents.PaginableDocumentModelListImpl;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.ecm.core.test.annotations.Granularity;
-import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.Features;
-import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
-@RunWith(FeaturesRunner.class)
-@Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.ecm.platform.query.api", "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.features" })
 @LocalDeploy({ "org.nuxeo.ecm.automation.core:test-qf-providers.xml" })
-@RepositoryConfig(cleanup = Granularity.METHOD)
-public class QueryAndFetchOperationTest {
+public class QueryAndFetchOperationTest extends AutomationFeaturesTestCase {
 
     @Inject
     AutomationService service;
@@ -65,15 +55,15 @@ public class QueryAndFetchOperationTest {
 
     @Before
     public void initRepo() throws Exception {
-        ws1 = session.createDocumentModel("/", "ws1", "Workspace");
+        ws1 = session.createDocumentModel("/default-domain/workspaces", "ws1", "Workspace");
         ws1.setPropertyValue("dc:title", "WS1");
         ws1 = session.createDocument(ws1);
 
-        DocumentModel ws2 = session.createDocumentModel("/", "ws2", "Workspace");
+        DocumentModel ws2 = session.createDocumentModel("/default-domain/workspaces", "ws2", "Workspace");
         ws2.setPropertyValue("dc:title", "WS2");
         ws2 = session.createDocument(ws2);
 
-        DocumentModel ws3 = session.createDocumentModel("/", "ws3", "Workspace");
+        DocumentModel ws3 = session.createDocumentModel("/default-domain/workspaces", "ws3", "Workspace");
         ws3.setPropertyValue("dc:title", "WS3");
         String[] fakeContributors = { session.getPrincipal().getName() };
         ws3.setPropertyValue("dc:contributors", fakeContributors);
@@ -92,7 +82,7 @@ public class QueryAndFetchOperationTest {
         String providerName = "CURRENT_DOCUMENT_CHILDREN_FETCH";
 
         params.put("providerName", providerName);
-        params.put("queryParams", session.getRootDocument().getId());
+        params.put("queryParams",  session.getDocument(new PathRef("/default-domain/workspaces")).getId());
 
         OperationChain chain = new OperationChain("fakeChain");
         OperationParameters oparams = new OperationParameters(ResultSetPageProviderOperation.ID, params);
@@ -109,8 +99,6 @@ public class QueryAndFetchOperationTest {
         assertEquals("WS1", result.get(0).get("dc:title"));
         assertEquals(ws1.getId(), result.get(0).get("ecm:uuid"));
 
-        providerName = "simpleProviderTest3";
-
     }
 
     @Test
@@ -124,7 +112,7 @@ public class QueryAndFetchOperationTest {
 
         params.put("providerName", providerName);
         Map<String, String> namedParameters = new HashMap<>();
-        namedParameters.put("parentIdVar", session.getRootDocument().getId());
+        namedParameters.put("parentIdVar", session.getDocument(new PathRef("/default-domain/workspaces")).getId());
         Properties namedProperties = new Properties(namedParameters);
         params.put("namedParameters", namedProperties);
 
@@ -153,7 +141,7 @@ public class QueryAndFetchOperationTest {
 
         params.put("providerName", providerName);
         Map<String, String> namedParameters = new HashMap<>();
-        namedParameters.put("npd:title", session.getRootDocument().getId());
+        namedParameters.put("npd:title", session.getDocument(new PathRef("/default-domain/workspaces")).getId());
         Properties namedProperties = new Properties(namedParameters);
         params.put("namedParameters", namedProperties);
 

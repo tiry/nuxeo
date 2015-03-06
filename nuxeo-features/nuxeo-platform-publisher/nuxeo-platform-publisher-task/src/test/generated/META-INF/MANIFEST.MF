@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Publisher Service task Test
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-publisher-tas
+ k.tests
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-publisher-task
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",
+ org.nuxeo.ecm.core.api.security;version="[0.0,1)",org.nuxeo.ecm.core.te
+ st,org.nuxeo.ecm.platform.publisher.api;version="[0.0,1)",org.nuxeo.ecm
+ .platform.publisher.impl.core;version="[0.0,1)",org.nuxeo.runtime.test.
+ runner
+Nuxeo-Component: OSGI-INF/test-sql-directories-contrib.xml,OSGI-INF/rela
+ tions-default-jena-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: data,org.nuxeo.ecm.platform.publisher.task.test
+Require-Bundle: org.nuxeo.runtime,org.nuxeo.ecm.relations,org.nuxeo.ecm.
+ relations.jena
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

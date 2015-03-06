@@ -36,9 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
@@ -67,17 +65,6 @@ public class TestLDAPSessionWithMissingId extends LDAPDirectoryTestCase {
             getLDAPDirectory("userDirectory").setTestServer(server);
             getLDAPDirectory("groupDirectory").setTestServer(server);
         }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        if (USE_EXTERNAL_TEST_LDAP_SERVER) {
-            runtimeHarness.undeployContrib("org.nuxeo.ecm.directory.ldap.tests", EXTERNAL_SERVER_SETUP_OVERRIDE);
-        } else {
-            runtimeHarness.undeployContrib("org.nuxeo.ecm.directory.ldap.tests", INTERNAL_SERVER_SETUP_OVERRIDE);
-        }
-        super.tearDown();
     }
 
     // override tests to get specific use cases

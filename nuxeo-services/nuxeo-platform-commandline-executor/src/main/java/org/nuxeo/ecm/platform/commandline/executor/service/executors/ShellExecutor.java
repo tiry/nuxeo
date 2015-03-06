@@ -51,6 +51,7 @@ import org.nuxeo.ecm.platform.commandline.executor.api.ExecResult;
 import org.nuxeo.ecm.platform.commandline.executor.api.CmdParameters.ParameterValue;
 import org.nuxeo.ecm.platform.commandline.executor.service.CommandLineDescriptor;
 import org.nuxeo.ecm.platform.commandline.executor.service.EnvironmentDescriptor;
+import org.nuxeo.launcher.commons.ThreadedStreamGobbler;
 
 /**
  * Default implementation of the {@link Executor} interface. Use simple shell exec.

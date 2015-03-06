@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Contributors:
  *     Stephane Lacoin
  */
@@ -26,24 +26,25 @@ import java.io.InputStream;
 import java.net.URL;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.runtime.test.protocols.inline.InlineURLFactory;
+import org.nuxeo.runtime.test.protocols.inline.InlineURLsFeature;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.RuntimeFeature;
 
 /**
  * @author matic
  */
+@RunWith(FeaturesRunner.class)
+@Features({ RuntimeFeature.class, InlineURLsFeature.class })
 public class TestInlineURLs {
 
     String info = "some info";
 
     URL inlineURL;
-
-    @BeforeClass
-    public static void installHandler() throws Exception {
-        InlineURLFactory.install();
-    }
 
     @Before
     public void encodeURL() throws IOException {

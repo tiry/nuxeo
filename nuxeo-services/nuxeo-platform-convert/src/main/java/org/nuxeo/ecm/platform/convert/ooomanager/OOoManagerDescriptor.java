@@ -31,31 +31,25 @@ import org.nuxeo.common.xmap.annotation.XObject;
 public class OOoManagerDescriptor {
 
     @XNodeList(value = "portNumbers/portNumber", type = ArrayList.class, componentType = Integer.class)
-    public List<Integer> portNumbers;
+    public List<Integer> portNumbers = new ArrayList<>();
 
     @XNodeList(value = "pipeNames/pipeName", type = ArrayList.class, componentType = String.class)
-    public List<String> pipeNames;
+    public List<String> pipeNames = new ArrayList<>();
 
     public int[] getPortNumbers() {
-        if (portNumbers != null) {
-            int[] ports = new int[portNumbers.size()];
-            for (int i = 0; i < portNumbers.size(); i++) {
-                ports[i] = portNumbers.get(i);
-            }
-            return ports;
-        } else {
-            return null;
+        int[] ports = new int[portNumbers.size()];
+        for (int i = 0; i < portNumbers.size(); i++) {
+            ports[i] = portNumbers.get(i).intValue();
         }
+        return ports;
     }
 
     public String[] getPipeNames() {
-        if (pipeNames != null) {
-            String[] pipes = new String[pipeNames.size()];
-            pipeNames.toArray(pipes);
-            return pipes;
-        } else {
+        if (pipeNames.isEmpty()) {
             return null;
         }
+        String[] pipes = new String[pipeNames.size()];
+        pipeNames.toArray(pipes);
+        return pipes;
     }
-
 }

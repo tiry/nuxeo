@@ -20,8 +20,6 @@
 package org.nuxeo.ecm.platform.content.template.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -32,6 +30,7 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.ecm.core.test.NoopRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.content.template.service.ContentTemplateService;
@@ -46,10 +45,9 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  */
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
+@RepositoryConfig(init=NoopRepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy("org.nuxeo.ecm.platform.content.template")
-@LocalDeploy({ "org.nuxeo.ecm.platform.content.template.tests:test-content-template-handlers-contrib.xml",
-        "org.nuxeo.ecm.platform.content.template.tests:test-content-template-handlers-contrib.xml" })
+@LocalDeploy("org.nuxeo.ecm.platform.content.template:test-content-template-contrib.xml")
 public class PostContentCreationHandlersTest {
 
     @Inject
@@ -65,13 +63,10 @@ public class PostContentCreationHandlersTest {
         assertEquals(2, rootChildren.size());
 
         // query result order is not fixed
-        if (!"default-domain".equals(rootChildren.get(0).getName())) {
+        if (!SimplePostContentCreationHandler.DOC_NAME.equals(rootChildren.get(0).getName())) {
             Collections.reverse(rootChildren);
         }
-        assertEquals("default-domain", rootChildren.get(0).getName());
-
-        DocumentModel child = rootChildren.get(1);
-        assertNotNull(child);
+        DocumentModel child = rootChildren.get(0);
         assertEquals(SimplePostContentCreationHandler.DOC_NAME, child.getName());
         assertEquals(SimplePostContentCreationHandler.DOC_TYPE, child.getType());
     }

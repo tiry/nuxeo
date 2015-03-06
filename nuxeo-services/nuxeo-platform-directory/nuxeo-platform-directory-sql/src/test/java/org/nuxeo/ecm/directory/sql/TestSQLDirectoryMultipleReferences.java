@@ -45,9 +45,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-schema-override.xml",
-        "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-bundle.xml",
-        "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-multi-refs.xml" })
+@LocalDeploy({ "org.nuxeo.ecm.directory.sql:test-sql-directories-multi-refs.xml" })
 public class TestSQLDirectoryMultipleReferences {
 
     protected static final String USER_DIR = "userDirectory";

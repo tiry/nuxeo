@@ -25,7 +25,7 @@ import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.automation.core.trace.TracerFactory;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.ecm.platform.test.PlatformFeature;
+import org.nuxeo.ecm.webengine.test.WebEngineFeatureCore;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
@@ -36,15 +36,15 @@ import com.google.inject.Binder;
 import com.google.inject.Provider;
 
 /**
- * Based on the existing {@link PlatformFeature}, AutomationFeature is a simple feature that includes
- * org.nuxeo.ecm.automation.core and org.nuxeo.ecm.automation.features bundles.
+ * Based on the existing {@link WebEngineFeatureCore}, AutomationFeature is a simple feature that includes
+ * automation bundles.
  *
  * @since 5.7
  * @since 5.6-HF02
  */
-@Features(PlatformFeature.class)
-@Deploy({ "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.features", "org.nuxeo.ecm.platform.query.api",
-        "org.nuxeo.runtime.management" })
+@Features(WebEngineFeatureCore.class)
+@Deploy({ "org.nuxeo.ecm.platform.userworkspace.api", "org.nuxeo.ecm.platform.userworkspace.core","org.nuxeo.ecm.automation.io", "org.nuxeo.ecm.automation.core", "org.nuxeo.ecm.automation.features",
+        "org.nuxeo.ecm.automation.scripting", "org.nuxeo.ecm.automation.jsf", "org.nuxeo.ecm.automation.server"})
 public class AutomationFeature extends SimpleFeature {
 
     protected final OperationContextProvider contextProvider = new OperationContextProvider();
@@ -63,7 +63,7 @@ public class AutomationFeature extends SimpleFeature {
 
         @Override
         public OperationContext get() {
-            return AutomationFeature.this.getContext();
+            return getContext();
         }
 
     }
@@ -72,7 +72,7 @@ public class AutomationFeature extends SimpleFeature {
 
         @Override
         public OperationCallback get() {
-            return AutomationFeature.this.getTracer();
+            return getTracer();
         }
 
     }

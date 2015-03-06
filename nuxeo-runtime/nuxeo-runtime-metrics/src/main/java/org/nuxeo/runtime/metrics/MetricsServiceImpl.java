@@ -38,7 +38,7 @@ public class MetricsServiceImpl extends DefaultComponent implements MetricsServi
 
     protected static final String CONFIGURATION_EP = "configuration";
 
-    public static MetricsDescriptor config;
+    protected MetricsDescriptor config;
 
     public MetricsServiceImpl() {
         super();
@@ -56,6 +56,9 @@ public class MetricsServiceImpl extends DefaultComponent implements MetricsServi
 
     @Override
     public void deactivate(ComponentContext context) {
+        if (config == null) {
+            return;
+        }
         try {
             config.disable(registry);
         } finally {

@@ -1,0 +1,3 @@
+-removeheaders: Bnd-LastModified
+hostname=${project.groupId}.${project.artifactId}
+Require-Capability: osgi.extender; filter:="(osgi.extender=nuxeo.runtime)", osgi.extender; filter:="(osgi.extender=nuxeo.osgi)"

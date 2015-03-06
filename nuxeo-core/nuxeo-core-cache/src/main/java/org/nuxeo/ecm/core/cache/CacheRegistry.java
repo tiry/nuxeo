@@ -55,12 +55,6 @@ public final class CacheRegistry extends ContributionFragmentRegistry<CacheDescr
             contributionRemoved(id, descriptor);
             return;
         }
-
-        if (caches.containsKey(name)) {
-            throw new IllegalStateException(String.format(
-                    "Another cache has already been registered for the given name %s", name));
-        }
-
         caches.put(name, descriptor);
         log.info("cache registered: " + name);
     }

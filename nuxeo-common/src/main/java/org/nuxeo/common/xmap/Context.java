@@ -36,10 +36,7 @@ public class Context extends ArrayList<Object> {
     private final HashMap<String, Object> properties = new HashMap<String, Object>();
 
     public Class<?> loadClass(String className) throws ClassNotFoundException {
-        if (className.startsWith("[")) {
-            return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
-        }
-        return Thread.currentThread().getContextClassLoader().loadClass(className);
+        return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
     }
 
     public URL getResource(String name) {

@@ -25,8 +25,6 @@ import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 

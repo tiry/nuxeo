@@ -22,10 +22,9 @@ import static org.junit.Assert.assertNotNull;
 
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.common.utils.ExceptionUtils;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.event.EventService;
 import org.nuxeo.ecm.core.storage.mongodb.MongoDBRepository;
@@ -83,8 +82,8 @@ public class StorageConfiguration {
 
     private DatabaseHelper databaseHelper;
 
-    public StorageConfiguration() {
-        initJDBC();
+    public StorageConfiguration(FeaturesRunner runner) {
+        initJDBC(runner);
         coreType = defaultSystemProperty(CORE_PROPERTY, DEFAULT_CORE);
         switch (coreType) {
         case CORE_VCS:
@@ -119,7 +118,7 @@ public class StorageConfiguration {
         return value;
     }
 
-    protected void initJDBC() {
+    protected void initJDBC(FeaturesRunner runner) {
         databaseHelper = DatabaseHelper.DATABASE;
 
         String msg = "Deploying JDBC using " + databaseHelper.getClass().getSimpleName();
@@ -131,8 +130,9 @@ public class StorageConfiguration {
         // this is used both for VCS (org.nuxeo.ecm.core.storage.sql.RepositoryService)
         // and DataSources (org.nuxeo.runtime.datasource) extension points
         try {
-            databaseHelper.setUp();
-        } catch (SQLException e) {
+            databaseHelper.setUp(runner);
+        } catch (Exception e) {
+            ExceptionUtils.checkInterrupt(e);
             throw new NuxeoException(e);
         }
     }
@@ -210,7 +210,11 @@ public class StorageConfiguration {
     }
 
     public String getRepositoryName() {
-        return "test";
+        if (isVCS()) {
+            return DatabaseHelper.getRepositoryName();
+        } else {
+            return "test"; // DBS
+        }
     }
 
     /**
@@ -277,7 +281,7 @@ public class StorageConfiguration {
         String bundleName = "org.nuxeo.ecm.core.test";
         String contribPath = "OSGI-INF/test-storage-blob-contrib.xml";
         RuntimeHarness harness = runner.getFeature(RuntimeFeature.class).getHarness();
-        Bundle bundle = harness.getOSGiAdapter().getRegistry().getBundle(bundleName);
+        Bundle bundle = harness.getOSGiAdapter().getBundle(bundleName);
         URL contribURL = bundle.getEntry(contribPath);
         assertNotNull("deployment contrib " + contribPath + " not found", contribURL);
         return contribURL;
@@ -312,7 +316,7 @@ public class StorageConfiguration {
             }
         }
         RuntimeHarness harness = runner.getFeature(RuntimeFeature.class).getHarness();
-        Bundle bundle = harness.getOSGiAdapter().getRegistry().getBundle(bundleName);
+        Bundle bundle = harness.getOSGiAdapter().getBundle(bundleName);
         URL contribURL = bundle.getEntry(contribPath);
         assertNotNull("deployment contrib " + contribPath + " not found", contribURL);
         return contribURL;

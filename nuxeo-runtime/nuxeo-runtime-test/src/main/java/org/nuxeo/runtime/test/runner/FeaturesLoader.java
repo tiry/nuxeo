@@ -41,6 +41,10 @@ class FeaturesLoader {
 
     protected interface Callable {
         void call(Holder holder) throws Exception;
+
+        default void rollback(Holder holder) throws Exception {
+
+        }
     }
 
     private final FeaturesRunner runner;
@@ -122,18 +126,32 @@ class FeaturesLoader {
 
     protected void apply(Iterable<Holder> holders, Callable callable) {
         AssertionError errors = new AssertionError("invoke on features error " + holders);
+        List<Holder> applied = new LinkedList<>();
         for (Holder each : holders) {
             try {
                 callable.call(each);
+                applied.add(each);
             } catch (AssumptionViolatedException cause) {
-                throw cause;
+                throw rollback(applied, callable, cause);
             } catch (Exception cause) {
                 errors.addSuppressed(cause);
             }
         }
         if (errors.getSuppressed().length > 0) {
-            throw errors;
+            throw rollback(applied, callable, errors);
         }
+    }
+
+    protected <T extends Throwable> T rollback(List<Holder> holders, Callable callable, T errors) {
+        Collections.reverse(holders);
+        for (Holder each : holders) {
+            try {
+                callable.rollback(each);
+            } catch (Exception cause) {
+                errors.addSuppressed(cause);
+            }
+        }
+        return errors;
     }
 
     protected boolean contains(Class<? extends RunnerFeature> aType) {
@@ -141,9 +159,9 @@ class FeaturesLoader {
     }
 
     public void loadFeatures(Class<?> classToRun) throws Exception {
-        FeaturesRunner.scanner.scan(classToRun);
+        runner.scanner.scan(classToRun);
         // load required features from annotation
-        List<Features> annos = FeaturesRunner.scanner.getAnnotations(classToRun, Features.class);
+        List<Features> annos = runner.scanner.getAnnotations(classToRun, Features.class);
         if (annos != null) {
             for (Features anno : annos) {
                 for (Class<? extends RunnerFeature> cl : anno.value()) {
@@ -161,9 +179,9 @@ class FeaturesLoader {
             throw new IllegalStateException("Cycle detected in features dependencies of " + clazz);
         }
         cycles.add(clazz);
-        FeaturesRunner.scanner.scan(clazz);
+        runner.scanner.scan(clazz);
         // load required features from annotation
-        List<Features> annos = FeaturesRunner.scanner.getAnnotations(clazz, Features.class);
+        List<Features> annos = runner.scanner.getAnnotations(clazz, Features.class);
         if (annos != null) {
             for (Features anno : annos) {
                 for (Class<? extends RunnerFeature> cl : anno.value()) {
@@ -183,10 +201,11 @@ class FeaturesLoader {
     protected Module onModule() {
         return new Module() {
 
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings({ "unchecked", "rawtypes" })
             @Override
             public void configure(Binder aBinder) {
                 for (Holder each : holders) {
+                    runner.injector.injectMembers(each.feature);
                     each.feature.configure(runner, aBinder);
                     aBinder.bind((Class) each.feature.getClass()).toInstance(each.feature);
                     aBinder.requestInjection(each.feature);

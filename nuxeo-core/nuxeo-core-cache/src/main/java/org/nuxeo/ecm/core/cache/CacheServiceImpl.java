@@ -102,6 +102,7 @@ public class CacheServiceImpl extends DefaultComponent implements CacheService {
 
     public void unregisterCache(CacheDescriptor descriptor) {
         cacheRegistry.removeContribution(descriptor);
+        descriptor.stop();
     }
 
 }

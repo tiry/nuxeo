@@ -1,0 +1,4 @@
+Bundle-SymbolicName: ${hostname}.tests
+Fragment-Host: ${hostname}
+Nuxeo-Component: 
+

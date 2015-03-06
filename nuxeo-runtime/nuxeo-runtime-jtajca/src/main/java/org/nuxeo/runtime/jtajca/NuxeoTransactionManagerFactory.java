@@ -28,6 +28,8 @@ import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
+import javax.transaction.UserTransaction;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.logging.Log;
@@ -44,25 +46,31 @@ public class NuxeoTransactionManagerFactory implements ObjectFactory {
     @Override
     public Object getObjectInstance(Object obj, Name objName, Context nameCtx, Hashtable<?, ?> env) {
         Reference ref = (Reference) obj;
-        if (!TransactionManager.class.getName().equals(ref.getClassName())) {
-            return null;
-        }
-        if (NuxeoContainer.tm != null) {
-            return NuxeoContainer.tm;
-        }
 
-        // initialize
-        TransactionManagerConfiguration config = new TransactionManagerConfiguration();
-        for (RefAddr addr : Collections.list(ref.getAll())) {
-            String name = addr.getType();
-            String value = (String) addr.getContent();
-            try {
-                BeanUtils.setProperty(config, name, value);
-            } catch (ReflectiveOperationException e) {
-                log.error(String.format("NuxeoTransactionManagerFactory cannot set %s = %s", name, value));
+        if (NuxeoContainer.tm == null) {
+
+            // initialize
+            TransactionManagerConfiguration config = new TransactionManagerConfiguration();
+            for (RefAddr addr : Collections.list(ref.getAll())) {
+                String name = addr.getType();
+                String value = (String) addr.getContent();
+                try {
+                    BeanUtils.setProperty(config, name, value);
+                } catch (ReflectiveOperationException e) {
+                    log.error(String.format("NuxeoTransactionManagerFactory cannot set %s = %s", name, value));
+                }
             }
+            NuxeoContainer.initTransactionManager(config);
         }
-        return NuxeoContainer.initTransactionManager(config);
+        String typename = ref.getClassName();
+        if (TransactionManager.class.getName().equals(typename)) {
+            return NuxeoContainer.tm;
+        } else if (UserTransaction.class.getName().equals(typename)) {
+            return NuxeoContainer.ut;
+        } else if (TransactionSynchronizationRegistry.class.getName().equals(typename)) {
+            return NuxeoContainer.tmSynchRegistry;
+        }
+        return null;
     }
 
 }

@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-forms-layout-io.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-forms-layout-
+ io.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-forms-layout-io
+Import-Package: javax.faces.component,javax.faces.view.facelets,net.sf.j
+ son,org.apache.commons.lang;version="[2.6,3)",org.junit,org.nuxeo.commo
+ n.utils;version="[0.0,1)",org.nuxeo.ecm.platform.forms.layout.api;versi
+ on="[0.0,1)",org.nuxeo.ecm.platform.forms.layout.api.converters;version
+ ="[0.0,1)",org.nuxeo.ecm.platform.forms.layout.api.exceptions;version="
+ [0.0,1)",org.nuxeo.ecm.platform.forms.layout.api.service;version="[0.0,
+ 1)",org.nuxeo.ecm.platform.forms.layout.facelets,org.nuxeo.ecm.platform
+ .forms.layout.facelets.plugins,org.nuxeo.ecm.platform.forms.layout.io,o
+ rg.nuxeo.ecm.platform.ui.web.tag.handler,org.nuxeo.runtime.api;version=
+ "[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.nuxeo.runtime.t
+ est,org.skyscreamer.jsonassert
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.layout.facelets,org.nuxeo.ecm.pl
+ atform.layout.service
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

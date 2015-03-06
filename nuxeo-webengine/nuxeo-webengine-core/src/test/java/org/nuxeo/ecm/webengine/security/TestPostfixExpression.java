@@ -21,11 +21,15 @@
 
 package org.nuxeo.ecm.webengine.security;
 
+import static org.junit.Assert.assertEquals;
+
 import java.text.ParseException;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.runner.RunWith;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
+@RunWith(FeaturesRunner.class)
 public class TestPostfixExpression {
 
     @Test

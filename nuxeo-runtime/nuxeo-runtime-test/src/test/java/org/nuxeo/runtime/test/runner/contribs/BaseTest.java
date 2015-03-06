@@ -17,8 +17,7 @@ package org.nuxeo.runtime.test.runner.contribs;
 
 import javax.inject.Inject;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.runtime.test.runner.Features;

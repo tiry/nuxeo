@@ -3,9 +3,13 @@
 <component
   name="org.nuxeo.ecm.platform.notification.service.NotificationVetoContrib-test">
 
+  <require>org.nuxeo.ecm.platform.notification.service.NotificationContrib</require>
+  
   <extension
     target="org.nuxeo.ecm.platform.ec.notification.service.NotificationService"
     point="notificationListenerVeto">
+
+    <veto remove="true" name="versionVeto" />
 
     <veto class="org.nuxeo.ecm.platform.ec.notification.veto.NotificationVeto1" name="veto1" />
 

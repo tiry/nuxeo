@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-filemanager-core.test
+ s
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-filemanager-c
+ ore.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-filemanager-core
+Import-Package: javax.inject,org.apache.commons.io;version="[1.4,2)",org
+ .apache.commons.lang;version="[2.6,3)",org.junit,org.junit.runner,org.n
+ uxeo.common.utils;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.
+ 0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",org.nuxeo.ecm.core.io;
+ version="[0.0,1)",org.nuxeo.ecm.core.io.impl;version="[0.0,1)",org.nuxe
+ o.ecm.core.io.impl.plugins;version="[0.0,1)",org.nuxeo.ecm.core.test,or
+ g.nuxeo.ecm.core.test.annotations,org.nuxeo.ecm.platform.filemanager.ap
+ i;version="[0.0,1)",org.nuxeo.ecm.platform.filemanager.service,org.nuxe
+ o.ecm.platform.filemanager.utils;version="[0.0,1)",org.nuxeo.ecm.platfo
+ rm.types;version="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.
+ nuxeo.runtime.model;version="[0.0,1)",org.nuxeo.runtime.test,org.nuxeo.
+ runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.filemanager,org.nuxeo.ecm.platfo
+ rm.filemanager.service.extension,test-data,test-data.update
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

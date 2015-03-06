@@ -32,11 +32,13 @@ import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
-@Deploy({ "org.nuxeo.ecm.platform.htmlsanitizer",
-        "org.nuxeo.ecm.platform.htmlsanitizer.test:OSGI-INF/core-types-contrib.xml" })
+@Deploy("org.nuxeo.ecm.platform.htmlsanitizer")
+@LocalDeploy(
+        "org.nuxeo.ecm.platform.htmlsanitizer:OSGI-INF/core-types-contrib.xml" )
 public class TestHtmlSanitizerServiceImpl {
 
     public static final String BAD_HTML = "<b>foo<script>bar</script></b>";

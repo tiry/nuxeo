@@ -26,6 +26,7 @@ import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.ecm.core.test.EmptyRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.platform.content.template.service.ContentTemplateService;
@@ -37,8 +38,10 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @Ignore
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.platform.content.template", //
+@RepositoryConfig(cleanup = Granularity.METHOD, init=EmptyRepositoryInit.class)
+@Deploy({ //
+        "org.nuxeo.ecm.platform.query.api",//
+        "org.nuxeo.ecm.platform.content.template", //
         "org.nuxeo.ecm.platform.filemanager.api", //
         "org.nuxeo.ecm.platform.filemanager.core", //
         "org.nuxeo.ecm.platform.types.api", //

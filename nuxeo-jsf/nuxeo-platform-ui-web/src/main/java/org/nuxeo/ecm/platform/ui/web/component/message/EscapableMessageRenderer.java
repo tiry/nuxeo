@@ -18,14 +18,15 @@
  */
 package org.nuxeo.ecm.platform.ui.web.component.message;
 
-import com.sun.faces.renderkit.html_basic.MessageRenderer;
+import java.io.IOException;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import javax.faces.context.ResponseWriterWrapper;
 import javax.faces.render.FacesRenderer;
-import java.io.IOException;
+
+import com.sun.faces.renderkit.html_basic.MessageRenderer;
 
 /**
  * Custom MessageRenderer that allows the use of HTML in <h:message>

@@ -23,7 +23,6 @@ import static org.junit.Assert.assertTrue;
 
 import javax.inject.Inject;
 
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.test.CoreFeature;
@@ -56,11 +55,6 @@ public class TestJenaOrCoreGraphFactory {
     @Inject
     protected CoreFeature coreFeature;
 
-    @After
-    public void tearDown() {
-        JenaOrCoreGraphFactory.testJenaGraph = null;
-    }
-
     @Test
     public void testJenaOrCoreGraph() throws Exception {
         RelationService serviceImpl = (RelationService) service;
@@ -81,10 +75,10 @@ public class TestJenaOrCoreGraphFactory {
         QNameResource isBasedOn = new QNameResourceImpl(DC_TERMS_NS, "IsBasedOn");
         jenaGraph.add(new StatementImpl(doc, isBasedOn, doc));
 
-        // reuse in-memory jena graph for next lookup
-        JenaOrCoreGraphFactory.testJenaGraph = (JenaGraph) jenaGraph;
-
         // TODO the following doesn't work anymore now that this test uses RuntimeFeature
+        // reuse in-memory jena graph for next lookup
+        // JenaOrCoreGraphFactory.testJenaGraph = (JenaGraph) jenaGraph;
+
         // which calls applicationStarted which initializes all graphs beforehand
 
         // non-empty graph detected and used

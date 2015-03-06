@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.webengine.nuxeo-webengine-samples-base
+Bundle-SymbolicName: org.nuxeo.ecm.webengine.nuxeo-webengine-samples-bas
+ e
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.webengine.samples;uses:="javax.ws.rs,javax.ws.rs.core,org.nuxeo.ec
+ m.webengine.model,org.nuxeo.ecm.webengine.model.impl";version="0.0.0",s
+ kin;version="0.0.0",skin.error;version="0.0.0",skin.views.Basics;versio
+ n="0.0.0",skin.views.Document;version="0.0.0",skin.views.Documents;vers
+ ion="0.0.0",skin.views.User;version="0.0.0",skin.views.UserBuddies;vers
+ ion="0.0.0",skin.views.UserManager;version="0.0.0"
+Import-Package: javax.ws.rs;version="[1.1,2)",javax.ws.rs.core;version="
+ [1.1,2)",org.nuxeo.ecm.core.rest;version="[0.0,1)",org.nuxeo.ecm.webeng
+ ine.model,org.nuxeo.ecm.webengine.model.exceptions,org.nuxeo.ecm.webeng
+ ine.model.impl
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Nuxeo-WebModule: org.nuxeo.ecm.webengine.app.WebEngineModule;name=sample
+ s;extends=base;package=/org/nuxeo/ecm/webengine/samples
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

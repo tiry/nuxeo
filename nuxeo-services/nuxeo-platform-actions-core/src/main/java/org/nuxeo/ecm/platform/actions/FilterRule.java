@@ -149,6 +149,7 @@ public class FilterRule {
         return getCacheKey().hashCode();
     }
 
+    @Override
     public FilterRule clone() {
         FilterRule clone = new FilterRule();
         clone.grant = grant;
@@ -172,6 +173,14 @@ public class FilterRule {
         }
         clone.cacheKey = cacheKey;
         return clone;
+    }
+
+    /**
+     * for tests
+     * @return
+     */
+    public String[] getGroups() {
+        return groups;
     }
 
 }

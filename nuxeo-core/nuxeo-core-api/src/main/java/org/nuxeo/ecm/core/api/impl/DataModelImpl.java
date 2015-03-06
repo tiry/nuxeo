@@ -68,6 +68,9 @@ public class DataModelImpl implements DataModel {
         assert data != null;
         SchemaManager schemaManager = Framework.getLocalService(SchemaManager.class);
         Schema schema = schemaManager.getSchema(schemaName);
+        if (schema == null) {
+            throw new NullPointerException("No such schema " + schemaName);
+        }
         dp = new DocumentPartImpl(schema);
         if (!data.isEmpty()) {
             dp.init((Serializable) data);

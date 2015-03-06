@@ -22,34 +22,35 @@ package org.nuxeo.ecm.platform.convert.tests;
 
 import java.io.File;
 import java.io.IOException;
+import javax.inject.Inject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.jempbox.xmp.XMPMetadata;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Assert;
+import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
-import org.nuxeo.ecm.platform.convert.ooomanager.OOoManagerService;
-import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.ecm.core.convert.api.ConversionService;
+import org.nuxeo.ecm.core.test.CoreFeature;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import static org.junit.Assert.*;
+@RunWith(FeaturesRunner.class)
+@Features(CoreFeature.class)
+@Deploy({ "org.nuxeo.ecm.platform.commandline.executor", "org.nuxeo.ecm.platform.convert" })
+public abstract class BaseConverterTest extends Assert {
 
-public abstract class BaseConverterTest extends NXRuntimeTestCase {
+    @Inject
+    protected ConversionService cs;
 
-    private static final Log log = LogFactory.getLog(BaseConverterTest.class);
-
-    OOoManagerService oooManagerService;
-
-    protected static BlobHolder getBlobFromPath(String path, String srcMT) throws IOException {
+    protected BlobHolder getBlobFromPath(String path, String srcMT) throws IOException {
         File file = FileUtils.getResourceFileFromContext(path);
         assertTrue(file.length() > 0);
 
@@ -61,36 +62,8 @@ public abstract class BaseConverterTest extends NXRuntimeTestCase {
         return new SimpleBlobHolder(blob);
     }
 
-    protected static BlobHolder getBlobFromPath(String path) throws IOException {
+    protected BlobHolder getBlobFromPath(String path) throws IOException {
         return getBlobFromPath(path, null);
-    }
-
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        deployBundle("org.nuxeo.ecm.core.api");
-        deployBundle("org.nuxeo.ecm.core.convert.api");
-        deployBundle("org.nuxeo.ecm.core.convert");
-        deployBundle("org.nuxeo.ecm.core.mimetype");
-        deployBundle("org.nuxeo.ecm.platform.convert");
-
-        oooManagerService = Framework.getService(OOoManagerService.class);
-        try {
-            oooManagerService.startOOoManager();
-        } catch (Exception e) {
-            log.warn("Can't run OpenOffice, JOD converter will not be available.");
-        }
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        oooManagerService = Framework.getService(OOoManagerService.class);
-        if (oooManagerService.isOOoManagerStarted()) {
-            oooManagerService.stopOOoManager();
-        }
-        super.tearDown();
     }
 
     public static String readPdfText(File pdfFile) throws IOException {

@@ -49,11 +49,10 @@ public class DatabaseOracle extends DatabaseHelper {
 
     private static final String DEF_PASSWORD = "nuxeo";
 
-    private static final String CONTRIB_XML = "OSGI-INF/test-repo-repository-oracle-contrib.xml";
-
     private static final String DRIVER = "oracle.jdbc.OracleDriver";
 
-    private void setProperties() {
+    @Override
+    protected void setProperties() {
         setProperty(URL_PROPERTY, DEF_URL);
         setProperty(USER_PROPERTY, DEF_USER);
         setProperty(PASSWORD_PROPERTY, DEF_PASSWORD);
@@ -62,20 +61,10 @@ public class DatabaseOracle extends DatabaseHelper {
     }
 
     @Override
-    public void setUp() throws SQLException {
-        super.setUp();
-        try {
-            Class.forName(DRIVER);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-        setProperties();
-        Connection connection = getConnection(Framework.getProperty(URL_PROPERTY),
-                Framework.getProperty(USER_PROPERTY), Framework.getProperty(PASSWORD_PROPERTY));
+    public void initDatabase(Connection connection) throws Exception {
         doOnAllTables(connection, null, Framework.getProperty(USER_PROPERTY).toUpperCase(),
                 "DROP TABLE \"%s\" CASCADE CONSTRAINTS PURGE");
         dropSequences(connection);
-        connection.close();
     }
 
     public void dropSequences(Connection connection) throws SQLException {
@@ -96,11 +85,6 @@ public class DatabaseOracle extends DatabaseHelper {
             st.execute(sql);
         }
         st.close();
-    }
-
-    @Override
-    public String getDeploymentContrib() {
-        return CONTRIB_XML;
     }
 
     @Override

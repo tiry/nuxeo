@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Publisher Service API
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-publisher-api
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.publisher.api;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm
+ .core.event,org.nuxeo.ecm.platform.publisher.helper,org.nuxeo.ecm.platf
+ orm.publisher.rules";version="0.0.0",org.nuxeo.ecm.platform.publisher.h
+ elper;uses:="org.nuxeo.ecm.core.api";version="0.0.0",org.nuxeo.ecm.plat
+ form.publisher.remoting.marshaling;version="0.0.0",org.nuxeo.ecm.platfo
+ rm.publisher.remoting.marshaling.interfaces;uses:="org.nuxeo.ecm.core.a
+ pi,org.nuxeo.ecm.platform.publisher.api";version="0.0.0",org.nuxeo.ecm.
+ platform.publisher.rules;uses:="org.nuxeo.ecm.core.api";version="0.0.0"
+ ,org.nuxeo.ecm.platform.publisher.synchonize.client;uses:="org.nuxeo.ec
+ m.platform.publisher.api";version="0.0.0",org.nuxeo.ecm.platform.publis
+ her.synchonize.server;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.platf
+ orm.publisher.api";version="0.0.0"
+Import-Package: org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.event;version="[0.0,1)",org.nuxeo.ecm.core.event.impl;version="[0.0
+ ,1)",org.nuxeo.ecm.platform.publisher.api,org.nuxeo.ecm.platform.publis
+ her.helper,org.nuxeo.ecm.platform.publisher.rules,org.nuxeo.runtime.api
+ ;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

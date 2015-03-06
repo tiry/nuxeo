@@ -29,7 +29,7 @@ import java.util.Map;
  * <p>
  * To use it you should extends this abstract implementation and implement the abstract methods.
  * <p>
- * The implementation registry doesn't need to be thread safe since it will be called from synchronized methods.
+ * The implementation registry doesn't need to be thread safe since it will be called from  methods.
  * <p>
  * Also, the contribution object
  * <p>
@@ -152,7 +152,7 @@ public abstract class ContributionFragmentRegistry<T> {
      *
      * @param contrib
      */
-    public synchronized void addContribution(T contrib) {
+    public  void addContribution(T contrib) {
         String id = getContributionId(contrib);
         FragmentList<T> head = addFragment(id, contrib);
         contributionUpdated(id, head.merge(this), contrib);
@@ -167,7 +167,7 @@ public abstract class ContributionFragmentRegistry<T> {
      * @param contrib
      * @see #removeContribution(Object, boolean)
      */
-    public synchronized void removeContribution(T contrib) {
+    public  void removeContribution(T contrib) {
         removeContribution(contrib, false);
     }
 
@@ -187,7 +187,7 @@ public abstract class ContributionFragmentRegistry<T> {
      *            of
      * @since 5.6
      */
-    public synchronized void removeContribution(T contrib, boolean useEqualsMethod) {
+    public  void removeContribution(T contrib, boolean useEqualsMethod) {
         String id = getContributionId(contrib);
         FragmentList<T> head = removeFragment(id, contrib, useEqualsMethod);
         if (head != null) {
@@ -211,7 +211,7 @@ public abstract class ContributionFragmentRegistry<T> {
      * @param id
      * @return
      */
-    protected synchronized T getContribution(String id) {
+    protected  T getContribution(String id) {
         FragmentList<T> head = contribs.get(id);
         return head != null ? head.merge(this) : null;
     }
@@ -222,7 +222,7 @@ public abstract class ContributionFragmentRegistry<T> {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public synchronized FragmentList<T>[] getFragments() {
+    public  FragmentList<T>[] getFragments() {
         return contribs.values().toArray(new FragmentList[contribs.size()]);
     }
 

@@ -31,14 +31,13 @@ import org.nuxeo.ecm.platform.content.template.service.PostContentCreationHandle
  */
 public class SimplePostContentCreationHandler implements PostContentCreationHandler {
 
-    public static final String DOC_TYPE = "Domain";
+    public static final String DOC_TYPE = "Document";
 
     public static final String DOC_NAME = "postContentCreationDoc";
 
     @Override
     public void execute(CoreSession session) {
-        DocumentModel root = session.getRootDocument();
-        DocumentModel doc = session.createDocumentModel(root.getPathAsString(), DOC_NAME, DOC_TYPE);
+        DocumentModel doc = session.createDocumentModel("/", DOC_NAME, DOC_TYPE);
         session.createDocument(doc);
     }
 

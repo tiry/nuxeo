@@ -1,0 +1,2 @@
+Fragment-Host: org.nuxeo.runtime.logging
+ExtensionBundle-Activator: org.nuxeo.runtime.logging.Log4jActivator

@@ -74,8 +74,8 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  */
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy("org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-contrib.xml")
+@RepositoryConfig(cleanup = Granularity.CLASS)
+@LocalDeploy("org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-contrib.xml")
 public class TestDocument {
 
     @Inject
@@ -258,7 +258,7 @@ public class TestDocument {
         @SuppressWarnings("unchecked")
         Map<String, Object> v0 = (Map<String, Object>) doc.getValue("cmpf:attachedFile/vignettes/0");
         assertEquals(size1, v0.get("width"));
-        b = (Blob) v0.get("content");
+        b = v0.get("content");
         assertEquals(content2, ((Blob) b).getString());
         Object v1 = doc.getValue("cmpf:attachedFile/vignettes/1");
         Map<String, Object> ev1 = new HashMap<>();
@@ -514,7 +514,7 @@ public class TestDocument {
     @Test
     public void testDeltaAfterPhantomNull() throws Exception {
         Document root = session.getRootDocument();
-        Document doc = root.addChild("doc", "MyDocType");
+        Document doc = root.addChild("pfouh", "MyDocType");
 
         // change to dc:title
         Schema schema = doc.getType().getSchema("myschema");
@@ -533,7 +533,7 @@ public class TestDocument {
 
         reopenSession();
         root = session.getRootDocument();
-        doc = root.getChild("doc");
+        doc = root.getChild("pfouh");
         assertEquals(Long.valueOf(10), doc.getValue("my:testDefaultLong"));
     }
 

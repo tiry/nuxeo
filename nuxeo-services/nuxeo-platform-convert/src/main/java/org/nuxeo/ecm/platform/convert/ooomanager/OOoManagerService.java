@@ -21,8 +21,6 @@
 
 package org.nuxeo.ecm.platform.convert.ooomanager;
 
-import java.io.IOException;
-
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 
 /**
@@ -36,7 +34,7 @@ public interface OOoManagerService {
 
     void stopOOoManager();
 
-    void startOOoManager() throws IOException;
+    void startOOoManager();
 
     boolean isOOoManagerStarted();
 

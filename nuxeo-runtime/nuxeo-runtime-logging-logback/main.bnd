@@ -1,0 +1,2 @@
+Fragment-Host: ch.qos.logback.classic
+ExtensionBundle-Activator: org.nuxeo.runtime.logging.logback.LogbackActivator

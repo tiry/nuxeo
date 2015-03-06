@@ -33,8 +33,8 @@ import org.junit.runner.RunWith;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.VersioningOption;
+import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
-import org.nuxeo.ecm.core.test.annotations.RepositoryInit;
 import org.nuxeo.ecm.core.versioning.VersioningService;
 import org.nuxeo.ecm.platform.audit.TestDocumentAuditPageProvider.Pfouh;
 import org.nuxeo.ecm.platform.audit.api.AuditReader;
@@ -56,7 +56,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
  */
 @RunWith(FeaturesRunner.class)
 @Features(AuditFeature.class)
-@LocalDeploy("org.nuxeo.ecm.platform.audit.tests:test-pageprovider-contrib.xml")
+@LocalDeploy("org.nuxeo.ecm.platform.audit:test-pageprovider-contrib.xml")
 @RepositoryConfig(init = Pfouh.class)
 public class TestDocumentAuditPageProvider {
 
@@ -70,7 +70,7 @@ public class TestDocumentAuditPageProvider {
 
     protected static Pfouh pfouh;
 
-    public static class Pfouh implements RepositoryInit {
+    public static class Pfouh extends DefaultRepositoryInit {
 
         {
             pfouh = this;

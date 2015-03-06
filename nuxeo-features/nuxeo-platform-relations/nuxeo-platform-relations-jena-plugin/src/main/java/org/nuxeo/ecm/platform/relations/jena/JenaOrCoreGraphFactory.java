@@ -37,21 +37,12 @@ public class JenaOrCoreGraphFactory implements GraphFactory {
 
     private static final Log log = LogFactory.getLog(JenaOrCoreGraphFactory.class);
 
-    // used for tests
-    protected static JenaGraph testJenaGraph;
-
     @Override
     public Graph createGraph(GraphDescription graphDescription, CoreSession session) {
         RelationService service = (RelationService) Framework.getRuntime().getComponent(RelationService.NAME);
         String name = graphDescription.getName();
 
-        Graph graph;
-        if (testJenaGraph == null) {
-            graph = new JenaGraph();
-        } else {
-            // test mode, allows reuse of in-memory graph
-            graph = testJenaGraph;
-        }
+        Graph graph = new JenaGraph();
         graph.setDescription(graphDescription);
         if (graph.size().longValue() > 0) {
             // Jena graph already contains data, use it

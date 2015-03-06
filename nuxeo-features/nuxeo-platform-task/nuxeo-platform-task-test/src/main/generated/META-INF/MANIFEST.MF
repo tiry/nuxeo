@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM task Test
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-task-test
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: data;version="0.0.0",doc;version="0.0.0",doc-parent;vers
+ ion="0.0.0",org.nuxeo.ecm.platform.task.test;version="0.0.0"
+Nuxeo-Component: OSGI-INF/test-sql-directories-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.runtime
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

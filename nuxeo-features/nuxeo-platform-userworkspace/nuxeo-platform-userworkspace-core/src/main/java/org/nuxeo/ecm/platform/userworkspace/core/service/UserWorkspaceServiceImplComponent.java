@@ -24,7 +24,6 @@ package org.nuxeo.ecm.platform.userworkspace.core.service;
 
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -108,9 +107,8 @@ public class UserWorkspaceServiceImplComponent extends DefaultComponent {
 
     // for tests only
     public static void reset() {
-        UserWorkspaceServiceImplComponent s = (UserWorkspaceServiceImplComponent) Framework.getRuntime().getComponent(
-                NAME);
+        UserWorkspaceServiceImplComponent s = (UserWorkspaceServiceImplComponent) Framework.getRuntime()
+                .getComponent(NAME);
         s.userWorkspaceService = null;
     }
-
 }

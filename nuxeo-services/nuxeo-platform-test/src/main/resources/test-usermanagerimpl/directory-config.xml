@@ -1,8 +1,7 @@
 <?xml version="1.0"?>
 <component name="org.nuxeo.ecm.platform.test.directory.sql.storage">
 
-  <implementation
-    class="org.nuxeo.ecm.directory.sql.SQLDirectoryDescriptor" />
+  <require>org.nuxeo.ecm.directory.sql.storage</require>
 
   <extension target="org.nuxeo.ecm.directory.sql.SQLDirectoryFactory"
     point="directories">
@@ -16,13 +15,13 @@
       <passwordField>password</passwordField>
 
       <autoincrementIdField>false</autoincrementIdField>
-      <dataFile>users.csv</dataFile>
+      <dataFile>test-usermanagerimpl/directories/users.csv</dataFile>
       <createTablePolicy>always</createTablePolicy>
 
       <references>
         <tableReference field="groups" directory="groupDirectory"
           table="user2group" sourceColumn="userId"
-          targetColumn="groupId" dataFile="user2group.csv"
+          targetColumn="groupId" dataFile="test-usermanagerimpl/directories/user2group.csv"
           master="true" />
       </references>
 
@@ -38,6 +37,7 @@
       <autoincrementIdField>false</autoincrementIdField>
       <dataFile>groups.csv</dataFile>
       <createTablePolicy>always</createTablePolicy>
+      <dataFile>test-usermanagerimpl/directories/groups.csv</dataFile>
 
       <references>
         <inverseReference field="members" directory="userDirectory"

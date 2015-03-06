@@ -26,7 +26,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,11 +48,8 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
+@Deploy("org.nuxeo.runtime.reload")
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.core.convert", //
-        "org.nuxeo.ecm.core.convert.plugins", //
-        "org.nuxeo.runtime.reload", //
-})
 public class TestSQLBinariesIndexingOverride {
 
     @Inject
@@ -81,18 +77,8 @@ public class TestSQLBinariesIndexingOverride {
 
         // cannot be done through @LocalDeploy, because the framework variables
         // about repository configuration aren't ready yet
-        runtimeHarness.deployContrib("org.nuxeo.ecm.core.test.tests", "OSGI-INF/test-override-indexing-contrib.xml");
-        deployed = true;
+        runtimeHarness.deployTestContrib("org.nuxeo.ecm.core.test", "OSGI-INF/test-override-indexing-contrib.xml");
         newRepository(); // fully reread repo and its indexing config
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (deployed) {
-            runtimeHarness.undeployContrib("org.nuxeo.ecm.core.test.tests",
-                    "OSGI-INF/test-override-indexing-contrib.xml");
-            deployed = false;
-        }
     }
 
     protected void newRepository() {

@@ -35,7 +35,8 @@ import org.nuxeo.runtime.model.RegistrationInfo;
 import org.w3c.dom.Element;
 
 /**
- * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ * @author  <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ *
  */
 @XObject
 public class ExtensionPointImpl implements ExtensionPoint, Serializable {
@@ -54,10 +55,9 @@ public class ExtensionPointImpl implements ExtensionPoint, Serializable {
     @XNodeList(value = "object@class", type = Class[].class, componentType = Class.class)
     public transient Class<?>[] contributions;
 
-    public transient XMap xmap;
-
     @XParent
     public transient RegistrationInfo ri;
+
 
     @Override
     public Class<?>[] getContributions() {
@@ -83,29 +83,33 @@ public class ExtensionPointImpl implements ExtensionPoint, Serializable {
         return null;
     }
 
-    public Object[] loadContributions(RegistrationInfo owner, Extension extension) {
+    void loadContributions(RegistrationInfo owner, Extension extension) throws Exception {
         Object[] contribs = extension.getContributions();
         if (contribs != null) {
             // contributions already computed - this should e an overloaded (extended) extension point
-            return contribs;
+            return;
+        }
+        if (contributions == null) {
+            throw new IllegalStateException("No contributions defined " + this);
         }
         // should compute now the contributions
-        if (contributions != null) {
-            if (xmap == null) {
-                xmap = new XMap();
-                for (Class<?> contrib : contributions) {
-                    if (contrib != null) {
-                        xmap.register(contrib);
-                    } else {
-                        throw new RuntimeException("Unknown implementation class when contributing to "
+        XMap xmap = new XMap();
+        for (Class<?> contrib : contributions) {
+            if (contrib != null) {
+              xmap.register(contrib);
+            } else {
+               throw new RuntimeException("Unknown implementation class when contributing to "
                                 + owner.getComponent().getName());
-                    }
-                }
             }
-            contribs = xmap.loadAll(new XMapContext(extension.getContext()), extension.getElement());
-            extension.setContributions(contribs);
+            xmap.register(contrib);
         }
-        return contribs;
+        contribs = xmap.loadAll(new XMapContext(extension.getContext()),
+                extension.getElement());
+        extension.setContributions(contribs);
     }
 
+    @Override
+    public String toString() {
+        return "xp (" + ri.getContext().getBundle().toString() + ":" + ri.getName() + ":" + name + ")";
+    }
 }

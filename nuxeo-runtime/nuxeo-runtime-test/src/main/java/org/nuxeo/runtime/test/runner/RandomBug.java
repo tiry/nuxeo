@@ -24,12 +24,12 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Properties;
 
 import javax.inject.Inject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.MDC;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -135,6 +135,7 @@ public class RandomBug {
         boolean bypass() default false;
     }
 
+    @Features(MDCFeature.class)
     public static class Feature extends SimpleFeature {
         @ClassRule
         public static TestRule onClass() {
@@ -151,6 +152,9 @@ public class RandomBug {
         @Inject
         protected RunNotifier notifier;
 
+        @Inject
+        FeaturesRunner runner;
+
         public RepeatStatement statement;
 
         @Override
@@ -159,7 +163,9 @@ public class RandomBug {
             if (actual == null) {
                 return base;
             }
-            return statement = onRepeat(actual, notifier, base, description);
+            statement = onRepeat(runner, actual, notifier, base, description);
+            statement.mdc = runner.getFeature(MDCFeature.class);
+            return statement;
         }
 
         @Override
@@ -171,8 +177,11 @@ public class RandomBug {
             Class<?> fixtureType = fixtureTarget.getClass();
             Description description = Description.createTestDescription(fixtureType, method.getName(),
                     method.getAnnotations());
-            return statement = onRepeat(actual, notifier, base, description);
+            statement = onRepeat(runner, actual, notifier, base, description);
+            statement.mdc = runner.getFeature(MDCFeature.class);
+            return statement;
         }
+
     }
 
     protected RepeatRule onTest() {
@@ -196,19 +205,19 @@ public class RandomBug {
      * </ul>
      * Could be set by the environment using the <em>nuxeo.tests.random.mode</em>T system property.
      */
-    public static enum Mode {
-        BYPASS, STRICT, RELAX
+    public enum Mode {
+        BYPASS, STRICT, RELAX;
+
+        public void set(Properties properties) {
+            properties.setProperty(MODE_PROPERTY, name());
+        }
+
+
+        public static Mode get(Properties properties) {
+            String mode = properties.getProperty(MODE_PROPERTY, Mode.RELAX.name());
+            return Mode.valueOf(mode.toUpperCase());
+        }
     };
-
-    /**
-     * The default mode if {@link #MODE_PROPERTY} is not set.
-     */
-    public final Mode DEFAULT = Mode.RELAX;
-
-    protected Mode fetchMode() {
-        String mode = System.getProperty(MODE_PROPERTY, DEFAULT.name());
-        return Mode.valueOf(mode.toUpperCase());
-    }
 
     protected abstract class RepeatStatement extends Statement {
         protected final Repeat params;
@@ -216,6 +225,8 @@ public class RandomBug {
         protected final RunNotifier notifier;
 
         protected boolean gotFailure;
+
+        protected MDCFeature mdc;
 
         protected final RunListener listener = new RunListener() {
             @Override
@@ -270,11 +281,11 @@ public class RandomBug {
         }
 
         protected void onEnter(int aSerial) {
-            MDC.put("fRepeat", serial = aSerial);
+            mdc.put("fRepeat", Integer.toString(serial = aSerial));
         }
 
         protected void onLeave() {
-            MDC.remove("fRepeat");
+            mdc.remove("fRepeat");
         }
 
         @Override
@@ -423,12 +434,12 @@ public class RandomBug {
         }
     }
 
-    protected RepeatStatement onRepeat(Repeat someParams, RunNotifier aNotifier, Statement aStatement,
+    protected RepeatStatement onRepeat(FeaturesRunner runner, Repeat someParams, RunNotifier aNotifier, Statement aStatement,
             Description description) {
         if (someParams.bypass()) {
             return new Bypass(someParams, aNotifier, aStatement, description);
         }
-        switch (fetchMode()) {
+        switch (Mode.get(runner.getProperties())) {
         case BYPASS:
             return new Bypass(someParams, aNotifier, aStatement, description);
         case STRICT:

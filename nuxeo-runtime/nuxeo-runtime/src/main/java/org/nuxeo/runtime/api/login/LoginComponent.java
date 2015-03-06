@@ -34,13 +34,13 @@ import java.util.Set;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.runtime.api.RuntimeInstanceIdentifier;
-import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.ComponentName;
 import org.nuxeo.runtime.model.DefaultComponent;
@@ -72,20 +72,18 @@ public class LoginComponent extends DefaultComponent implements LoginService {
     private SecurityDomain clientLogin;
 
     @Override
-    public void activate(ComponentContext context) {
-        LoginConfiguration.INSTANCE.install(new LoginConfiguration.Provider() {
-
-            @Override
-            public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-                return LoginComponent.this.getAppConfigurationEntry(name);
-            }
-
-        });
-    }
+    public void activate(org.nuxeo.runtime.model.ComponentContext context) {
+        if (getClass().getClassLoader().equals(Configuration.class.getClassLoader())) {
+            Configuration.setConfiguration(new SystemConfiguration());
+        }
+    };
 
     @Override
-    public void deactivate(ComponentContext context) {
-        LoginConfiguration.INSTANCE.uninstall();
+    public void deactivate(org.nuxeo.runtime.model.ComponentContext context) {
+        if (getClass().getClassLoader().equals(Configuration.class.getClassLoader())) {
+            SystemConfiguration config = (SystemConfiguration) Configuration.getConfiguration();
+            Configuration.setConfiguration(config.parent);
+        }
     }
 
     @Override
@@ -104,19 +102,25 @@ public class LoginComponent extends DefaultComponent implements LoginService {
         }
     }
 
-    public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-        SecurityDomain domain = domains.get(name);
-        if (domain != null) {
-            return domain.getAppConfigurationEntries();
-        }
-        return null;
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getAdapter(Class<T> adapter) {
         if (LoginService.class.isAssignableFrom(adapter)) {
             return (T) this;
+        }
+        if (Configuration.class.isAssignableFrom(adapter)) {
+            return adapter.cast(new Configuration() {
+
+                @Override
+                public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
+                    SecurityDomain domain = domains.get(name);
+                    if (domain != null) {
+                        return domain.getAppConfigurationEntries();
+                    }
+                    return new AppConfigurationEntry[0];
+                }
+
+            });
         }
         return null;
     }
@@ -222,7 +226,8 @@ public class LoginComponent extends DefaultComponent implements LoginService {
                 SystemID sys = (SystemID) principal;
                 String sourceInstanceId = sys.getSourceInstanceId();
                 if (sourceInstanceId == null) {
-                    log.warn("Can not accept a system login without InstanceID of the source : System login is rejected");
+                    log.warn(
+                            "Can not accept a system login without InstanceID of the source : System login is rejected");
                     return false;
                 } else {
                     if (sourceInstanceId.equals(instanceId)) {
@@ -242,6 +247,19 @@ public class LoginComponent extends DefaultComponent implements LoginService {
             }
         }
         return false;
+    }
+
+    class SystemConfiguration extends Configuration {
+        final Configuration parent = Configuration.getConfiguration();
+
+        @Override
+        public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
+            SecurityDomain domain = domains.get(name);
+            if (domain != null) {
+                return domain.getAppConfigurationEntries();
+            }
+            return parent.getAppConfigurationEntry(name);
+        }
     }
 
     public static class SystemID implements Principal, Serializable {

@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.webengine.nuxeo-webengine-core.tests
+Bundle-SymbolicName: org.nuxeo.ecm.webengine.nuxeo-webengine-core.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.webengine.nuxeo-webengine-core
+Import-Package: freemarker.template;version="[2.3,3)",org.apache.commons
+ .logging;version="[1.2,2)",org.junit,org.junit.runner,org.nuxeo.ecm.cor
+ e.api;version="[0.0,1)",org.nuxeo.runtime.contribution.impl,org.nuxeo.r
+ untime.model;version="[0.0,1)",org.nuxeo.runtime.test,org.nuxeo.runtime
+ .test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.webengine.rendering,org.nuxeo.ecm.webengi
+ ne.security,org.nuxeo.runtime.annotations,org.nuxeo.runtime.contributio
+ n,samples
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

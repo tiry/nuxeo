@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateful
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Platform IO Core Fragment
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-io-core
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.io.descriptors;uses:="org.nuxeo.common.xmap.annotation";v
+ ersion="0.0.0",org.nuxeo.ecm.platform.io.impl;uses:="org.nuxeo.ecm.core
+ .api,org.nuxeo.ecm.core.io,org.nuxeo.ecm.platform.io.api,org.nuxeo.runt
+ ime.model";version="0.0.0",org.nuxeo.ecm.platform.io.operation;uses:="o
+ rg.nuxeo.ecm.automation.core.annotations,org.nuxeo.ecm.core.api,org.nux
+ eo.ecm.core.io";version="0.0.0"
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.nuxeo.c
+ ommon.utils;version="[0.0,1)",org.nuxeo.common.xmap.annotation;version=
+ "[0.0,1)",org.nuxeo.ecm.automation.core.annotations;version="[0.0,1)",o
+ rg.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.io;version="
+ [0.0,1)",org.nuxeo.ecm.core.io.impl;version="[0.0,1)",org.nuxeo.ecm.cor
+ e.io.impl.plugins;version="[0.0,1)",org.nuxeo.ecm.platform.io.api;versi
+ on="[0.0,1)",org.nuxeo.ecm.platform.io.descriptors,org.nuxeo.runtime;ve
+ rsion="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runti
+ me.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/io-framework.xml,OSGI-INF/operations-contrib.x
+ ml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

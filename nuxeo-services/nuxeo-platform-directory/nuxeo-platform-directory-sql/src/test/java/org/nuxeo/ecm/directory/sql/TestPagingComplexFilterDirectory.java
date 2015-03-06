@@ -45,7 +45,7 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 @RunWith(FeaturesRunner.class)
 @Features(SQLDirectoryFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy("org.nuxeo.ecm.directory.sql.tests:pagingDirectory-contrib.xml")
+@LocalDeploy("org.nuxeo.ecm.directory.sql:pagingDirectory-contrib.xml")
 public class TestPagingComplexFilterDirectory {
 
     private static final String DIR = "pagingDirectory";

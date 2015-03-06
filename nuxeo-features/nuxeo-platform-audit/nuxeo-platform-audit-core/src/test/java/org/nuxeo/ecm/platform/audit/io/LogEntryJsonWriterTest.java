@@ -19,27 +19,34 @@
 
 package org.nuxeo.ecm.platform.audit.io;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.io.marshallers.json.AbstractJsonWriterTest;
 import org.nuxeo.ecm.core.io.marshallers.json.JsonAssert;
 import org.nuxeo.ecm.platform.audit.AuditFeature;
+import org.nuxeo.ecm.platform.audit.api.AuditLogger;
+import org.nuxeo.ecm.platform.audit.api.AuditReader;
 import org.nuxeo.ecm.platform.audit.api.LogEntry;
+import org.nuxeo.ecm.platform.audit.impl.LogEntryImpl;
 import org.nuxeo.ecm.platform.query.api.PageProvider;
 import org.nuxeo.ecm.platform.query.api.PageProviderService;
+import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @Features(AuditFeature.class)
-@LocalDeploy("org.nuxeo.ecm.platform.audit.tests:test-pageprovider-contrib.xml")
+@LocalDeploy("org.nuxeo.ecm.platform.audit:test-pageprovider-contrib.xml")
 public class LogEntryJsonWriterTest extends AbstractJsonWriterTest.External<LogEntryJsonWriter, LogEntry> {
 
     public LogEntryJsonWriterTest() {
@@ -52,22 +59,46 @@ public class LogEntryJsonWriterTest extends AbstractJsonWriterTest.External<LogE
     @Inject
     private CoreSession session;
 
+    @Inject
+    AuditFeature audit;
+
+    @Before
+    public void createTestEntries() {
+
+        AuditReader reader = Framework.getLocalService(AuditReader.class);
+        assertNotNull(reader);
+
+        AuditLogger logger = Framework.getLocalService(AuditLogger.class);
+        assertNotNull(logger);
+        LogEntry entry = new LogEntryImpl();
+        entry.setRepositoryId("test");
+        entry.setCategory("category");
+        entry.setEventId("event");
+        entry.setPrincipalName("Administrator");
+        entry.setDocPath("/");
+        entry.setEventDate(Calendar.getInstance().getTime());
+        entry.setDocType("docType");
+        entry.setDocUUID("uuid");
+
+        logger.addLogEntries(Collections.singletonList(entry));
+
+    }
+
     @Test
     public void test() throws Exception {
-        DocumentModel root = session.getDocument(new PathRef("/"));
         PageProvider<?> pp = pps.getPageProvider("DOCUMENT_HISTORY_PROVIDER", null, Long.valueOf(20), Long.valueOf(0),
-                new HashMap<String, Serializable>(), root);
+                new HashMap<String, Serializable>(), "uuid");
         @SuppressWarnings("unchecked")
         List<LogEntry> entries = (List<LogEntry>) pp.getCurrentPage();
         JsonAssert json = jsonAssert(entries.get(0));
         json.properties(14);
         json.has("entity-type").isEquals("logEntry");
         json.has("id").isInt();
-        json.has("category").isEquals("eventDocumentCategory");
-        json.has("principalName").isEquals("system");
+        json.has("category").isEquals("category");
+        json.has("principalName").isEquals("Administrator");
         json.has("docPath").isEquals("/");
-        json.has("docType").isEquals("Root");
-        json.has("docUUID").isEquals(root.getId());
+        json.has("docType").isEquals("docType");
+        json.has("docUUID").isEquals("uuid");
         json.has("eventId").isText();
         json.has("repositoryId").isEquals("test");
         json.has("eventDate").isText();

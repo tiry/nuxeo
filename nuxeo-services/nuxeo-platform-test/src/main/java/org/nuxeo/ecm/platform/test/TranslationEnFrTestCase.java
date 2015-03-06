@@ -33,7 +33,7 @@ public class TranslationEnFrTestCase extends TranslationTestCase {
      * Useful for override.
      */
     protected String getFrTranslationsPath() {
-        return "OSGI-INF/l10n/messages_fr_FR.properties";
+        return "messages_fr_FR.properties";
     }
 
     @Test

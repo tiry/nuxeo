@@ -18,13 +18,13 @@
  */
 package org.nuxeo.connect.update.task.live.commands;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.nuxeo.connect.update.PackageException;
 import org.nuxeo.connect.update.task.Command;
 import org.nuxeo.connect.update.task.Task;
 import org.nuxeo.connect.update.task.standalone.commands.FlushPlaceholder;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.reload.ReloadService;
 
@@ -48,8 +48,8 @@ public class Flush extends FlushPlaceholder {
             Framework.getRuntime().reloadProperties();
             ReloadService deployer = Framework.getLocalService(ReloadService.class);
             deployer.flush();
-        } catch (IOException e) {
-            throw new PackageException("Failed to reload repository", e);
+        } catch (RuntimeServiceException cause) {
+            throw new PackageException("Failed to reload repository", cause);
         }
     }
 

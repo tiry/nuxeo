@@ -21,10 +21,6 @@
 
 package org.nuxeo.ecm.platform.actions;
 
-import org.nuxeo.ecm.platform.actions.AbstractActionFilter;
-import org.nuxeo.ecm.platform.actions.Action;
-import org.nuxeo.ecm.platform.actions.ActionContext;
-
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
  */

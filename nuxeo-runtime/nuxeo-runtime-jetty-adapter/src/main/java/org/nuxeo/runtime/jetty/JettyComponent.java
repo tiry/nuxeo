@@ -28,11 +28,13 @@ import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.jetty.NCSARequestLog;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.handler.HandlerCollection;
-import org.mortbay.jetty.handler.RequestLogHandler;
+import org.mortbay.jetty.handler.HandlerWrapper;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebInfConfiguration;
@@ -41,6 +43,8 @@ import org.mortbay.xml.XmlConfiguration;
 import org.nuxeo.common.Environment;
 import org.nuxeo.common.server.WebApplication;
 import org.nuxeo.common.utils.ExceptionUtils;
+import org.nuxeo.runtime.RuntimeServiceEvent;
+import org.nuxeo.runtime.RuntimeServiceListener;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
@@ -106,6 +110,7 @@ public class JettyComponent extends DefaultComponent {
         URL cfg = null;
 
         String cfgName = Framework.getProperty("org.nuxeo.jetty.config");
+        Environment env = Environment.getDefault();
         if (cfgName != null) {
             if (cfgName.contains(":/")) {
                 try {
@@ -124,7 +129,7 @@ public class JettyComponent extends DefaultComponent {
                 }
             }
         } else {
-            File file = new File(Environment.getDefault().getConfig(), "jetty.xml");
+            File file = new File(env.getConfig(), "jetty.xml");
             if (file.isFile()) {
                 try {
                     cfg = file.toURI().toURL();
@@ -133,9 +138,7 @@ public class JettyComponent extends DefaultComponent {
                 }
             }
         }
-        boolean hasConfigFile = false;
         if (cfg != null) {
-            hasConfigFile = true;
             XmlConfiguration configuration;
             try {
                 configuration = new XmlConfiguration(cfg);
@@ -147,71 +150,38 @@ public class JettyComponent extends DefaultComponent {
             } catch (Exception e) { // stupid Jetty API throws Exception
                 throw ExceptionUtils.runtimeException(e);
             }
-        } else {
-            int p = 8080;
-            String port = Environment.getDefault().getProperty("http_port");
-            if (port != null) {
-                try {
-                    p = Integer.parseInt(port);
-                } catch (NumberFormatException e) {
-                    // do noting
-                }
+            // create the war context handler if needed
+            HandlerCollection hc = handlerCollection(server);
+            warContexts = (ContextHandlerCollection) hc.getChildHandlerByClass(ContextHandlerCollection.class);
+            if (warContexts == null) {
+                // create the war context
+                warContexts = new ContextHandlerCollection();
+                server.addHandler(warContexts);
             }
-            server = new Server(p);
-
-        }
-
-        // if a jetty.xml is present we don't configure logging - this should be
-        // done in that file.
-        if (!hasConfigFile) {
-            RequestLogHandler requestLogHandler = new RequestLogHandler();
-            File logDir = Environment.getDefault().getLog();
-            logDir.mkdirs();
-            File logFile = new File(logDir, "jetty.log");
-            NCSARequestLog requestLog = new NCSARequestLog(logFile.getAbsolutePath());
-            requestLogHandler.setRequestLog(requestLog);
-            // handlers = new Handler[] {contexts, new DefaultHandler(),
-            // requestLogHandler};
-            server.addHandler(requestLogHandler);
+        } else {
+            server = new Server();
+            Connector connector = new SocketConnector();
+            connector.setPort(Integer.parseInt(env.getProperty("org.nuxeo.jetty.port", "8080")));
+            connector.setHost(env.getProperty("org.nuxeo.jetty.host", "127.0.0.1"));
+            server.setConnectors(new Connector[] { connector });
             server.setSendServerVersion(true);
             server.setStopAtShutdown(true);
-
         }
-
-        // create the war context handler if needed
-        HandlerCollection hc = (HandlerCollection) server.getHandler();
-        warContexts = (ContextHandlerCollection) hc.getChildHandlerByClass(ContextHandlerCollection.class);
-        if (warContexts == null) {
-            // create the war context
-            warContexts = new ContextHandlerCollection();
-            server.addHandler(warContexts);
-        }
-
         // scan for WAR files
         // deploy any war found in web directory
         String scanWebDir = Framework.getProperty(P_SCAN_WEBDIR);
         if (scanWebDir != null && scanWebDir.equals("true")) {
             logger.info("Scanning for WARs in web directory");
-            File web = Environment.getDefault().getWeb();
+            File web = env.getWeb();
             scanForWars(web);
         }
 
         ctxMgr = new ContextManager(server);
-
-        // start the server
-        // server.start(); -> server will be start after frameworks starts to be
-        // sure that all services
-        // used by web.xml filters are registered.
     }
 
     @Override
     public void deactivate(ComponentContext context) {
         ctxMgr = null;
-        try {
-            server.stop();
-        } catch (Exception e) { // stupid Jetty API throws Exception
-            throw ExceptionUtils.runtimeException(e);
-        }
         server = null;
     }
 
@@ -220,17 +190,6 @@ public class JettyComponent extends DefaultComponent {
         if (XP_WEB_APP.equals(extensionPoint)) {
             File home = Environment.getDefault().getHome();
             WebApplication app = (WebApplication) contribution;
-            // TODO preprocessing was removed from this component -
-            // preprocessing should be done in another bundle
-            // if still required (on equinox distribution)
-            // if (app.needsWarPreprocessing()) {
-            // logger.info("Starting deployment preprocessing");
-            // DeploymentPreprocessor dp = new DeploymentPreprocessor(home);
-            // dp.init();
-            // dp.predeploy();
-            // logger.info("Deployment preprocessing terminated");
-            // }
-
             WebAppContext ctx = new WebAppContext();
             ctx.setContextPath(app.getContextPath());
             String root = app.getWebRoot();
@@ -253,16 +212,6 @@ public class JettyComponent extends DefaultComponent {
             } else {
                 warContexts.addHandler(ctx);
             }
-            org.mortbay.log.Log.setLog(new Log4JLogger(logger));
-            // ctx.start();
-            // HandlerWrapper wrapper = (HandlerWrapper)ctx.getHandler();
-            // wrapper = (HandlerWrapper)wrapper.getHandler();
-            // wrapper.setHandler(new NuxeoServletHandler());
-
-            if (ctx.isFailed()) {
-                logger.error("Error in war deployment");
-            }
-
         } else if (XP_FILTER.equals(extensionPoint)) {
             ctxMgr.addFilter((FilterDescriptor) contribution);
         } else if (XP_SERVLET.equals(extensionPoint)) {
@@ -294,6 +243,9 @@ public class JettyComponent extends DefaultComponent {
         if (adapter == org.mortbay.jetty.Server.class) {
             return adapter.cast(server);
         }
+        if (Connector.class.isAssignableFrom(adapter)) {
+            return adapter.cast(server.getConnectors()[0]);
+        }
         return null;
     }
 
@@ -322,20 +274,30 @@ public class JettyComponent extends DefaultComponent {
 
     @Override
     public void applicationStarted(ComponentContext context) {
-        if (server == null) {
-            return;
-        }
         ctxMgr.applyLifecycleListeners();
-        Thread t = Thread.currentThread();
-        ClassLoader oldcl = t.getContextClassLoader();
-        t.setContextClassLoader(getClass().getClassLoader());
         try {
             server.start();
-        } catch (Exception e) { // stupid Jetty API throws Exception
-            throw ExceptionUtils.runtimeException(e);
-        } finally {
-            t.setContextClassLoader(getClassLoader(oldcl));
+        } catch (Exception cause) {
+            throw new AssertionError("Cannor start jetty server", cause);
         }
+
+        Framework.addListener(new RuntimeServiceListener() {
+
+            Server actual = server;
+
+            @Override
+            public void handleEvent(RuntimeServiceEvent event) {
+                if (event.id != RuntimeServiceEvent.RUNTIME_ABOUT_TO_STOP) {
+                    return;
+                }
+                Framework.removeListener(this);
+                try {
+                    actual.stop();
+                } catch (Exception cause) {
+                    throw new AssertionError("Cannor stop jetty server", cause);
+                }
+            }
+        });
     }
 
     private void scanForWars(File dir) {
@@ -364,6 +326,20 @@ public class JettyComponent extends DefaultComponent {
                 }
             }
         }
+
+    }
+
+    protected HandlerCollection handlerCollection(Handler handler) {
+        if (handler == null) {
+            throw new NullPointerException("cannot find handler collection");
+        }
+        if (handler instanceof HandlerCollection) {
+            return ((HandlerCollection) handler);
+        }
+        if (handler instanceof HandlerWrapper) {
+            return handlerCollection(((HandlerWrapper) handler).getHandler());
+        }
+        throw new AssertionError("Unknown handler " + handler.getClass());
     }
 
 }

@@ -28,11 +28,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.nuxeo.runtime.test.runner.ConditionalIgnoreRule.IgnoreIsolated;
 import org.nuxeo.runtime.trackers.concurrent.ThreadEvent;
 
 @RunWith(FeaturesRunner.class)
 @Features({ RuntimeFeature.class, FileEventsTrackingFeature.class })
 @BlacklistComponent("org.nuxeo.runtime.trackers.files.threadstracking.config")
+@ConditionalIgnoreRule.Ignore(cause="isolated-classloader",condition=IgnoreIsolated.class)
 public class DisabledThreadsTrackingTest {
 
     @Inject

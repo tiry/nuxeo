@@ -23,10 +23,12 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.web.resources.api.ResourceBundle;
 import org.nuxeo.ecm.web.resources.api.service.WebResourceManager;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.theme.styling.service.ThemeStylingService;
 import org.nuxeo.theme.styling.service.descriptors.FlavorDescriptor;
 import org.nuxeo.theme.styling.service.descriptors.IconDescriptor;
@@ -34,13 +36,10 @@ import org.nuxeo.theme.styling.service.descriptors.LogoDescriptor;
 import org.nuxeo.theme.styling.service.descriptors.PageDescriptor;
 import org.nuxeo.theme.styling.service.descriptors.PalettePreview;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 /**
  * @since 5.5
  */
+@Features(CoreFeature.class)
 public class TestThemeStylingService extends NXRuntimeTestCase {
 
     public static final String THEME_NAME = "testStyling";
@@ -49,14 +48,18 @@ public class TestThemeStylingService extends NXRuntimeTestCase {
 
     public static final String PRINT_PAGE_NAME = THEME_NAME + "/print";
 
+
     protected ThemeStylingService service;
 
+    protected AutoCloseable testInfos;
+
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         deployBundle("org.nuxeo.web.resources.core");
         deployBundle("org.nuxeo.theme.styling");
-        deployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config.xml");
+        testInfos = deployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config.xml");
         deployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-addon-config.xml");
 
         // force application start
@@ -169,29 +172,26 @@ public class TestThemeStylingService extends NXRuntimeTestCase {
 
         // override conf, by adding additional nuxeo_dm_default2 css to the
         // page
-        deployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config2.xml");
+        try(AutoCloseable  infos = deployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config2.xml")) {
+            assertEquals("default", service.getDefaultFlavorName(DEFAULT_PAGE_NAME));
+            assertEquals("default", service.getDefaultFlavorName(PRINT_PAGE_NAME));
 
-        assertEquals("default", service.getDefaultFlavorName(DEFAULT_PAGE_NAME));
-        assertEquals("default", service.getDefaultFlavorName(PRINT_PAGE_NAME));
+            WebResourceManager wrm = Framework.getService(WebResourceManager.class);
+            ResourceBundle bundle = wrm
+                    .getResourceBundle(PageDescriptor.RESOURCE_BUNDLE_PREFIX + "testStyling_default");
+            assertNotNull(bundle);
+            assertEquals(4, bundle.getResources().size());
+            assertEquals("nuxeo_dm_default.css", bundle.getResources().get(0));
+            assertEquals("jquery.fancybox.js", bundle.getResources().get(1));
+            assertEquals("nuxeo_dm_default2.css", bundle.getResources().get(2));
+            assertEquals("jquery.fancybox.style.css", bundle.getResources().get(3));
 
-        WebResourceManager wrm = Framework.getService(WebResourceManager.class);
-        ResourceBundle bundle = wrm.getResourceBundle(PageDescriptor.RESOURCE_BUNDLE_PREFIX + "testStyling_default");
-        assertNotNull(bundle);
-        assertEquals(4, bundle.getResources().size());
-        assertEquals("nuxeo_dm_default.css", bundle.getResources().get(0));
-        assertEquals("jquery.fancybox.js", bundle.getResources().get(1));
-        assertEquals("nuxeo_dm_default2.css", bundle.getResources().get(2));
-        assertEquals("jquery.fancybox.style.css", bundle.getResources().get(3));
-
-        ResourceBundle globalBundle = wrm.getResourceBundle(PageDescriptor.RESOURCE_BUNDLE_PREFIX + "*");
-        assertNotNull(globalBundle);
-        assertEquals(2, globalBundle.getResources().size());
-        assertEquals("addon_style.css", globalBundle.getResources().get(0));
-        assertEquals("jquery.addon.js", globalBundle.getResources().get(1));
-
-        // undeploy, check theme styling is back to first definition
-        undeployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config2.xml");
-
+            ResourceBundle globalBundle = wrm.getResourceBundle(PageDescriptor.RESOURCE_BUNDLE_PREFIX + "*");
+            assertNotNull(globalBundle);
+            assertEquals(2, globalBundle.getResources().size());
+            assertEquals("addon_style.css", globalBundle.getResources().get(0));
+            assertEquals("jquery.addon.js", globalBundle.getResources().get(1));
+        }
         checkOriginalTheme();
     }
 
@@ -200,105 +200,104 @@ public class TestThemeStylingService extends NXRuntimeTestCase {
         checkOriginalTheme();
 
         // override conf, by changing dark flavor colors and default flavor
-        deployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config3.xml");
+        try(AutoCloseable infos = deployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config3.xml")) {
+            assertEquals("dark", service.getDefaultFlavorName(DEFAULT_PAGE_NAME));
 
-        assertEquals("dark", service.getDefaultFlavorName(DEFAULT_PAGE_NAME));
+            List<String> flavorNames = service.getFlavorNames(DEFAULT_PAGE_NAME);
+            assertNotNull(flavorNames);
+            assertEquals(2, flavorNames.size());
+            assertEquals("dark", flavorNames.get(0));
+            assertEquals("addon_flavor", flavorNames.get(1));
 
-        List<String> flavorNames = service.getFlavorNames(DEFAULT_PAGE_NAME);
-        assertNotNull(flavorNames);
-        assertEquals(2, flavorNames.size());
-        assertEquals("dark", flavorNames.get(0));
-        assertEquals("addon_flavor", flavorNames.get(1));
+            List<FlavorDescriptor> flavors = service.getFlavors(DEFAULT_PAGE_NAME);
+            assertNotNull(flavors);
+            assertEquals(2, flavors.size());
+            assertEquals("dark", flavors.get(0).getName());
+            assertEquals("addon_flavor", flavors.get(1).getName());
+            assertEquals("default", service.getDefaultFlavorName(PRINT_PAGE_NAME));
 
-        List<FlavorDescriptor> flavors = service.getFlavors(DEFAULT_PAGE_NAME);
-        assertNotNull(flavors);
-        assertEquals(2, flavors.size());
-        assertEquals("dark", flavors.get(0).getName());
-        assertEquals("addon_flavor", flavors.get(1).getName());
-        assertEquals("default", service.getDefaultFlavorName(PRINT_PAGE_NAME));
+            flavorNames = service.getFlavorNames(PRINT_PAGE_NAME);
+            assertNotNull(flavorNames);
+            assertEquals("fl: " + flavorNames, 5, flavorNames.size());
+            assertEquals("default", flavorNames.get(0));
+            assertEquals("dark", flavorNames.get(1));
+            assertEquals("subDark", flavorNames.get(2));
+            assertEquals("nonExistingFlavor", flavorNames.get(3));
+            assertEquals("addon_flavor", flavorNames.get(4));
 
-        flavorNames = service.getFlavorNames(PRINT_PAGE_NAME);
-        assertNotNull(flavorNames);
-        assertEquals("fl: " + flavorNames, 5, flavorNames.size());
-        assertEquals("default", flavorNames.get(0));
-        assertEquals("dark", flavorNames.get(1));
-        assertEquals("subDark", flavorNames.get(2));
-        assertEquals("nonExistingFlavor", flavorNames.get(3));
-        assertEquals("addon_flavor", flavorNames.get(4));
+            flavors = service.getFlavors(PRINT_PAGE_NAME);
+            assertNotNull(flavors);
+            assertEquals(4, flavors.size());
+            assertEquals("default", flavors.get(0).getName());
+            assertEquals("dark", flavors.get(1).getName());
+            assertEquals("subDark", flavors.get(2).getName());
+            assertEquals("addon_flavor", flavors.get(3).getName());
+            // non existing flavors are omitted
 
-        flavors = service.getFlavors(PRINT_PAGE_NAME);
-        assertNotNull(flavors);
-        assertEquals(4, flavors.size());
-        assertEquals("default", flavors.get(0).getName());
-        assertEquals("dark", flavors.get(1).getName());
-        assertEquals("subDark", flavors.get(2).getName());
-        assertEquals("addon_flavor", flavors.get(3).getName());
-        // non existing flavors are omitted
+            FlavorDescriptor flavor = service.getFlavor("*");
+            assertNull(flavor);
 
-        FlavorDescriptor flavor = service.getFlavor("*");
-        assertNull(flavor);
+            LogoDescriptor logo = service.getLogo("*");
+            assertNull(logo);
 
-        LogoDescriptor logo = service.getLogo("*");
-        assertNull(logo);
+            flavor = service.getFlavor("default");
+            assertEquals("default", flavor.getName());
+            assertEquals("Default flavor", flavor.getLabel());
 
-        flavor = service.getFlavor("default");
-        assertEquals("default", flavor.getName());
-        assertEquals("Default flavor", flavor.getLabel());
+            logo = flavor.getLogo();
+            assertNotNull(logo);
+            assertEquals("/img/nuxeo_logo.png", logo.getPath());
+            assertEquals("92", logo.getWidth());
+            assertEquals("36", logo.getHeight());
+            assertEquals("Nuxeo", logo.getTitle());
 
-        logo = flavor.getLogo();
-        assertNotNull(logo);
-        assertEquals("/img/nuxeo_logo.png", logo.getPath());
-        assertEquals("92", logo.getWidth());
-        assertEquals("36", logo.getHeight());
-        assertEquals("Nuxeo", logo.getTitle());
+            List<IconDescriptor> icons = flavor.getFavicons();
+            assertEquals(2, icons.size());
+            assertEquals("icon", icons.get(0).getName());
+            assertEquals("/icons/favicon.png", icons.get(0).getValue());
+            assertEquals("shortcut icon", icons.get(1).getName());
+            assertEquals("/icons/favicon.ico", icons.get(1).getValue());
 
-        List<IconDescriptor> icons = flavor.getFavicons();
-        assertEquals(2, icons.size());
-        assertEquals("icon", icons.get(0).getName());
-        assertEquals("/icons/favicon.png", icons.get(0).getValue());
-        assertEquals("shortcut icon", icons.get(1).getName());
-        assertEquals("/icons/favicon.ico", icons.get(1).getValue());
+            flavor = service.getFlavor("dark");
+            assertEquals("dark", flavor.getName());
+            assertEquals("Dark flavor", flavor.getLabel());
 
-        flavor = service.getFlavor("dark");
-        assertEquals("dark", flavor.getName());
-        assertEquals("Dark flavor", flavor.getLabel());
+            logo = flavor.getLogo();
+            assertNotNull(logo);
+            assertEquals("/img/nuxeo_dark_logo.png", logo.getPath());
+            assertEquals("100", logo.getWidth());
+            assertEquals("666", logo.getHeight());
+            // title merged
+            assertEquals("Darxeo", logo.getTitle());
 
-        logo = flavor.getLogo();
-        assertNotNull(logo);
-        assertEquals("/img/nuxeo_dark_logo.png", logo.getPath());
-        assertEquals("100", logo.getWidth());
-        assertEquals("666", logo.getHeight());
-        // title merged
-        assertEquals("Darxeo", logo.getTitle());
+            icons = flavor.getFavicons();
+            assertEquals(2, icons.size());
+            assertEquals("icon", icons.get(0).getName());
+            assertEquals("/icons/dark_favicon.png", icons.get(0).getValue());
+            assertEquals("shortcut icon", icons.get(1).getName());
+            assertEquals("/icons/dark_favicon.ico", icons.get(1).getValue());
 
-        icons = flavor.getFavicons();
-        assertEquals(2, icons.size());
-        assertEquals("icon", icons.get(0).getName());
-        assertEquals("/icons/dark_favicon.png", icons.get(0).getValue());
-        assertEquals("shortcut icon", icons.get(1).getName());
-        assertEquals("/icons/dark_favicon.ico", icons.get(1).getValue());
+            flavor = service.getFlavor("subDark");
+            assertEquals("subDark", flavor.getName());
+            assertEquals("SubDark flavor", flavor.getLabel());
 
-        flavor = service.getFlavor("subDark");
-        assertEquals("subDark", flavor.getName());
-        assertEquals("SubDark flavor", flavor.getLabel());
+            logo = flavor.getLogo();
+            assertNotNull(logo);
+            assertEquals("/img/nuxeo_dark_logo.png", logo.getPath());
+            assertEquals("100", logo.getWidth());
+            assertEquals("666", logo.getHeight());
+            // title merged
+            assertEquals("Darxeo", logo.getTitle());
 
-        logo = flavor.getLogo();
-        assertNotNull(logo);
-        assertEquals("/img/nuxeo_dark_logo.png", logo.getPath());
-        assertEquals("100", logo.getWidth());
-        assertEquals("666", logo.getHeight());
-        // title merged
-        assertEquals("Darxeo", logo.getTitle());
+            icons = flavor.getFavicons();
+            assertEquals(2, icons.size());
+            assertEquals("icon", icons.get(0).getName());
+            assertEquals("/icons/dark_favicon.png", icons.get(0).getValue());
+            assertEquals("shortcut icon", icons.get(1).getName());
+            assertEquals("/icons/dark_favicon.ico", icons.get(1).getValue());
 
-        icons = flavor.getFavicons();
-        assertEquals(2, icons.size());
-        assertEquals("icon", icons.get(0).getName());
-        assertEquals("/icons/dark_favicon.png", icons.get(0).getValue());
-        assertEquals("shortcut icon", icons.get(1).getName());
-        assertEquals("/icons/dark_favicon.ico", icons.get(1).getValue());
-
-        // undeploy, check theme styling is back to first definition
-        undeployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config3.xml");
+            // undeploy, check theme styling is back to first definition
+        }
         checkOriginalTheme();
     }
 
@@ -307,7 +306,7 @@ public class TestThemeStylingService extends NXRuntimeTestCase {
         checkOriginalTheme();
 
         // undeploy => check web resources manage service status
-        undeployContrib("org.nuxeo.theme.styling.tests", "theme-styling-test-config.xml");
+        testInfos.close();
 
         assertNull(service.getDefaultFlavorName(DEFAULT_PAGE_NAME));
         assertNull(service.getFlavorNames(DEFAULT_PAGE_NAME));

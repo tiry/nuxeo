@@ -30,7 +30,6 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -42,11 +41,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.xml.DOMConfigurator;
 
 import org.nuxeo.common.codec.CryptoProperties;
 import org.nuxeo.common.utils.TextTemplate;
+import org.nuxeo.runtime.logging.LoggingConfigurator;
 
 import freemarker.template.TemplateException;
 
@@ -74,8 +72,8 @@ public abstract class ServerConfigurator {
     /**
      * @since 5.4.2
      */
-    public static final List<String> NUXEO_SYSTEM_PROPERTIES = Arrays.asList(new String[] { "nuxeo.conf", "nuxeo.home",
-            "log.id" });
+    public static final List<String> NUXEO_SYSTEM_PROPERTIES = Arrays.asList(
+            new String[] { "nuxeo.conf", "nuxeo.home", "log.id" });
 
     protected static final String DEFAULT_CONTEXT_NAME = "/nuxeo";
 
@@ -127,10 +125,10 @@ public abstract class ServerConfigurator {
         final TextTemplate templateParser = new TextTemplate(config);
         templateParser.setKeepEncryptedAsVar(true);
         templateParser.setTrim(true);
-        templateParser.setTextParsingExtensions(config.getProperty(
-                ConfigurationGenerator.PARAM_TEMPLATES_PARSING_EXTENSIONS, "xml,properties,nx"));
-        templateParser.setFreemarkerParsingExtensions(config.getProperty(
-                ConfigurationGenerator.PARAM_TEMPLATES_FREEMARKER_EXTENSIONS, "nxftl"));
+        templateParser.setTextParsingExtensions(
+                config.getProperty(ConfigurationGenerator.PARAM_TEMPLATES_PARSING_EXTENSIONS, "xml,properties,nx"));
+        templateParser.setFreemarkerParsingExtensions(
+                config.getProperty(ConfigurationGenerator.PARAM_TEMPLATES_FREEMARKER_EXTENSIONS, "nxftl"));
 
         deleteTemplateFiles();
         // add included templates directories
@@ -151,8 +149,8 @@ public abstract class ServerConfigurator {
                 }
                 // Retrieve optional target directory if defined
                 String outputDirectoryStr = config.getProperty(templateName + ".target");
-                File outputDirectory = (outputDirectoryStr != null) ? new File(generator.getNuxeoHome(),
-                        outputDirectoryStr) : getOutputDirectory();
+                File outputDirectory = (outputDirectoryStr != null)
+                        ? new File(generator.getNuxeoHome(), outputDirectoryStr) : getOutputDirectory();
                 for (File in : listFiles) {
                     // copy template(s) directories parsing properties
                     newFilesList.addAll(templateParser.processDirectory(in, new File(outputDirectory, in.getName())));
@@ -187,9 +185,9 @@ public abstract class ServerConfigurator {
                         FileUtils.copyFile(backup, original);
                         backup.delete();
                     } catch (IOException e) {
-                        throw new ConfigurationException(String.format("Failed to restore %s from %s\nEdit or "
-                                + "delete %s to bypass that error.", line.substring(0, line.length() - 4), line,
-                                newFiles), e);
+                        throw new ConfigurationException(String.format(
+                                "Failed to restore %s from %s\nEdit or " + "delete %s to bypass that error.",
+                                line.substring(0, line.length() - 4), line, newFiles), e);
                     }
                 } else {
                     log.debug("Remove " + line);
@@ -292,23 +290,12 @@ public abstract class ServerConfigurator {
      * @since 5.4.2
      */
     public void initLogs() {
-        File logFile = getLogConfFile();
-        try {
-            String logDirectory = System.getProperty(org.nuxeo.common.Environment.NUXEO_LOG_DIR);
-            if (logDirectory == null) {
-                System.setProperty(org.nuxeo.common.Environment.NUXEO_LOG_DIR, getLogDir().getPath());
-            }
-            if (logFile == null || !logFile.exists()) {
-                System.out.println("No logs configuration, will setup a basic one.");
-                BasicConfigurator.configure();
-            } else {
-                System.out.println("Try to configure logs with " + logFile);
-                DOMConfigurator.configure(logFile.toURI().toURL());
-            }
-            log.info("Logs successfully configured.");
-        } catch (MalformedURLException e) {
-            log.error("Could not initialize logs with " + logFile, e);
+        String logDirectory = System.getProperty(org.nuxeo.common.Environment.NUXEO_LOG_DIR);
+        if (logDirectory == null) {
+            System.setProperty(org.nuxeo.common.Environment.NUXEO_LOG_DIR, getLogDir().getPath());
         }
+        File logFile = getLogConfFile();
+        LoggingConfigurator.getInstance().initLogs(logFile);
     }
 
     /**
@@ -338,8 +325,8 @@ public abstract class ServerConfigurator {
      * @since 5.4.2
      */
     public void checkPaths() throws ConfigurationException {
-        File badInstanceClid = new File(generator.getNuxeoHome(), getDefaultDataDir() + File.separator
-                + "instance.clid");
+        File badInstanceClid = new File(generator.getNuxeoHome(),
+                getDefaultDataDir() + File.separator + "instance.clid");
         if (badInstanceClid.exists() && !getDataDir().equals(badInstanceClid.getParentFile())) {
             log.warn(String.format("Moving %s to %s.", badInstanceClid, getDataDir()));
             try {
@@ -476,7 +463,9 @@ public abstract class ServerConfigurator {
      * @return Log4J configuration file
      * @since 5.4.2
      */
-    public abstract File getLogConfFile();
+    public File getLogConfFile() {
+        return LoggingConfigurator.getInstance().getConfigurationFile(getConfigDir());
+    }
 
     /**
      * @return Nuxeo config directory

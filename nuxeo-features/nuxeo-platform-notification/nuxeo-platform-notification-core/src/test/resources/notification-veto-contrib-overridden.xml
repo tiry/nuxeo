@@ -3,6 +3,7 @@
 <component
   name="org.nuxeo.ecm.platform.notification.service.NotificationVetoContrib-overridden">
 
+  <require>org.nuxeo.ecm.platform.notification.service.NotificationVetoContrib-test</require>
   <extension
     target="org.nuxeo.ecm.platform.ec.notification.service.NotificationService"
     point="notificationListenerVeto">

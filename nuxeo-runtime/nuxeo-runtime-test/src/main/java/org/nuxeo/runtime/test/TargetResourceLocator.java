@@ -69,7 +69,7 @@ public class TargetResourceLocator {
         }
     }
 
-    public URL getTargetTestResource(String name) throws IOException {
+    public URL getTargetTestResource(String name)  {
         try {
             final Enumeration<URL> resources = loader.getResources(name);
             while (resources.hasMoreElements()) {
@@ -83,7 +83,7 @@ public class TargetResourceLocator {
                     return path.toUri().toURL();
                 }
             }
-        } catch (URISyntaxException cause) {
+        } catch (URISyntaxException | IOException cause) {
             throw new AssertionError("Cannot find location of " + name, cause);
         }
         return null;

@@ -12,18 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Contributors:
  *     Stephane Lacoin
  */
 package org.nuxeo.runtime.test.protocols.inline;
 
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.SimpleFeature;
 
 public class InlineURLsFeature extends SimpleFeature {
 
-    public InlineURLsFeature() {
+    @Override
+    public void beforeRun(FeaturesRunner runner) throws Exception {
         InlineURLFactory.install();
+    }
+
+    @Override
+    public void afterRun(FeaturesRunner runner) throws Exception {
+        InlineURLFactory.uninstall();
     }
 
 }

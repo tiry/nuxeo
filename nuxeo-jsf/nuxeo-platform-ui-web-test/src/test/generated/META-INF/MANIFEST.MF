@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM Web Platform Fragment Test
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-ui-web-test.t
+ ests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-ui-web-test
+Import-Package: javax.inject,org.apache.commons.logging;version="[1.2,2)
+ ",org.junit,org.junit.runner,org.nuxeo.ecm.core.api;version="[0.0,1)",o
+ rg.nuxeo.ecm.core.io.marshallers.json;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.io.marshallers.json.document;version="[0.0,1)",org.nuxeo.ecm.core.i
+ o.registry.context;version="[0.0,1)",org.nuxeo.ecm.core.test;version="[
+ 0.0,1)",org.nuxeo.ecm.core.test.annotations;version="[0.0,1)",org.nuxeo
+ .ecm.platform.ui.web.jsf,org.nuxeo.ecm.platform.ui.web.tag.fn;version="
+ [0.0,1)",org.nuxeo.ecm.platform.util;version="[0.0,1)",org.nuxeo.runtim
+ e.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.n
+ uxeo.runtime.test.runner;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.ui.web.directory,org.nuxeo.ecm.p
+ latform.ui.web.io,org.nuxeo.ecm.platform.ui.web.restAPI,org.nuxeo.ecm.p
+ latform.ui.web.util,schemas
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

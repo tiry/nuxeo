@@ -28,6 +28,7 @@ import org.nuxeo.runtime.model.RuntimeContext;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
+ *
  */
 public class XMapContext extends Context {
 
@@ -41,10 +42,7 @@ public class XMapContext extends Context {
 
     @Override
     public Class<?> loadClass(String className) throws ClassNotFoundException {
-        if (className.startsWith("[")) {
-            return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
-        }
-        return ctx.loadClass(className);
+        return Class.forName(className, true, ctx.getClassLoader());
     }
 
     @Override

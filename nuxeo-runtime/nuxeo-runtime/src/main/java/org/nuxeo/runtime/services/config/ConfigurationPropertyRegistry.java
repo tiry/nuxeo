@@ -25,6 +25,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.logging.DeprecationLogger;
 import org.nuxeo.runtime.model.SimpleContributionRegistry;
@@ -50,8 +51,7 @@ public class ConfigurationPropertyRegistry extends SimpleContributionRegistry<Co
             ConfigurationPropertyDescriptor newOrigContrib) {
         String name = contrib.getName();
         if (StringUtils.isEmpty(name)) {
-            log.error("Cannot register configuration property with an empty name");
-            return;
+            throw new RuntimeServiceException("Cannot register configuration property with an empty name");
         }
         if (Framework.getProperties().containsKey(key)) {
             String message = String.format("Property '" + key + "' should now be contributed to extension "

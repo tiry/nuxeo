@@ -47,7 +47,6 @@ import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.collections.DependencyTree;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.common.utils.JarUtils;
-import org.nuxeo.common.utils.Path;
 import org.nuxeo.common.utils.StringUtils;
 import org.nuxeo.common.xmap.XMap;
 import org.nuxeo.launcher.config.ConfigurationGenerator;
@@ -55,6 +54,7 @@ import org.nuxeo.runtime.deployment.preprocessor.install.CommandContext;
 import org.nuxeo.runtime.deployment.preprocessor.install.CommandContextImpl;
 import org.nuxeo.runtime.deployment.preprocessor.template.TemplateContribution;
 import org.nuxeo.runtime.deployment.preprocessor.template.TemplateParser;
+import org.osgi.framework.Bundle;
 
 /**
  * Initializer for the deployment skeleton, taking care of creating templates, aggregating default components before
@@ -101,7 +101,7 @@ public class DeploymentPreprocessor {
         return root;
     }
 
-    public void init() throws IOException {
+    public void init() throws MalformedURLException, IOException {
         root = getDefaultContainer(dir);
         if (root != null) {
             // run container commands
@@ -109,7 +109,7 @@ public class DeploymentPreprocessor {
         }
     }
 
-    public void init(File metadata, File[] files) throws IOException {
+    public void init(File metadata, File[] files) throws MalformedURLException, IOException {
         if (metadata == null) {
             root = getDefaultContainer(dir);
         } else {
@@ -122,7 +122,7 @@ public class DeploymentPreprocessor {
         }
     }
 
-    protected void init(ContainerDescriptor cd) throws IOException {
+    protected void init(ContainerDescriptor cd) throws MalformedURLException, IOException {
         cd.context = new CommandContextImpl(cd.directory);
         initContextProperties(cd.context);
         // run container install instructions if any
@@ -131,17 +131,15 @@ public class DeploymentPreprocessor {
             log.info("Running custom installation for container: " + cd.name);
             cd.install.exec(cd.context);
         }
+        // scan directories
+        if (cd.directories != null) {
+            for (String dirPath : cd.directories) {
+                init(cd, new File(dir, dirPath));
+            }
+        }
+        // scan files
         if (cd.files != null) {
             init(cd, cd.files);
-        } else {
-            // scan directories
-            if (cd.directories == null || cd.directories.isEmpty()) {
-                init(cd, dir);
-            } else {
-                for (String dirPath : cd.directories) {
-                    init(cd, new File(dir, dirPath));
-                }
-            }
         }
     }
 
@@ -154,7 +152,7 @@ public class DeploymentPreprocessor {
         }
     }
 
-    protected void processFile(ContainerDescriptor cd, File file) throws IOException {
+    protected void processFile(ContainerDescriptor cd, File file) throws MalformedURLException, IOException {
         String fileName = file.getName();
         FragmentDescriptor fd = null;
         boolean isBundle = false;
@@ -173,11 +171,13 @@ public class DeploymentPreprocessor {
             } else {
                 fd = getJARFragment(file);
             }
+        } else if (file.isDirectory()) {
+            fd = getDirectoryFragment(file);
         }
         // register the fragment if any was found
         if (fd != null) {
             fd.fileName = fileName;
-            fd.filePath = getRelativeChildPath(cd.directory.getAbsolutePath(), file.getAbsolutePath());
+            fd.filePath = file.getAbsolutePath();
             cd.fragments.add(fd);
             if (fd.templates != null) {
                 for (TemplateDescriptor td : fd.templates.values()) {
@@ -207,7 +207,7 @@ public class DeploymentPreprocessor {
                 return id;
             }
         }
-        return null;
+        return getJarArtifactName(file.getName());
     }
 
     protected String getJarArtifactName(String name) {
@@ -221,13 +221,13 @@ public class DeploymentPreprocessor {
         return name;
     }
 
-    protected void init(ContainerDescriptor cd, File[] files) throws IOException {
+    protected void init(ContainerDescriptor cd, File[] files) throws MalformedURLException, IOException {
         for (File file : files) {
             processFile(cd, file);
         }
     }
 
-    protected void init(ContainerDescriptor cd, File dir) throws IOException {
+    protected void init(ContainerDescriptor cd, File dir) throws MalformedURLException, IOException {
         log.info("Scanning directory: " + dir.getName());
         if (!dir.exists()) {
             log.warn("Directory doesn't exist: " + dir.getPath());
@@ -262,7 +262,6 @@ public class DeploymentPreprocessor {
         }
         log.info(buf);
 
-        StringBuilder errors = new StringBuilder();
         List<DependencyTree.Entry<String, FragmentDescriptor>> missing = fragments.getMissingRequirements();
         for (DependencyTree.Entry<String, FragmentDescriptor> entry : missing) {
             buf = new StringBuilder("Unknown bundle: ");
@@ -277,8 +276,6 @@ public class DeploymentPreprocessor {
                 buf.append(listFragmentDescriptor(dep.get()));
             }
             log.error(buf);
-            errors.append(buf);
-            errors.append("\n");
         }
         for (DependencyTree.Entry<String, FragmentDescriptor> entry : fragments.getPendingEntries()) {
             if (!entry.isRegistered()) {
@@ -296,13 +293,6 @@ public class DeploymentPreprocessor {
                 buf.append(dep.getKey());
             }
             log.error(buf);
-            errors.append(buf);
-            errors.append("\n");
-        }
-        if (errors.length() != 0) {
-            // set system property to log startup errors
-            // this is read by AbstractRuntimeService
-            System.setProperty("org.nuxeo.runtime.deployment.errors", errors.toString());
         }
     }
 
@@ -381,29 +371,17 @@ public class DeploymentPreprocessor {
         }
     }
 
-    protected FragmentDescriptor getXMLFragment(File file) throws IOException {
-        URL url;
-        try {
-            url = file.toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        FragmentDescriptor fd = (FragmentDescriptor) xmap.load(url);
+    protected FragmentDescriptor getXMLFragment(File file) throws MalformedURLException, IOException {
+        FragmentDescriptor fd = (FragmentDescriptor) xmap.load(file.toURI().toURL());
         if (fd != null && fd.name == null) {
             fd.name = file.getName();
         }
         return fd;
     }
 
-    protected void collectXMLFragments(ContainerDescriptor cd, File file) throws IOException {
+    protected void collectXMLFragments(ContainerDescriptor cd, File file) throws MalformedURLException, IOException {
         String fileName = file.getName();
-        URL url;
-        try {
-            url = file.toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        Object[] result = xmap.loadAll(url);
+        Object[] result = xmap.loadAll(file.toURI().toURL());
         for (Object entry : result) {
             FragmentDescriptor fd = (FragmentDescriptor) entry;
             assert fd != null;
@@ -413,7 +391,7 @@ public class DeploymentPreprocessor {
             } else {
                 cd.fragments.add(fd);
                 fd.fileName = fileName;
-                fd.filePath = getRelativeChildPath(cd.directory.getAbsolutePath(), file.getAbsolutePath());
+                fd.filePath = file.getAbsolutePath();
             }
         }
     }
@@ -431,27 +409,16 @@ public class DeploymentPreprocessor {
         }
     }
 
-    protected FragmentDescriptor getDirectoryFragment(File directory) throws IOException {
+    protected FragmentDescriptor getDirectoryFragment(File directory) throws MalformedURLException, IOException {
         FragmentDescriptor fd = null;
         File file = new File(directory.getAbsolutePath() + '/' + FRAGMENT_FILE);
         if (file.isFile()) {
-            URL url;
-            try {
-                url = file.toURI().toURL();
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-            fd = (FragmentDescriptor) xmap.load(url);
+            fd = (FragmentDescriptor) xmap.load(file.toURI().toURL());
         } else {
             return null; // don't need preprocessing
         }
         if (fd.name == null) {
-            // fallback on symbolic name
             fd.name = getSymbolicName(directory);
-        }
-        if (fd.name == null) {
-            // fallback on artifact id
-            fd.name = getJarArtifactName(directory.getName());
         }
         if (fd.version == 0) { // compat with versions < 5.4
             processBundleForCompat(fd, directory);
@@ -459,34 +426,67 @@ public class DeploymentPreprocessor {
         return fd;
     }
 
-    protected FragmentDescriptor getJARFragment(File file) throws IOException {
-        FragmentDescriptor fd = null;
-        JarFile jar = new JarFile(file);
+    protected FragmentDescriptor getFragment(Bundle bundle) throws IOException {
+        URL location = bundle.getEntry("OSGI-INF/deployment-fragment.xml");
+        if (location == null) {
+            return null;
+        }
+        File jarFile = getJarFile(location);
+        if (jarFile == null) {
+            log.warn("Cannot extract fragment from " + location);
+            return null;
+        }
+        InputStream stream = location.openStream();
         try {
-            ZipEntry ze = jar.getEntry(FRAGMENT_FILE);
-            if (ze != null) {
-                InputStream in = new BufferedInputStream(jar.getInputStream(ze));
-                try {
-                    fd = (FragmentDescriptor) xmap.load(in);
-                } finally {
-                    in.close();
-                }
-                if (fd.name == null) {
-                    // fallback on symbolic name
-                    fd.name = getSymbolicName(file);
-                }
-                if (fd.name == null) {
-                    // fallback on artifact id
-                    fd.name = getJarArtifactName(file.getName());
-                }
-                if (fd.version == 0) { // compat with versions < 5.4
-                    processBundleForCompat(fd, file);
-                }
-            }
+            FragmentDescriptor fd = getFragment(bundle.getSymbolicName(), stream);
+            fd.fileName = jarFile.getName();
+            fd.filePath = jarFile.getAbsolutePath();
+            return fd;
         } finally {
-            jar.close();
+            stream.close();
+        }
+    }
+
+    protected File getJarFile(URL location) throws MalformedURLException {
+        String spec = location.getFile();
+        String protocol = location.getProtocol();
+        if ("jar".equals(protocol)) {
+            int separator = spec.indexOf("!/");
+            URL jarFileLocation = new URL(spec.substring(0, separator));
+            return getJarFile(jarFileLocation);
+        } else if ("file".equals(protocol)) {
+            int separator = spec.indexOf(".jar");
+            String path = spec.substring(0, separator + 4);
+            return new File(path);
+        } else {
+            return null;
+        }
+    }
+
+    protected FragmentDescriptor getFragment(String name, InputStream stream) throws IOException {
+        InputStream buffered = new BufferedInputStream(stream);
+        FragmentDescriptor fd = (FragmentDescriptor) xmap.load(buffered);
+        if (fd.name == null) {
+            fd.name = name;
         }
         return fd;
+    }
+
+    protected FragmentDescriptor getJARFragment(File file) throws IOException {
+        FragmentDescriptor fd = null;
+        try (JarFile jar = new JarFile(file)) {
+            ZipEntry ze = jar.getEntry(FRAGMENT_FILE);
+            if (ze == null) {
+                return null;
+            }
+            try (InputStream in = jar.getInputStream(ze)) {
+                fd = getFragment(getSymbolicName(file), in);
+            }
+            if (fd.version == 0) { // compat with versions < 5.4
+                processBundleForCompat(fd, file);
+            }
+            return fd;
+        }
     }
 
     protected void processManifest(FragmentDescriptor fd, String fileName, Manifest mf) {
@@ -544,15 +544,12 @@ public class DeploymentPreprocessor {
 
     /**
      * Reads a container fragment metadata file and returns the container descriptor.
+     *
+     * @throws IOException
+     * @throws MalformedURLException
      */
-    protected ContainerDescriptor getContainer(File home, File file) throws IOException {
-        URL url;
-        try {
-            url = file.toURI().toURL();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        ContainerDescriptor cd = (ContainerDescriptor) xmap.load(url);
+    protected ContainerDescriptor getContainer(File home, File file) throws MalformedURLException, IOException {
+        ContainerDescriptor cd = (ContainerDescriptor) xmap.load(file.toURI().toURL());
         if (cd != null) {
             cd.directory = home;
             if (cd.name == null) {
@@ -562,9 +559,9 @@ public class DeploymentPreprocessor {
         return cd;
     }
 
-    protected ContainerDescriptor getDefaultContainer(File directory) throws IOException {
+    protected ContainerDescriptor getDefaultContainer(File directory) throws MalformedURLException, IOException {
         File file = new File(directory.getAbsolutePath() + '/' + CONTAINER_FILE);
-        if (!file.isFile()) {
+        if (!file.exists()) {
             file = new File(directory.getAbsolutePath() + '/' + CONTAINER_FILE_COMPAT);
         }
         ContainerDescriptor cd = null;
@@ -574,22 +571,7 @@ public class DeploymentPreprocessor {
         return cd;
     }
 
-    public static String getRelativeChildPath(String parent, String child) {
-        // TODO optimize this method
-        // fix win32 case
-        if (parent.indexOf('\\') > -1) {
-            parent = parent.replace('\\', '/');
-        }
-        if (child.indexOf('\\') > -1) {
-            child = child.replace('\\', '/');
-        } // end fix win32
-        Path parentPath = new Path(parent);
-        Path childPath = new Path(child);
-        if (parentPath.isPrefixOf(childPath)) {
-            return childPath.removeFirstSegments(parentPath.segmentCount()).makeRelative().toString();
-        }
-        return null;
-    }
+    protected static DeploymentPreprocessor processor;
 
     /**
      * Run preprocessing in the given home directory and using the given list of bundles. Bundles must be ordered by the
@@ -597,16 +579,24 @@ public class DeploymentPreprocessor {
      * <p>
      * The metadata file is the metadat file to be used to configure the processor. If null the default location will be
      * used (relative to home): {@link #CONTAINER_FILE}.
+     *
+     * @throws IOException
+     * @throws MalformedURLException
      */
-    public static void process(File home, File metadata, File[] files) throws IOException {
-        DeploymentPreprocessor processor = new DeploymentPreprocessor(home);
+    public static void process(File home, File metadata, File[] files) throws MalformedURLException, IOException {
+        processor = new DeploymentPreprocessor(home);
         // initialize
         processor.init(metadata, files);
         // run preprocessor
         processor.predeploy();
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void reprocess(File[] files) throws IOException {
+        processor.init(processor.root, files);
+        processor.predeploy();
+    }
+
+    public static void main(String[] args) {
         File root;
         if (args.length > 0) {
             root = new File(args[0]);
@@ -615,11 +605,27 @@ public class DeploymentPreprocessor {
         }
         System.out.println("Preprocessing: " + root);
         DeploymentPreprocessor processor = new DeploymentPreprocessor(root);
-        // initialize
-        processor.init();
-        // and predeploy
-        processor.predeploy();
+        try {
+            // initialize
+            processor.init();
+            // and predeploy
+            processor.predeploy();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
         System.out.println("Done.");
+    }
+
+    protected void processBundle(Bundle bundle) throws IOException {
+        FragmentDescriptor fd = getFragment(bundle);
+        if (fd != null) {
+            root.fragments.add(bundle.getSymbolicName(), fd);
+        }
+    }
+
+    protected void forgetBundle(Bundle bundle) {
+        root.fragments.remove(bundle.getSymbolicName());
     }
 
 }

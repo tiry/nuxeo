@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Login Deputy Management Module extension
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-deputy
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",l10n;vers
+ ion="0.0.0",org.nuxeo.ecm.platform.login.deputy.management;uses:="org.n
+ uxeo.ecm.core.api,org.nuxeo.runtime.model";version="0.0.0",org.nuxeo.ec
+ m.platform.login.deputy.management.web;uses:="javax.servlet,org.jboss.s
+ eam,org.jboss.seam.annotations,org.nuxeo.ecm.core.api,org.nuxeo.ecm.pla
+ tform.login.deputy.management";version="0.0.0",schemas;version="0.0.0"
+Import-Package: javax.faces.application;version="[2.2,3)",javax.faces.co
+ ntext;version="[2.2,3)",javax.servlet;version="[3.0,4)",javax.servlet.h
+ ttp;version="[3.0,4)",org.jboss.seam,org.jboss.seam.annotations,org.nux
+ eo.common.utils;version="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,
+ 1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",org.nuxeo.ecm.directo
+ ry;version="[0.0,1)",org.nuxeo.ecm.directory.api;version="[0.0,1)",org.
+ nuxeo.ecm.platform.login.deputy.management,org.nuxeo.ecm.platform.userm
+ anager;version="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nu
+ xeo.runtime.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/actions-contrib.xml,OSGI-INF/nxdirectories-con
+ trib.xml,OSGI-INF/deputymanagement-service.xml,OSGI-INF/schemas-contrib
+ .xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

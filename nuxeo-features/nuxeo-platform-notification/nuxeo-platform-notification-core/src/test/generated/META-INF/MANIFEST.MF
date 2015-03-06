@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-notification-core.tes
+ ts
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-notification-
+ core.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-notification-core
+Import-Package: com.google.inject;version="[1.4,2)",org.apache.commons.l
+ ogging;version="[1.2,2)",org.assertj.core.api,org.junit,org.junit.runne
+ r,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.event;ver
+ sion="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.core.test.annotati
+ ons,org.nuxeo.ecm.platform.ec.notification.email,org.nuxeo.ecm.platform
+ .ec.notification.service,org.nuxeo.ecm.platform.notification.api;versio
+ n="[0.0,1)",org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.m
+ odel;version="[0.0,1)",org.nuxeo.runtime.test,org.nuxeo.runtime.test.ru
+ nner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.ec.notification,org.nuxeo.ecm.pl
+ atform.ec.notification.veto,templates
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

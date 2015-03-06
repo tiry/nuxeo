@@ -24,9 +24,9 @@ package org.nuxeo.runtime.deploy;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map;
 
 import org.nuxeo.common.collections.ListenerList;
 
@@ -35,7 +35,7 @@ import org.nuxeo.common.collections.ListenerList;
  */
 public class FileChangeNotifier {
 
-    private final ListenerList listeners = new ListenerList();
+    private final ListenerList<FileChangeListener> listeners = new ListenerList<>(FileChangeListener.class);
 
     private final Timer timer = new Timer("FileChangeNotifier");
 

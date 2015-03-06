@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateful
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM JBPM
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-task-core
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.task.core.helpers;uses:="org.nuxeo.ecm.core.api";version=
+ "0.0.0",org.nuxeo.ecm.platform.task.core.listener;uses:="org.nuxeo.ecm.
+ core.event,org.nuxeo.ecm.platform.task";version="0.0.0",org.nuxeo.ecm.p
+ latform.task.core.service;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.c
+ ore.event,org.nuxeo.ecm.platform.task,org.nuxeo.runtime.model";version=
+ "0.0.0",schemas;version="0.0.0"
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.apache.com
+ mons.logging;version="[1.2,2)",org.nuxeo.common.utils;version="[0.0,1)"
+ ,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.securi
+ ty;version="[0.0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",org.nux
+ eo.ecm.core.event.impl;version="[0.0,1)",org.nuxeo.ecm.platform.query.a
+ pi;version="[0.0,1)",org.nuxeo.ecm.platform.task;version="[0.0,1)",org.
+ nuxeo.ecm.platform.task.core.helpers,org.nuxeo.runtime.api;version="[0.
+ 0,1)",org.nuxeo.runtime.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/task-core-types-contrib.xml, OSGI-INF/TaskServ
+ ice.xml, OSGI-INF/task-content-template-contrib.xml, OSGI-INF/task-list
+ ener-contrib.xml, OSGI-INF/task-adapter-contrib.xml, OSGI-INF/task-life
+ cycle-contrib.xml, OSGI-INF/task-pageprovider-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

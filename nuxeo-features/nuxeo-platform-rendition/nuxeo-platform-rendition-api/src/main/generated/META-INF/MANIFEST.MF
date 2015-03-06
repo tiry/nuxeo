@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Platform Rendition API
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-rendition-api
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.rendition;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.pla
+ tform.rendition.service";version="0.0.0",org.nuxeo.ecm.platform.renditi
+ on.extension;uses:="org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.rendi
+ tion.service";version="0.0.0",org.nuxeo.ecm.platform.rendition.impl;use
+ s:="org.apache.commons.logging,org.nuxeo.ecm.core.api,org.nuxeo.ecm.pla
+ tform.rendition,org.nuxeo.ecm.platform.rendition.service";version="0.0.
+ 0",org.nuxeo.ecm.platform.rendition.service;uses:="org.nuxeo.common.xma
+ p.annotation,org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.rendition,or
+ g.nuxeo.ecm.platform.rendition.extension";version="0.0.0"
+Import-Package: org.apache.commons.lang3;version="[3.3,4)",org.apache.co
+ mmons.logging;version="[1.2,2)",org.nuxeo.common.xmap.annotation;versio
+ n="[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core
+ .api.blobholder;version="[0.0,1)",org.nuxeo.ecm.platform.rendition,org.
+ nuxeo.ecm.platform.rendition.extension,org.nuxeo.ecm.platform.rendition
+ .service
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

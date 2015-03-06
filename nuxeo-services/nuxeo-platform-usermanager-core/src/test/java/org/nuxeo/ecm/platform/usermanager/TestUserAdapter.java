@@ -18,23 +18,16 @@
  */
 package org.nuxeo.ecm.platform.usermanager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author Thierry Martins
  */
-@LocalDeploy("org.nuxeo.ecm.platform.usermanager.tests:test-usermanagerimpl/directory-config.xml")
 public class TestUserAdapter extends UserManagerTestCase {
 
     @Test

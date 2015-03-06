@@ -1,5 +1,7 @@
 <component name="org.nuxeo.runtime.ConfigurationService.test.override">
 
+  <require>org.nuxeo.runtime.ConfigurationService.test</require>
+  
   <extension target="org.nuxeo.runtime.ConfigurationService" point="configuration">
 
     <property name="nuxeo.test.dummyBooleanProperty">false</property>

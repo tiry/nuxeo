@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo User Center OAuth
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-user-oauth
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.user.center;uses:="org.jboss.seam,org.jboss.seam.annotations,org.n
+ uxeo.ecm.admin.oauth,org.nuxeo.ecm.core.api";version="0.0.0"
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.jboss.seam
+ ,org.jboss.seam.annotations,org.nuxeo.ecm.admin.oauth;version="[0.0,1)"
+ ,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.impl;v
+ ersion="[0.0,1)",org.nuxeo.ecm.directory;version="[0.0,1)",org.nuxeo.ec
+ m.directory.api;version="[0.0,1)",org.nuxeo.ecm.platform.oauth2.provide
+ rs;version="[0.0,1)",org.nuxeo.ecm.platform.oauth2.tokens;version="[0.0
+ ,1)",org.nuxeo.runtime.api;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/oauth-actions-contrib.xml,OSGI-INF/oauth-layou
+ ts-contrib.xml,OSGI-INF/oauth-themes-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

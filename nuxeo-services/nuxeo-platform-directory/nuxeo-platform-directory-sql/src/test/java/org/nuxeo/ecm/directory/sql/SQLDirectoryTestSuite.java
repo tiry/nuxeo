@@ -40,8 +40,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
-import org.nuxeo.ecm.core.test.annotations.Granularity;
-import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.ecm.directory.AbstractDirectory;
 import org.nuxeo.ecm.directory.BaseSession;
 import org.nuxeo.ecm.directory.DirectoryException;
@@ -49,12 +47,11 @@ import org.nuxeo.ecm.directory.PasswordHelper;
 import org.nuxeo.ecm.directory.Reference;
 import org.nuxeo.ecm.directory.Session;
 import org.nuxeo.ecm.directory.api.DirectoryService;
+import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @Ignore
-@RepositoryConfig(cleanup = Granularity.METHOD)
-@LocalDeploy({ "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-schema-override.xml",
-        "org.nuxeo.ecm.directory.sql.tests:test-sql-directories-bundle.xml" })
+@Features(SQLDirectoryFeature.class)
 public class SQLDirectoryTestSuite {
 
     protected static final String USER_DIR = "userDirectory";
@@ -101,6 +98,10 @@ public class SQLDirectoryTestSuite {
 
     public Session getSession() throws Exception {
         return directoryService.open(USER_DIR);
+    }
+
+    public Session getGroupSession() throws Exception {
+        return directoryService.open(GROUP_DIR);
     }
 
     public SQLDirectory getSQLDirectory() throws Exception {
@@ -376,7 +377,7 @@ public class SQLDirectoryTestSuite {
             assertNull(dm);
         }
 
-        try (Session session = directoryService.open(GROUP_DIR)) {
+        try (Session session = getGroupSession()) {
             DocumentModel group1 = session.getEntry("group_1");
             List<String> members = (List<String>) group1.getProperty("group", "members");
             assertTrue(members.isEmpty());
@@ -623,7 +624,7 @@ public class SQLDirectoryTestSuite {
 
     @Ignore
     @Test
-    @LocalDeploy("org.nuxeo.ecm.directory.sql.tests:test-sql-directories-alteration-config.xml")
+    @LocalDeploy("org.nuxeo.ecm.directory.sql:test-sql-directories-alteration-config.xml")
     public void testColumnCreation() throws Exception {
         AbstractDirectory dirtmp1 = null;
         AbstractDirectory dirtmp2 = null;

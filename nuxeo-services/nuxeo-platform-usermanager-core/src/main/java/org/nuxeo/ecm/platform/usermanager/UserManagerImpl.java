@@ -225,6 +225,7 @@ public class UserManagerImpl implements UserManager, MultiTenantUserManager, Adm
 
         if (cacheService != null && descriptor.userCacheName != null) {
             principalCache = cacheService.getCache(descriptor.userCacheName);
+            principalCache.invalidateAll();
         }
 
     }
@@ -480,8 +481,7 @@ public class UserManagerImpl implements UserManager, MultiTenantUserManager, Adm
             try {
                 userEntry.setProperty(userSchemaName, prop.getKey(), prop.getValue());
             } catch (PropertyNotFoundException ce) {
-                log.error(
-                        "Property: " + prop.getKey() + " does not exists. Check your " + "UserService configuration.",
+                log.error("Property: " + prop.getKey() + " does not exists. Check your " + "UserService configuration.",
                         ce);
             }
         }
@@ -1076,7 +1076,8 @@ public class UserManagerImpl implements UserManager, MultiTenantUserManager, Adm
     }
 
     @Override
-    public DocumentModelList searchUsers(Map<String, Serializable> filter, Set<String> fulltext, DocumentModel context) {
+    public DocumentModelList searchUsers(Map<String, Serializable> filter, Set<String> fulltext,
+            DocumentModel context) {
         throw new UnsupportedOperationException();
     }
 
@@ -1086,7 +1087,8 @@ public class UserManagerImpl implements UserManager, MultiTenantUserManager, Adm
     }
 
     @Override
-    public DocumentModelList searchGroups(Map<String, Serializable> filter, Set<String> fulltext, DocumentModel context) {
+    public DocumentModelList searchGroups(Map<String, Serializable> filter, Set<String> fulltext,
+            DocumentModel context) {
         filter = filter != null ? cloneMap(filter) : new HashMap<String, Serializable>();
         HashSet<String> fulltextClone = fulltext != null ? cloneSet(fulltext) : new HashSet<String>();
         multiTenantManagement.queryTransformer(this, filter, fulltextClone, context);

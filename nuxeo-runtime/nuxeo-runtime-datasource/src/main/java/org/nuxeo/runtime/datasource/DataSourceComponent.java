@@ -63,10 +63,10 @@ public class DataSourceComponent extends DefaultComponent {
             } else if (contrib instanceof DataSourceLinkDescriptor) {
                 addDataSourceLink((DataSourceLinkDescriptor) contrib);
             } else {
-                log.error("Wrong datasource extension type " + contrib.getClass().getName());
+                throw new AssertionError("Wrong datasource extension type " + contrib.getClass().getName());
             }
         } else {
-            log.error("Ignoring unknown extension point: " + extensionPoint);
+            throw new AssertionError("Ignoring unknown extension point: " + extensionPoint);
         }
     }
 
@@ -157,7 +157,7 @@ public class DataSourceComponent extends DefaultComponent {
         try {
             descr.bindSelf(namingContext);
         } catch (NamingException e) {
-            log.error("Cannot bind datasource '" + descr.getName() + "' in JNDI", e);
+            throw new AssertionError("Cannot bind datasource '" + descr.getName() + "' in JNDI", e);
         }
     }
 
@@ -169,7 +169,7 @@ public class DataSourceComponent extends DefaultComponent {
         try {
             descr.unbindSelf(namingContext);
         } catch (NamingException cause) {
-            log.error("Cannot unbind datasource '" + descr.name + "' in JNDI", cause);
+            throw new AssertionError("Cannot unbind datasource '" + descr.name + "' in JNDI", cause);
         }
     }
 
@@ -191,7 +191,7 @@ public class DataSourceComponent extends DefaultComponent {
         try {
             descr.bindSelf(namingContext);
         } catch (NamingException e) {
-            log.error("Cannot bind DataSourceLink '" + descr.name + "' in JNDI", e);
+            throw new AssertionError("Cannot bind DataSourceLink '" + descr.name + "' in JNDI", e);
         }
     }
 
@@ -203,7 +203,7 @@ public class DataSourceComponent extends DefaultComponent {
         try {
             descr.unbindSelf(namingContext);
         } catch (NamingException e) {
-            log.error("Cannot unbind DataSourceLink '" + descr.name + "' in JNDI", e);
+            throw new AssertionError("Cannot unbind DataSourceLink '" + descr.name + "' in JNDI", e);
         }
     }
 

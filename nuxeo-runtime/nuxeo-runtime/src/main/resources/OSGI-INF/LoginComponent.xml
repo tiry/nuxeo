@@ -11,6 +11,7 @@
 
   <service>
 	  <provide interface="org.nuxeo.runtime.api.login.LoginService" />
+	  <provide interface="javax.security.auth.login.Configuration" />
   </service>
 
 

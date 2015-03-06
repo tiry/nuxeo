@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 
 import javax.inject.Inject;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mortbay.jetty.Server;
@@ -30,6 +31,7 @@ import org.mortbay.jetty.Server;
 @RunWith(FeaturesRunner.class)
 @Features(JettyFeature.class)
 @Jetty(port = 9090)
+@Ignore
 public class JettyTest {
 
     @Inject

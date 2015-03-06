@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.elasticsearch.nuxeo-elasticsearch-audit.tests
+Bundle-SymbolicName: org.nuxeo.elasticsearch.nuxeo-elasticsearch-audit.t
+ ests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.elasticsearch.nuxeo-elasticsearch-audit
+Import-Package: javax.inject,org.apache.commons.io;version="[1.4,2)",org
+ .elasticsearch.action,org.elasticsearch.action.admin.indices.flush,org.
+ elasticsearch.action.admin.indices.refresh,org.elasticsearch.client,org
+ .junit,org.junit.runner,org.nuxeo.common.collections;version="[0.0,1)",
+ org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.event;versi
+ on="[0.0,1)",org.nuxeo.ecm.core.work.api;version="[0.0,1)",org.nuxeo.ec
+ m.platform.audit.api;version="[0.0,1)",org.nuxeo.ecm.platform.audit.imp
+ l;version="[0.0,1)",org.nuxeo.ecm.platform.audit.service;version="[0.0,
+ 1)",org.nuxeo.ecm.platform.query.api;version="[0.0,1)",org.nuxeo.elasti
+ csearch.api;version="[0.0,1)",org.nuxeo.elasticsearch.audit,org.nuxeo.e
+ lasticsearch.test,org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runtime
+ .api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)",org.nu
+ xeo.runtime.test.runner,org.nuxeo.runtime.transaction;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.elasticsearch,schemas
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

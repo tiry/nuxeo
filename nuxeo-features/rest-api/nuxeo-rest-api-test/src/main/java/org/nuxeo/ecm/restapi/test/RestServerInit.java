@@ -35,7 +35,9 @@ import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.NuxeoGroup;
 import org.nuxeo.ecm.core.api.NuxeoPrincipal;
 import org.nuxeo.ecm.core.api.PathRef;
-import org.nuxeo.ecm.core.test.annotations.RepositoryInit;
+import org.nuxeo.ecm.core.storage.sql.RepositoryManagement;
+import org.nuxeo.ecm.core.storage.sql.coremodel.SQLRepositoryService;
+import org.nuxeo.ecm.core.test.NoopRepositoryInit;
 import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
 import org.nuxeo.ecm.platform.usermanager.exceptions.GroupAlreadyExistsException;
@@ -49,7 +51,7 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
  *
  * @since 5.7.2
  */
-public class RestServerInit implements RepositoryInit {
+public class RestServerInit extends NoopRepositoryInit {
 
     /**
      *

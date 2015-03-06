@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateless
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo ECM task Web
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-task-web
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.task.web;uses:="org.jboss.seam,org.jboss.seam.annotations
+ ,org.jboss.seam.annotations.intercept,org.jboss.seam.faces,org.jboss.se
+ am.international,org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.contentv
+ iew.seam,org.nuxeo.ecm.platform.task,org.nuxeo.ecm.platform.task.dashbo
+ ard,org.nuxeo.ecm.platform.ui.web.api,org.nuxeo.ecm.platform.ui.web.inv
+ alidations,org.nuxeo.ecm.webapp.helpers";version="0.0.0",org.nuxeo.ecm.
+ webapp.dashboard.workflow;uses:="org.jboss.seam,org.jboss.seam.annotati
+ ons,org.jboss.seam.annotations.intercept,org.jboss.seam.international,o
+ rg.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.task,org.nuxeo.ecm.platfor
+ m.task.dashboard";version="0.0.0"
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.jboss.s
+ eam,org.jboss.seam.annotations,org.jboss.seam.annotations.intercept,org
+ .jboss.seam.core,org.jboss.seam.faces,org.jboss.seam.international,org.
+ nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.platform.contentview
+ .seam;version="[0.0,1)",org.nuxeo.ecm.platform.task;version="[0.0,1)",o
+ rg.nuxeo.ecm.platform.task.core.helpers;version="[0.0,1)",org.nuxeo.ecm
+ .platform.task.dashboard;version="[0.0,1)",org.nuxeo.ecm.platform.ui.we
+ b.api;version="[0.0,1)",org.nuxeo.ecm.platform.ui.web.invalidations;ver
+ sion="[0.0,1)",org.nuxeo.ecm.webapp.helpers;version="[0.0,1)",org.nuxeo
+ .runtime.api;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.task.api
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

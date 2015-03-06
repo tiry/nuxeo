@@ -51,12 +51,6 @@ import org.nuxeo.ecm.platform.layout.facelets.DummyWidgetTypeHandler;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 /**
  * Test layout service API
  *
@@ -66,11 +60,12 @@ public class TestLayoutService extends NXRuntimeTestCase {
 
     private WebLayoutManager service;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         deployBundle("org.nuxeo.ecm.platform.forms.layout.core");
-        deployContrib("org.nuxeo.ecm.platform.forms.layout.client", "OSGI-INF/layouts-framework.xml");
+        deployBundle("org.nuxeo.ecm.platform.forms.layout.client");
         service = Framework.getService(WebLayoutManager.class);
         assertNotNull(service);
     }
@@ -126,10 +121,6 @@ public class TestLayoutService extends NXRuntimeTestCase {
         assertNotNull(layouts);
         assertEquals(2, layouts.size());
 
-        List<WidgetTypeDefinition> wTypeDefs = service.getWidgetTypeDefinitions();
-        assertNotNull(wTypeDefs);
-        assertEquals(2, wTypeDefs.size());
-        assertEquals(wTypeDef, wTypeDefs.get(0));
     }
 
     @Test

@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.automation.nuxeo-automation-io.tests
+Bundle-SymbolicName: org.nuxeo.ecm.automation.nuxeo-automation-io.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.automation.nuxeo-automation-io
+Import-Package: javax.inject,javax.servlet;version="[3.0,4)",javax.ws.rs
+ .core;version="[1.1,2)",org.codehaus.jackson;version="[1.8,2)",org.code
+ haus.jackson.map;version="[1.8,2)",org.codehaus.jackson.node;version="[
+ 1.8,2)",org.junit,org.junit.runner,org.mockito,org.mockito.stubbing,org
+ .nuxeo.common.utils;version="[0.0,1)",org.nuxeo.ecm.automation;version=
+ "[0.0,1)",org.nuxeo.ecm.automation.core;version="[0.0,1)",org.nuxeo.ecm
+ .automation.core.util;version="[0.0,1)",org.nuxeo.ecm.automation.io.ser
+ vices.enricher,org.nuxeo.ecm.automation.io.yaml,org.nuxeo.ecm.automatio
+ n.jaxrs.io,org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.
+ io.marshallers.json;version="[0.0,1)",org.nuxeo.ecm.core.test.annotatio
+ ns,org.nuxeo.ecm.webengine.test,org.nuxeo.runtime.test.runner,org.skysc
+ reamer.jsonassert
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.automation.io,org.nuxeo.ecm.automation.io
+ .json.test,org.nuxeo.ecm.automation.io.yaml.test,org.nuxeo.ecm.automati
+ on.jaxrs.io.documents,org.nuxeo.ecm.automation.test.service,org.nuxeo.e
+ cm.automation.test.service.enrichers
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

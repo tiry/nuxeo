@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Contributors:
  *     bstefanescu
  */
@@ -34,7 +34,7 @@ public @interface Jetty {
 
     String host() default "localhost";
 
-    int port() default 8080;
+    int port() default 0;
 
     String config() default "";
 

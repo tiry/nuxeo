@@ -21,13 +21,6 @@
 
 package org.nuxeo.ecm.directory.memory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,13 +36,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
+import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.directory.BaseSession;
 import org.nuxeo.ecm.directory.DirectoryException;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 /**
  * @author Florent Guillaume
  */
+@Features(CoreFeature.class)
+@Deploy("org.nuxeo.ecm.directory")
+@LocalDeploy("org.nuxeo.ecm.directory:test-schema.xml")
 public class TestMemoryDirectory extends NXRuntimeTestCase {
 
     MemoryDirectory memDir;
@@ -60,12 +60,10 @@ public class TestMemoryDirectory extends NXRuntimeTestCase {
 
     static final String SCHEMA_NAME = "myschema";
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployContrib("org.nuxeo.ecm.directory.core.tests", "test-schema.xml");
 
         Set<String> schemaSet = new HashSet<String>(Arrays.asList("i", "pw", "a", "int", "b"));
         memDir = new MemoryDirectory("mydir", SCHEMA_NAME, schemaSet, "i", "pw");

@@ -111,8 +111,8 @@ public class TestPictureConversions {
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.picture.core:"+PICTURE_CONVERSIONS_OVERRIDE_MORE_COMPONENT_LOCATION)
     public void iHavePictureConversionsOrder() throws Exception {
-        deployContrib(PICTURE_CONVERSIONS_OVERRIDE_MORE_COMPONENT_LOCATION);
 
         String[] expectedPictureConversionsOrder = new String[] { "ThumbnailMini", "Tiny", "OriginalJpeg", "Thumbnail",
                 "Wide", "ThumbnailWide", "Small", "Medium" };
@@ -124,12 +124,11 @@ public class TestPictureConversions {
             assertEquals(expectedPictureConversionsOrder[i], pictureConversions.get(i).getId());
         }
 
-        undeployContrib(PICTURE_CONVERSIONS_OVERRIDE_MORE_COMPONENT_LOCATION);
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.picture.core:"+PICTURE_CONVERSIONS_OVERRIDE_COMPONENT_LOCATION)
     public void iCanMergePictureConversions() throws Exception {
-        deployContrib(PICTURE_CONVERSIONS_OVERRIDE_COMPONENT_LOCATION);
 
         checkDefaultPictureConversionsPresence();
 
@@ -148,12 +147,11 @@ public class TestPictureConversions {
             }
         }
 
-        undeployContrib(PICTURE_CONVERSIONS_OVERRIDE_COMPONENT_LOCATION);
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.picture.core:"+PICTURE_CONVERSIONS_OVERRIDE_MORE_COMPONENT_LOCATION)
     public void iCanMergeMorePictureConversions() throws Exception {
-        deployContrib(PICTURE_CONVERSIONS_OVERRIDE_MORE_COMPONENT_LOCATION);
 
         checkDefaultPictureConversionsPresence();
 
@@ -175,12 +173,12 @@ public class TestPictureConversions {
         assertEquals(48, (int) imagingService.getPictureConversion("Tiny").getMaxSize());
         assertEquals(2048, (int) imagingService.getPictureConversion("Wide").getMaxSize());
 
-        undeployContrib(PICTURE_CONVERSIONS_OVERRIDE_MORE_COMPONENT_LOCATION);
     }
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.platform.picture.core:"+PICTURE_CONVERSIONS_FILTERS_COMPONENT_LOCATION)
+
     public void shouldFilterPictureConversions() throws Exception {
-        deployContrib(PICTURE_CONVERSIONS_FILTERS_COMPONENT_LOCATION);
 
         DocumentModel picture = session.createDocumentModel("/", "picture", "Picture");
         Blob blob = Blobs.createBlob(FileUtils.getResourceFileFromContext("images/test.jpg"));
@@ -219,16 +217,6 @@ public class TestPictureConversions {
         assertEquals(5, multiviewPicture.getViews().length);
         assertNotNull(multiviewPicture.getView("smallConversion"));
         assertNull(multiviewPicture.getView("anotherSmallConversion"));
-
-        undeployContrib(PICTURE_CONVERSIONS_FILTERS_COMPONENT_LOCATION);
-    }
-
-    private void deployContrib(String component) throws Exception {
-        runtimeHarness.deployContrib(PICTURE_CORE, component);
-    }
-
-    private void undeployContrib(String component) throws Exception {
-        runtimeHarness.undeployContrib(PICTURE_CORE, component);
     }
 
 }

@@ -38,7 +38,7 @@ public class DownloadPermissionDescriptor implements Comparable<DownloadPermissi
     private String script;
 
     @XNode("script@language")
-    private String scriptLanguage;
+    private String scriptLanguage = DEFAULT_SCRIPT_LANGUAGE;
 
     public String getName() {
         return name;
@@ -49,7 +49,7 @@ public class DownloadPermissionDescriptor implements Comparable<DownloadPermissi
     }
 
     public String getScriptLanguage() {
-        return scriptLanguage == null ? DEFAULT_SCRIPT_LANGUAGE : scriptLanguage;
+        return scriptLanguage;
     }
 
     // empty constructor

@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: NuxeoWeb
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-webapp-core.t
+ ests
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-webapp-core
+Import-Package: javax.inject,org.junit,org.junit.runner,org.nuxeo.ecm.co
+ re.api;version="[0.0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",org
+ .nuxeo.ecm.core.test,org.nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.
+ runtime.test.runner,org.nuxeo.runtime.transaction;version="[0.0,1)"
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.lifeCycle,org.nuxeo.ecm.permissions,org.n
+ uxeo.ecm.webapp.note
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

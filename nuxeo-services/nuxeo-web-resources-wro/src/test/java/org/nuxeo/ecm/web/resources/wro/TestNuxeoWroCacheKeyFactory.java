@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 
@@ -33,8 +32,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.nuxeo.ecm.web.resources.wro.factory.NuxeoWroCacheKeyFactory;
+import org.nuxeo.runtime.test.mockito.MockitoTestCase;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
 import ro.isdc.wro.cache.CacheKey;
 import ro.isdc.wro.config.Context;
@@ -47,9 +49,9 @@ import ro.isdc.wro.model.resource.ResourceType;
 /**
  * @since 7.3
  */
-public class TestNuxeoWroCacheKeyFactory {
+@RunWith(FeaturesRunner.class)
+public class TestNuxeoWroCacheKeyFactory extends MockitoTestCase {
 
-    @Mock
     private HttpServletRequest mockRequest;
 
     @Mock
@@ -67,9 +69,14 @@ public class TestNuxeoWroCacheKeyFactory {
         assertEquals(0, Context.countActive());
     }
 
+
+    @Before
+    public void mockServletRequest() {
+    }
+
     @Before
     public void setUp() {
-        initMocks(this);
+        mockRequest = mock(HttpServletRequest.class);
         Context.set(Context.standaloneContext());
         victim = new NuxeoWroCacheKeyFactory();
         final WroManagerFactory managerFactory = new BaseWroManagerFactory().setGroupExtractor(mockGroupExtractor);

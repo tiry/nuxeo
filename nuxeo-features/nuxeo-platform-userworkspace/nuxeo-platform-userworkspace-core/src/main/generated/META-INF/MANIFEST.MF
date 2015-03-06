@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-Category: stateless
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: NXUserWorkspace
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-userworkspace
+ -core
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.userworkspace.core.service;uses:="org.nuxeo.common.xmap.a
+ nnotation,org.nuxeo.ecm.core.api,org.nuxeo.ecm.platform.userworkspace.a
+ pi,org.nuxeo.runtime.model";version="0.0.0"
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.apache.com
+ mons.logging;version="[1.2,2)",org.nuxeo.common.utils;version="[0.0,1)"
+ ,org.nuxeo.common.xmap.annotation;version="[0.0,1)",org.nuxeo.ecm.core.
+ api;version="[0.0,1)",org.nuxeo.ecm.core.api.pathsegment;version="[0.0,
+ 1)",org.nuxeo.ecm.core.api.security;version="[0.0,1)",org.nuxeo.ecm.cor
+ e.api.security.impl;version="[0.0,1)",org.nuxeo.ecm.core.event;version=
+ "[0.0,1)",org.nuxeo.ecm.core.event.impl;version="[0.0,1)",org.nuxeo.ecm
+ .platform.usermanager;version="[0.0,1)",org.nuxeo.ecm.platform.userwork
+ space.api;version="[0.0,1)",org.nuxeo.runtime;version="[0.0,1)",org.nux
+ eo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,
+ 1)"
+Nuxeo-Component: OSGI-INF/userworkspace-framework.xml,OSGI-INF/userWorks
+ paceImpl.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.platform.userworkspace.api, org.nuxeo.ecm.
+ core.api
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

@@ -24,35 +24,32 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.RuntimeFeature;
 
 @RunWith(FeaturesRunner.class)
-@Deploy("org.nuxeo.runtime.management")
 @Features(RuntimeFeature.class)
 public class TestCounters {
 
-    @Test
-    public void verifyServiceBinding() {
+    @Inject CounterManager cm;
 
-        CounterManager cm = Framework.getLocalService(CounterManager.class);
-        assertNotNull(cm);
-    }
 
     protected class CounterCaller implements Runnable {
         @Override
         public void run() {
             int idx = new Random(System.currentTimeMillis()).nextInt(9);
             CounterManager cm = Framework.getLocalService(CounterManager.class);
+            String name = "org.nuxeo.counter" + idx;
             if (idx % 2 == 0) {
-                cm.increaseCounter("org.nuxeo.counter" + idx);
+                cm.increaseCounter(name);
             } else {
-                cm.decreaseCounter("org.nuxeo.counter" + idx);
+                cm.decreaseCounter(name);
             }
         }
     }
@@ -80,13 +77,7 @@ public class TestCounters {
     @Test
     public void verifyConcurrency() throws InterruptedException {
 
-        CounterManager cm = Framework.getLocalService(CounterManager.class);
-
         doRandomCounters();
-
-        for (int i = 0; i < 9; i++) {
-            // System.out.print(cm.getCounterHistory("org.nuxeo.counter" + i));
-        }
 
         String snapshot = getCountersSnapshot();
 
@@ -110,8 +101,6 @@ public class TestCounters {
 
     @Test
     public void verifyHistory() throws InterruptedException {
-
-        CounterManager cm = Framework.getLocalService(CounterManager.class);
 
         String myCounter = "org.nuxeo.testMe";
 

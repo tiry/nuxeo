@@ -130,6 +130,10 @@ public class ServerLocatorService extends DefaultComponent implements ServerLoca
         return server;
     }
 
+    protected void doDestroyServer(MBeanServer server) {
+        MBeanServerFactory.releaseMBeanServer(server);
+    }
+
     @SuppressWarnings("cast")
     protected MBeanServer doFindServer(String domainName) {
         for (MBeanServer server : MBeanServerFactory.findMBeanServer(null)) {
@@ -143,9 +147,12 @@ public class ServerLocatorService extends DefaultComponent implements ServerLoca
     }
 
     protected void doUnregisterLocator(ServerLocatorDescriptor descriptor) {
-        servers.remove(descriptor.domainName);
+        MBeanServer server = servers.remove(descriptor.domainName);
         if (descriptor.isDefault) {
             defaultServer = ManagementFactory.getPlatformMBeanServer();
+        }
+        if (!descriptor.isExisting) {
+            doDestroyServer(server);
         }
     }
 

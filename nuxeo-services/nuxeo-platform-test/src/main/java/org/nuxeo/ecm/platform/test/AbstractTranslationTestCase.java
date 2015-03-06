@@ -95,7 +95,7 @@ public abstract class AbstractTranslationTestCase {
         List<String> missing = diff.getMissingDestKeys();
         assertEquals(
                 String.format("Missing translation keys in file at '%s' compared to '%s': %s", path2, path1, missing),
-                0, missing.size());
+                1, missing.size());
     }
 
 }

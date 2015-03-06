@@ -242,7 +242,8 @@ public class TestTrashService {
         DocumentRef versionRef = session.checkIn(doc3.getRef(), VersioningOption.MAJOR, null);
         DocumentModel version = session.getDocument(versionRef);
         DocumentModel proxy = session.createProxy(versionRef, fold.getRef());
-        session.save();
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
 
         assertEquals("project", fold.getCurrentLifeCycleState());
         assertEquals("project", proxy.getCurrentLifeCycleState());
@@ -265,7 +266,8 @@ public class TestTrashService {
         createDocuments();
         DocumentRef verRef = doc3.checkIn(null, null);
         DocumentModel proxy = session.createProxy(verRef, fold.getRef());
-        session.save();
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
         assertTrue(trashService.canDelete(Collections.singletonList(proxy), principal, false));
         assertFalse(trashService.canDelete(Collections.singletonList(proxy), principal, true));
         assertFalse(trashService.canPurgeOrUndelete(Collections.singletonList(proxy), principal));

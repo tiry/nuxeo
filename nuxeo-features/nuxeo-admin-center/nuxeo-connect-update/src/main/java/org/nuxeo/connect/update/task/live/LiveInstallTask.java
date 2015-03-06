@@ -93,7 +93,11 @@ public class LiveInstallTask extends InstallTask {
         RegistrationInfoImpl ri = (RegistrationInfoImpl) Framework.getRuntime().getComponentManager().getRegistrationInfo(
                 new ComponentName(name));
         if (ri != null) {
-            ri.reload();
+            try {
+                ri.reload();
+            } catch (Exception cause) {
+                throw new PackageException("Cannot reload " + name, cause);
+            }
         }
     }
 

@@ -28,7 +28,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.runtime.api.Framework;
 
 /**
  * @author Florent Guillaume
@@ -42,50 +41,27 @@ public class DatabaseH2 extends DatabaseHelper {
     /** This directory will be deleted and recreated. */
     protected static final String DIRECTORY = "target";
 
-    protected static final String DEF_USER = "sa";
+    protected static final String URL2_PROPERTY = URL_PROPERTY + "2";
 
-    protected static final String DEF_PASSWORD = "";
+    protected static final String DATABASE2_PROPERTY = DATABASE_PROPERTY + "2";
 
-    protected static final String CONTRIB_XML = "OSGI-INF/test-repo-repository-h2-contrib.xml";
+    protected static final String REPOSITORY2_PROPERTY = REPOSITORY_PROPERTY + "2";
 
-    protected static final String DRIVER = "org.h2.Driver";
+    protected static final String URL_FORMAT = "jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false";
 
-    protected static final String URL_FORMAT = "jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1";
-
-    protected String url;
-
-    protected String user;
-
-    protected String password;
-
+    @Override
     protected void setProperties() {
-        url = setProperty(URL_PROPERTY, String.format(URL_FORMAT, databaseName));
-
-        setProperty(DATABASE_PROPERTY, databaseName);
-        user = setProperty(USER_PROPERTY, DEF_USER);
-        password = setProperty(PASSWORD_PROPERTY, DEF_PASSWORD);
-        // for sql directory tests
-        setProperty(DRIVER_PROPERTY, DRIVER);
+        setProperty(USER_PROPERTY, "");
+        setProperty(PASSWORD_PROPERTY, "");
+        setProperty(DRIVER_PROPERTY, "org.h2.Driver");
+        setProperty(URL_PROPERTY, URL_FORMAT, DATABASE_PROPERTY);
+        setProperty(FULLTEXT_ANALYZER_PROPERTY, "org.apache.lucene.analysis.fr.FrenchAnalyzer");
     }
 
     @Override
-    public void setUp() throws SQLException {
-        super.setUp();
-        try {
-            Class.forName(DRIVER);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-        setProperties();
-        checkDatabaseLive();
-    }
-
-    protected void checkDatabaseLive() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(url, Framework.getProperty(USER_PROPERTY, "sa"),
-                Framework.getProperty(PASSWORD_PROPERTY, null))) {
-            try (Statement st = connection.createStatement()) {
-                st.execute("SELECT 1");
-            }
+    public void initDatabase(Connection connection) throws Exception {
+        try (Statement st = connection.createStatement()) {
+            st.execute("SELECT 1");
         }
     }
 
@@ -99,14 +75,15 @@ public class DatabaseH2 extends DatabaseHelper {
             return;
         }
         try {
-            tearDownDatabase(url);
+            tearDownDatabase(getProperty(URL_PROPERTY));
         } finally {
             super.tearDown();
         }
     }
 
     protected void tearDownDatabase(String url) throws SQLException {
-        Connection connection = DriverManager.getConnection(url, user, password);
+        Connection connection = DriverManager.getConnection(url, getProperty(USER_PROPERTY),
+                getProperty(PASSWORD_PROPERTY));
         try {
             Statement st = connection.createStatement();
             try {
@@ -122,18 +99,13 @@ public class DatabaseH2 extends DatabaseHelper {
     }
 
     @Override
-    public String getDeploymentContrib() {
-        return CONTRIB_XML;
-    }
-
-    @Override
     public RepositoryDescriptor getRepositoryDescriptor() {
         RepositoryDescriptor descriptor = new RepositoryDescriptor();
         descriptor.xaDataSourceName = "org.h2.jdbcx.JdbcDataSource";
         Map<String, String> properties = new HashMap<String, String>();
-        properties.put("URL", url);
-        properties.put("User", Framework.getProperty(USER_PROPERTY));
-        properties.put("Password", Framework.getProperty(PASSWORD_PROPERTY));
+        properties.put("URL", getProperty(URL_PROPERTY));
+        properties.put("User", getProperty(USER_PROPERTY));
+        properties.put("Password", getProperty(PASSWORD_PROPERTY));
         descriptor.properties = properties;
         return descriptor;
     }

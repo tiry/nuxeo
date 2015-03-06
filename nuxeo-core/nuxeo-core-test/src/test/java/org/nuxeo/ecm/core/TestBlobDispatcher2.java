@@ -72,17 +72,14 @@ public class TestBlobDispatcher2 {
         assertEquals(foo_key, key);
 
         // now install dispatch
-        harness.deployContrib("org.nuxeo.ecm.core.test.tests", "OSGI-INF/test-blob-dispatcher.xml");
-        try {
-            // check that blob still readable
-            doc = session.getDocument(doc.getRef());
-            blob = (Blob) doc.getPropertyValue("file:content");
-            try (InputStream in = blob.getStream()) {
-                assertEquals("foo", IOUtils.toString(in));
-            }
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.core.test.tests", "OSGI-INF/test-blob-dispatcher.xml");
+        harness.deployTestContrib("org.nuxeo.ecm.core.test", "OSGI-INF/test-blob-dispatcher.xml");
+        // check that blob still readable
+        doc = session.getDocument(doc.getRef());
+        blob = (Blob) doc.getPropertyValue("file:content");
+        try (InputStream in = blob.getStream()) {
+            assertEquals("foo", IOUtils.toString(in));
         }
+
     }
 
 }

@@ -18,10 +18,6 @@
  */
 package org.nuxeo.ecm.core.work;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.nuxeo.ecm.core.work.api.Work.State.CANCELED;
 import static org.nuxeo.ecm.core.work.api.Work.State.COMPLETED;
@@ -49,12 +45,17 @@ import org.nuxeo.ecm.core.work.api.WorkManager.Scheduling;
 import org.nuxeo.ecm.core.work.api.WorkQueueDescriptor;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.ConditionalIgnoreRule;
+import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.FileEventsTrackingFeature;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.trackers.files.FileEvent;
 
 @Features(FileEventsTrackingFeature.class)
+@Deploy("org.nuxeo.ecm.core.event")
+@LocalDeploy("org.nuxeo.ecm.core.event:test-workmanager-config.xml")
 public class WorkManagerTest extends NXRuntimeTestCase {
 
     protected static class CreateFile extends AbstractWork implements Serializable {
@@ -108,17 +109,7 @@ public class WorkManagerTest extends NXRuntimeTestCase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        deployBundle("org.nuxeo.ecm.core.event");
         service = (WorkManagerImpl) Framework.getLocalService(WorkManager.class);
-    }
-
-    protected void doDeploy() throws Exception {
-        deployContrib("org.nuxeo.ecm.core.event.test", "test-workmanager-config.xml");
-    }
-
-    protected void deployAndStart() throws Exception {
-        doDeploy();
-        fireFrameworkStarted();
     }
 
     @Override
@@ -137,7 +128,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testBasics() throws Exception {
-        deployAndStart();
 
         assertNotNull(service);
         service.clearCompletedWork(0);
@@ -148,7 +138,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testWorkManagerConfig() throws Exception {
-        deployAndStart();
 
         SleepWork work = new SleepWork(1);
         assertEquals(CATEGORY, work.getCategory());
@@ -163,7 +152,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testWorkManagerWork() throws Exception {
-        deployAndStart();
 
         int duration = 3000; // ms
         SleepWork work = new SleepWork(duration, false);
@@ -189,7 +177,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testWorkManagerScheduling() throws Exception {
-        deployAndStart();
 
         assertEquals(Collections.emptyList(), service.listWorkIds(QUEUE, COMPLETED));
         int duration = 5000; // 2s
@@ -248,7 +235,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
     @Test
     @Ignore
     public void testWorkManagerShutdown() throws Exception {
-        deployAndStart();
 
         int duration = 2000; // 2s
         SleepWork work1 = new SleepWork(duration, false, "1");
@@ -287,7 +273,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testWorkManagerConfigDisableOneBeforeStart() throws Exception {
-        doDeploy();
         // before first applicationStarted:
         // disable SleepWork queue
         deployContrib("org.nuxeo.ecm.core.event.test", "test-workmanager-disablequeue.xml");
@@ -299,8 +284,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testWorkManagerConfigDisableOneAfterStart() throws Exception {
-        doDeploy();
-        fireFrameworkStarted();
         // after first applicationStarted:
         // disable SleepWork queue
         deployContrib("org.nuxeo.ecm.core.event.test", "test-workmanager-disablequeue.xml");
@@ -311,7 +294,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testWorkManagerConfigDisableAllBeforeStart() throws Exception {
-        doDeploy();
         // before first applicationStarted:
         // disable * then enable SleepWork queue
         deployContrib("org.nuxeo.ecm.core.event.test", "test-workmanager-disablequeue1.xml");
@@ -323,8 +305,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
 
     @Test
     public void testWorkManagerConfigDisableAllAfterStart() throws Exception {
-        doDeploy();
-        fireFrameworkStarted();
         // after first applicationStarted:
         // disable * then enable SleepWork queue
         deployContrib("org.nuxeo.ecm.core.event.test", "test-workmanager-disablequeue1.xml");
@@ -336,7 +316,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
     @Ignore("NXP-15680")
     @Test
     public void testWorkManagerDisableProcessing() throws Exception {
-        deployAndStart();
         assumeTrue(persistent());
 
         // disable SleepWork queue
@@ -363,7 +342,7 @@ public class WorkManagerTest extends NXRuntimeTestCase {
         descr.id = "SleepWork";
         descr.processing = Boolean.TRUE;
         descr.categories = Collections.emptySet();
-        ((WorkManagerImpl) service).activateQueue(descr);
+        service.activateQueue(descr);
 
         Thread.sleep(duration / 2);
         assertEquals(0, service.getQueueSize(QUEUE, SCHEDULED));
@@ -378,7 +357,6 @@ public class WorkManagerTest extends NXRuntimeTestCase {
     @Ignore("NXP-15680")
     @Test
     public void testWorkManagerDisableProcessing2() throws Exception {
-        deployAndStart();
         assumeTrue(persistent());
 
         // disable all queues
@@ -405,7 +383,7 @@ public class WorkManagerTest extends NXRuntimeTestCase {
         descr.id = "SleepWork";
         descr.processing = Boolean.TRUE;
         descr.categories = Collections.emptySet();
-        ((WorkManagerImpl) service).activateQueue(descr);
+        service.activateQueue(descr);
 
         Thread.sleep(duration / 2);
         assertEquals(0, service.getQueueSize(QUEUE, SCHEDULED));
@@ -428,8 +406,8 @@ public class WorkManagerTest extends NXRuntimeTestCase {
     }
 
     @Test
+    @ConditionalIgnoreRule.Ignore(cause="redis",condition=ConditionalIgnoreRule.IgnoreIsolated.class)
     public void transientFilesWorkAreCleaned() throws Exception {
-        deployAndStart();
 
         final File file = feature.resolveAndCreate(new File("pfouh"));
         service.schedule(new CreateFile(file));
@@ -437,8 +415,8 @@ public class WorkManagerTest extends NXRuntimeTestCase {
     }
 
     @Test
+    @ConditionalIgnoreRule.Ignore(cause="redis",condition=ConditionalIgnoreRule.IgnoreIsolated.class)
     public void testClearCompleted() throws Exception {
-        deployAndStart();
 
         int N = 20;
         int duration = 100; // ms
@@ -454,8 +432,8 @@ public class WorkManagerTest extends NXRuntimeTestCase {
     }
 
     @Test
+    @ConditionalIgnoreRule.Ignore(cause="redis",condition=ConditionalIgnoreRule.IgnoreIsolated.class)
     public void testClearCompletedBefore() throws Exception {
-        deployAndStart();
 
         int duration = 1000; // ms
         SleepWork work = new SleepWork(duration, false);

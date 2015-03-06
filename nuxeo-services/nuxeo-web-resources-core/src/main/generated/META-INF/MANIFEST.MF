@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-Category: core
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Web Resources Core
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-web-resources-core
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.web.resources.core;uses:="org.nuxeo.common.xmap.annotation,org.nux
+ eo.ecm.web.resources.api";version="0.0.0",org.nuxeo.ecm.web.resources.c
+ ore.service;uses:="org.codehaus.plexus.util.dag,org.nuxeo.ecm.web.resou
+ rces.api,org.nuxeo.ecm.web.resources.api.service,org.nuxeo.ecm.web.reso
+ urces.core,org.nuxeo.runtime.model";version="0.0.0"
+Import-Package: org.apache.commons.lang;version="[2.6,3)",org.apache.com
+ mons.lang.builder;version="[2.6,3)",org.apache.commons.logging;version=
+ "[1.2,2)",org.codehaus.plexus.util.dag,org.nuxeo.common.utils;version="
+ [0.0,1)",org.nuxeo.common.xmap.annotation;version="[0.0,1)",org.nuxeo.e
+ cm.web.resources.api;version="[0.0,1)",org.nuxeo.ecm.web.resources.api.
+ service;version="[0.0,1)",org.nuxeo.ecm.web.resources.core,org.nuxeo.ru
+ ntime.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/webresources-framework.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

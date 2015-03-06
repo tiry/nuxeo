@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-login-saml2.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-login-saml2.t
+ ests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-login-saml2
+Import-Package: com.google.common.collect;version="[18.0,19)",javax.inje
+ ct,javax.servlet;version="[3.0,4)",javax.servlet.http;version="[3.0,4)"
+ ,junit.framework,org.apache.http,org.apache.http.client.utils,org.junit
+ ,org.junit.runner,org.mockito,org.mockito.stubbing,org.nuxeo.ecm.core.a
+ pi;version="[0.0,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.core.test.an
+ notations,org.nuxeo.ecm.platform.api.login;version="[0.0,1)",org.nuxeo.
+ ecm.platform.auth.saml.binding,org.nuxeo.ecm.platform.usermanager;versi
+ on="[0.0,1)",org.nuxeo.runtime.test.runner,org.opensaml.common,org.open
+ saml.common.binding.decoding,org.opensaml.saml2.core,org.opensaml.ws.me
+ ssage.decoder,org.opensaml.xml,org.opensaml.xml.io,org.opensaml.xml.par
+ se,org.opensaml.xml.util,org.w3c.dom
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.auth.saml,org.nuxeo.ecm.platform
+ .auth.saml.mock
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

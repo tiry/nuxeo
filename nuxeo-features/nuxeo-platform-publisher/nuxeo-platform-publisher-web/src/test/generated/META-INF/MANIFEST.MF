@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-publisher-web.tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-publisher-web
+ .tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-publisher-web
+Import-Package: javax.inject,junit.framework,org.junit,org.junit.runner,
+ org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.test,org.nu
+ xeo.ecm.core.test.annotations,org.nuxeo.ecm.webapp.helpers;version="[0.
+ 0,1)",org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.publisher.web
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

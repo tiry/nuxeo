@@ -1,2 +1,3 @@
 username, password, firstName, lastName, company, email
 "Administrator","Administrator","","","","devnull@nuxeo.com"
+"user1","members","","","","devnull@nuxeo.com"

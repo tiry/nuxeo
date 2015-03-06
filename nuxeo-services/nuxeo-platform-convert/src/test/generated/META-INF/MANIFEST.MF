@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: NXPlatformConvertPlugins
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-convert.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-convert
+Import-Package: javax.inject,org.apache.commons.logging;version="[1.2,2)
+ ",org.apache.jempbox.xmp,org.apache.pdfbox.pdmodel,org.apache.pdfbox.pd
+ model.common,org.apache.pdfbox.util,org.artofsolving.jodconverter,org.h
+ amcrest,org.junit,org.junit.runner,org.nuxeo.common.utils;version="[0.0
+ ,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.api.bl
+ obholder;version="[0.0,1)",org.nuxeo.ecm.core.convert.api;version="[0.0
+ ,1)",org.nuxeo.ecm.core.test,org.nuxeo.ecm.platform.commandline.executo
+ r.api;version="[0.0,1)",org.nuxeo.ecm.platform.convert.ooomanager,org.n
+ uxeo.ecm.platform.convert.plugins,org.nuxeo.runtime.api;version="[0.0,1
+ )",org.nuxeo.runtime.test,org.nuxeo.runtime.test.runner,org.w3c.dom
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.convert.tests,test-docs
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

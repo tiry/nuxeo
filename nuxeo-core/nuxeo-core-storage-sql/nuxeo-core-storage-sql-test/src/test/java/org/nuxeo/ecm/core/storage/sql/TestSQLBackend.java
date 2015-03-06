@@ -18,13 +18,6 @@
  */
 package org.nuxeo.ecm.core.storage.sql;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.BufferedInputStream;
@@ -80,6 +73,7 @@ import org.nuxeo.ecm.core.blob.BlobProvider;
 import org.nuxeo.ecm.core.blob.binary.BinaryGarbageCollector;
 import org.nuxeo.ecm.core.blob.binary.BinaryManager;
 import org.nuxeo.ecm.core.blob.binary.BinaryManagerStatus;
+import org.nuxeo.ecm.core.blob.binary.LocalBinaryManager.DefaultBinaryGarbageCollector;
 import org.nuxeo.ecm.core.event.EventService;
 import org.nuxeo.ecm.core.model.Document;
 import org.nuxeo.ecm.core.model.LockManager;
@@ -627,6 +621,7 @@ public class TestSQLBackend extends SQLBackendTestCase {
         BinaryManager binaryManager = blobProvider.getBinaryManager();
         BinaryGarbageCollector gc = binaryManager.getGarbageCollector();
         assertFalse(gc.isInProgress());
+        Thread.sleep(DefaultBinaryGarbageCollector.TIME_RESOLUTION);
         gc.start();
         assertTrue(gc.isInProgress());
         repository.markReferencedBinaries();
@@ -1198,6 +1193,7 @@ public class TestSQLBackend extends SQLBackendTestCase {
         assertEquals(0, session2.getProxies(ver2, null).size()); // by target
 
         // in first session, create proxy
+        @SuppressWarnings("unused")
         Node proxy1 = session1.addProxy(ver1.getId(), id, root1, "proxy", null);
         session1.save();
         assertEquals(1, session1.getProxies(ver1, null).size()); // by target
@@ -1546,6 +1542,7 @@ public class TestSQLBackend extends SQLBackendTestCase {
         Node docb = session.addChildNode(fold, "b", null, "TestDoc", false);
         Node docc = session.addChildNode(fold, "c", null, "TestDoc", false);
         Node docd = session.addChildNode(fold, "d", null, "TestDoc", false);
+        @SuppressWarnings("unused")
         Node doce = session.addChildNode(fold, "e", null, "TestDoc", false);
         session.save();
         // check order
@@ -1716,6 +1713,7 @@ public class TestSQLBackend extends SQLBackendTestCase {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private static Map<String, Set<String>> buildDescendants(List<String[]> graph, String root) {
         Map<String, Set<String>> ancestors = new HashMap<>();
         Map<String, Set<String>> descendants = new HashMap<>();
@@ -1755,12 +1753,14 @@ public class TestSQLBackend extends SQLBackendTestCase {
     }
 
     // dump in dot format, for graphviz
+    @SuppressWarnings("unused")
     private static void dumpGraph(List<String[]> graph) {
         for (String[] edge : graph) {
             System.out.println("\t" + edge[0] + " -> " + edge[1] + ";");
         }
     }
 
+    @SuppressWarnings("unused")
     private static void dumpDescendants(Map<String, Set<String>> descendants) {
         for (Entry<String, Set<String>> e : descendants.entrySet()) {
             String p = e.getKey();
@@ -1779,6 +1779,7 @@ public class TestSQLBackend extends SQLBackendTestCase {
         Node nodea = session.addChildNode(foldera, "node_a", null, "TestDoc", false);
         Serializable prevNodeaId = nodea.getId();
         Node nodeac = session.addChildNode(nodea, "node_a_complex", null, "TestDoc", true);
+        @SuppressWarnings("unused")
         Node nodead = session.addChildNode(nodea, "node_a_duo", null, "duo", true);
         Serializable prevNodeacId = nodeac.getId();
         nodea.setSimpleProperty("tst:title", "hello world");
@@ -1847,6 +1848,7 @@ public class TestSQLBackend extends SQLBackendTestCase {
         Node root = session.getRootNode();
         Node fold = session.addChildNode(root, "fold", null, "OFolder", false);
         Node doca = session.addChildNode(fold, "a", null, "TestDoc", false);
+        @SuppressWarnings("unused")
         Node docb = session.addChildNode(fold, "b", null, "TestDoc", false);
         session.save();
         // check order

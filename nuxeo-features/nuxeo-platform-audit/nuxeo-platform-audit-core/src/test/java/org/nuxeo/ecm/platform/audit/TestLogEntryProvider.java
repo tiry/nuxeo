@@ -63,8 +63,8 @@ public class TestLogEntryProvider extends PersistenceTestCase {
 
     protected Map<String, ExtendedInfo> createExtendedInfos() {
         Map<String, ExtendedInfo> infos = new HashMap<String, ExtendedInfo>();
-        ExtendedInfo info = ExtendedInfoImpl.createExtendedInfo(new Long(1));
-        infos.put("id", info);
+        infos.put("id", ExtendedInfoImpl.createExtendedInfo(new Long(1)));
+        infos.put("info", ExtendedInfoImpl.createExtendedInfo("info"));
         return infos;
     }
 
@@ -164,7 +164,17 @@ public class TestLogEntryProvider extends PersistenceTestCase {
         doCreateEntryAndPersist("one");
         doCreateEntryAndPersist("two");
         List<LogEntry> entries = providerUnderTest.nativeQueryLogs(
-                "log.extendedInfos['id'] is not null order by log.eventDate desc", 2, 1);
+                "log.extendedInfos['id'] is not null and log.extendedInfos['id'].longValue = 1L order by log.eventDate desc", 2, 1);
+        assertNotNull(entries);
+        int entryCount = entries.size();
+        assertEquals(1, entryCount);
+    }
+
+    @Test
+    public void testQueryByExtendedString() {
+        doCreateEntryAndPersist("zoo");
+        List<LogEntry> entries = providerUnderTest.nativeQueryLogs(
+                "log.extendedInfos['info'].stringValue = 'info' order by log.eventDate desc", 1, 1);
         assertNotNull(entries);
         int entryCount = entries.size();
         assertEquals(1, entryCount);

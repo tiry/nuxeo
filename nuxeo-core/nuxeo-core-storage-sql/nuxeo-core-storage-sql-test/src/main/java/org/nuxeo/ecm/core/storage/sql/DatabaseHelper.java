@@ -29,6 +29,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,7 @@ import org.nuxeo.runtime.RuntimeServiceEvent;
 import org.nuxeo.runtime.RuntimeServiceListener;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.datasource.ConnectionHelper;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
 public abstract class DatabaseHelper {
 
@@ -82,6 +85,9 @@ public abstract class DatabaseHelper {
 
     public static final String DATABASE_PROPERTY = "nuxeo.test.vcs.database";
 
+    public static final String REPOSITORY_PROPERTY = "nuxeo.test.vcs.repository";
+
+
     public static final String USER_PROPERTY = "nuxeo.test.vcs.user";
 
     public static final String PASSWORD_PROPERTY = "nuxeo.test.vcs.password";
@@ -90,6 +96,12 @@ public abstract class DatabaseHelper {
 
     // set this to true to activate single datasource for all tests
     public static final String SINGLEDS_PROPERTY = "nuxeo.test.vcs.singleds";
+
+    public static final String FULLTEXT_DISABLED_PROPERTY = "nuxeo.test.vcs.fulltext.disabled";
+
+    public static final String FULLTEXT_SEARCH_DISABLED_PROPERTY = "nuxeo.test.vcs.fulltext.search.disabled";
+
+    public static final String FULLTEXT_ANALYZER_PROPERTY = "nuxeo.test.vcs.fulltext.analyzer";
 
     protected Error owner;
 
@@ -101,6 +113,14 @@ public abstract class DatabaseHelper {
         return value;
     }
 
+    public static String getProperty(String name) {
+        return Framework.getProperty(name);
+    }
+
+    public static String getProperty(String name, String defvalue) {
+        return Framework.getProperty(name, defvalue);
+    }
+
     public static String setProperty(String name, String def) {
         String value = System.getProperty(name);
         if (value == null || value.equals("") || value.equals("${" + name + "}")) {
@@ -110,12 +130,35 @@ public abstract class DatabaseHelper {
         return value;
     }
 
+    public static String setProperty(String name, String format, String... properties) {
+        List<String> values = Stream.of(properties).map(key -> getProperty(key)).collect(Collectors.toList());
+        return setProperty(name, String.format(format, values.toArray(new Object[values.size()])));
+    }
+
     public static final String DEFAULT_DATABASE_NAME = "nuxeojunittests";
 
-    public String databaseName = DEFAULT_DATABASE_NAME;
+    public static void setDatabaseName(String name) {
+        setProperty(DATABASE_PROPERTY, name);
+    }
 
-    public void setDatabaseName(String name) {
-        databaseName = name;
+    public static String getDatabaseName() {
+        return getProperty(DATABASE_PROPERTY, DEFAULT_DATABASE_NAME);
+    }
+
+    public static void setFulltextMode(boolean disabled, String analyzer, boolean searchDisabled) {
+        setProperty(FULLTEXT_DISABLED_PROPERTY, Boolean.toString(disabled));
+        setProperty(FULLTEXT_ANALYZER_PROPERTY, analyzer);
+        setProperty(FULLTEXT_SEARCH_DISABLED_PROPERTY, Boolean.toString(searchDisabled));
+    }
+
+    public static final String DEFAULT_REPOSITORY_NAME = "test";
+
+    public static void setRepositoryName(String name) {
+        setProperty(REPOSITORY_PROPERTY, name);
+    }
+
+    public static String getRepositoryName() {
+        return getProperty(REPOSITORY_PROPERTY, DEFAULT_REPOSITORY_NAME);
     }
 
     /**
@@ -146,57 +189,58 @@ public abstract class DatabaseHelper {
         DatabaseMetaData metadata = connection.getMetaData();
         List<String> tableNames = new LinkedList<String>();
         Set<String> truncateFirst = new HashSet<String>();
-        ResultSet rs = metadata.getTables(catalog, schemaPattern, "%", new String[] { "TABLE" });
-        while (rs.next()) {
-            String tableName = rs.getString("TABLE_NAME");
-            if (tableName.indexOf('$') != -1) {
-                // skip Oracle 10g flashback/fulltext-index tables
-                continue;
+        try (ResultSet rs = metadata.getTables(catalog, schemaPattern, "%", new String[] { "TABLE" })) {
+            while (rs.next()) {
+                String tableName = rs.getString("TABLE_NAME");
+                if (tableName.indexOf('$') != -1) {
+                    // skip Oracle 10g flashback/fulltext-index tables
+                    continue;
+                }
+                if (tableName.toLowerCase().startsWith("trace_xe_")) {
+                    // Skip mssql 2012 system table
+                    continue;
+                }
+                if ("ACLR_USER_USERS".equals(tableName)) {
+                    // skip nested table that is dropped by the main table
+                    continue;
+                }
+                if ("ANCESTORS_ANCESTORS".equals(tableName)) {
+                    // skip nested table that is dropped by the main table
+                    continue;
+                }
+                if ("ACLR_MODIFIED".equals(tableName) && DATABASE instanceof DatabaseOracle) {
+                    // global temporary table on Oracle, must TRUNCATE before DROP
+                    truncateFirst.add(tableName);
+                }
+                tableNames.add(tableName);
             }
-            if (tableName.toLowerCase().startsWith("trace_xe_")) {
-                // Skip mssql 2012 system table
-                continue;
+            // not all databases can cascade on drop
+            // remove hierarchy last because of foreign keys
+            if (tableNames.remove("HIERARCHY")) {
+                tableNames.add("HIERARCHY");
             }
-            if ("ACLR_USER_USERS".equals(tableName)) {
-                // skip nested table that is dropped by the main table
-                continue;
+            // needed for Azure
+            if (tableNames.remove("NXP_LOGS")) {
+                tableNames.add("NXP_LOGS");
             }
-            if ("ANCESTORS_ANCESTORS".equals(tableName)) {
-                // skip nested table that is dropped by the main table
-                continue;
+            if (tableNames.remove("NXP_LOGS_EXTINFO")) {
+                tableNames.add("NXP_LOGS_EXTINFO");
             }
-            if ("ACLR_MODIFIED".equals(tableName) && DATABASE instanceof DatabaseOracle) {
-                // global temporary table on Oracle, must TRUNCATE before DROP
-                truncateFirst.add(tableName);
+            // PostgreSQL is lowercase
+            if (tableNames.remove("hierarchy")) {
+                tableNames.add("hierarchy");
             }
-            tableNames.add(tableName);
-        }
-        // not all databases can cascade on drop
-        // remove hierarchy last because of foreign keys
-        if (tableNames.remove("HIERARCHY")) {
-            tableNames.add("HIERARCHY");
-        }
-        // needed for Azure
-        if (tableNames.remove("NXP_LOGS")) {
-            tableNames.add("NXP_LOGS");
-        }
-        if (tableNames.remove("NXP_LOGS_EXTINFO")) {
-            tableNames.add("NXP_LOGS_EXTINFO");
-        }
-        // PostgreSQL is lowercase
-        if (tableNames.remove("hierarchy")) {
-            tableNames.add("hierarchy");
-        }
-        Statement st = connection.createStatement();
-        for (String tableName : tableNames) {
-            if (truncateFirst.contains(tableName)) {
-                String sql = String.format("TRUNCATE TABLE \"%s\"", tableName);
-                executeSql(st, sql);
+            try (Statement st = connection.createStatement()) {
+                for (String tableName : tableNames) {
+                    if (truncateFirst.contains(tableName)) {
+                        String sql = String.format("TRUNCATE TABLE \"%s\"", tableName);
+                        executeSql(st, sql);
+                    }
+                    String sql = String.format(statement, tableName);
+                    executeSql(st, sql);
+                }
             }
-            String sql = String.format(statement, tableName);
-            executeSql(st, sql);
         }
-        st.close();
     }
 
     protected static void executeSql(Statement st, String sql) throws SQLException {
@@ -204,11 +248,15 @@ public abstract class DatabaseHelper {
         st.execute(sql);
     }
 
-    public void setUp() throws SQLException {
-        setOwner();
+    public void setUp(FeaturesRunner runner) throws Exception {
+        setOwner(runner);
         setDatabaseName(DEFAULT_DATABASE_NAME);
+        setRepositoryName(DEFAULT_REPOSITORY_NAME);
         setBinaryManager(defaultBinaryManager, "");
+        setFulltextMode(false, fulltextAnalyzer(), false);
         setSingleDataSourceMode();
+        setProperties();
+        Class.forName(getProperty(DRIVER_PROPERTY));
         Framework.addListener(new RuntimeServiceListener() {
 
             @Override
@@ -224,13 +272,23 @@ public abstract class DatabaseHelper {
         });
     }
 
-    protected void setOwner() {
+    protected void setProperties() {
+
+    }
+
+    public void initDatabase(Connection connection) throws Exception {
+
+    }
+
+    protected String fulltextAnalyzer() {
+        return "none";
+    }
+
+    protected void setOwner(FeaturesRunner runner) {
         if (owner != null) {
-            Error e = new Error("Second call to setUp() without tearDown()", owner);
-            log.fatal(e.getMessage(), e);
-            throw e;
+            throw new Error("Second call to setUp() without tearDown() on " + runner.getDescription(), owner);
         }
-        owner = new Error("Database not released");
+        owner = new Error("Database not released on " + runner.getDescription());
     }
 
     /**
@@ -245,12 +303,24 @@ public abstract class DatabaseHelper {
         setProperty("nuxeo.test.vcs.binary-manager-key", key);
     }
 
-    public abstract String getDeploymentContrib();
+    public static void setFulltext(boolean disabled, String analyzerOptions, boolean searchDisabled) {
+        setProperty("nuxeo.test.vcs.fulltext.disabled", Boolean.toString(disabled));
+        setProperty("nuxeo.test.vcs.fulltext.analyzer", analyzerOptions);
+        setProperty("nuxeo.text.vcs.fulltext.search.disabled", Boolean.toString(searchDisabled));
+    }
+
+    public static void setDatasourceURL(String value) {
+        setProperty(URL_PROPERTY, value);
+    }
+
+    public String getDeploymentContrib() {
+        return "OSGI-INF/test-repository-contrib.xml";
+    }
 
     public abstract RepositoryDescriptor getRepositoryDescriptor();
 
     public static void setSingleDataSourceMode() {
-        if (Boolean.parseBoolean(System.getProperty(SINGLEDS_PROPERTY)) || SINGLEDS_DEFAULT) {
+        if (Boolean.parseBoolean(Framework.getProperty(SINGLEDS_PROPERTY)) || SINGLEDS_DEFAULT) {
             // the name doesn't actually matter, as code in
             // ConnectionHelper.getDataSource ignores it and uses
             // nuxeo.test.vcs.url etc. for connections in test mode
@@ -321,6 +391,10 @@ public abstract class DatabaseHelper {
 
     public boolean supportsArrayColumns() {
         return false;
+    }
+
+    protected void setProperties2() {
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -1,0 +1,42 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Automation feature Tests
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.automation.nuxeo-automation-features.
+ tests
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.automation.nuxeo-automation-features
+Import-Package: javax.inject,junit.framework,org.codehaus.jackson.map;ve
+ rsion="[1.8,2)",org.codehaus.jackson.type;version="[1.8,2)",org.junit,o
+ rg.junit.runner,org.mockito,org.mockito.stubbing,org.nuxeo.common.colle
+ ctions;version="[0.0,1)",org.nuxeo.ecm.automation;version="[0.0,1)",org
+ .nuxeo.ecm.automation.context;version="[0.0,1)",org.nuxeo.ecm.automatio
+ n.core.annotations;version="[0.0,1)",org.nuxeo.ecm.automation.core.even
+ ts;version="[0.0,1)",org.nuxeo.ecm.automation.core.operations.services,
+ org.nuxeo.ecm.automation.core.scripting;version="[0.0,1)",org.nuxeo.ecm
+ .automation.core.util;version="[0.0,1)",org.nuxeo.ecm.automation.featur
+ es,org.nuxeo.ecm.automation.jaxrs.io.documents;version="[0.0,1)",org.nu
+ xeo.ecm.automation.server.jaxrs.batch;version="[0.0,1)",org.nuxeo.ecm.c
+ ore.api;version="[0.0,1)",org.nuxeo.ecm.core.api.blobholder;version="[0
+ .0,1)",org.nuxeo.ecm.core.api.impl;version="[0.0,1)",org.nuxeo.ecm.core
+ .api.impl.blob;version="[0.0,1)",org.nuxeo.ecm.core.api.localconfigurat
+ ion;version="[0.0,1)",org.nuxeo.ecm.core.event;version="[0.0,1)",org.nu
+ xeo.ecm.core.test,org.nuxeo.ecm.core.test.annotations,org.nuxeo.ecm.dir
+ ectory;version="[0.0,1)",org.nuxeo.ecm.directory.api;version="[0.0,1)",
+ org.nuxeo.ecm.platform.audit,org.nuxeo.ecm.platform.audit.api;version="
+ [0.0,1)",org.nuxeo.ecm.platform.audit.impl,org.nuxeo.ecm.platform.query
+ .api;version="[0.0,1)",org.nuxeo.ecm.platform.usermanager;version="[0.0
+ ,1)",org.nuxeo.ecm.webengine.test,org.nuxeo.runtime.api;version="[0.0,1
+ )",org.nuxeo.runtime.test.mockito,org.nuxeo.runtime.test.runner,org.sky
+ screamer.jsonassert
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Private-Package: org.nuxeo.ecm.automation.core.operations.notification,o
+ rg.nuxeo.ecm.automation.core.test,org.nuxeo.ecm.automation.core.test.di
+ rectory,schemas,test-data,testdirectorydata
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

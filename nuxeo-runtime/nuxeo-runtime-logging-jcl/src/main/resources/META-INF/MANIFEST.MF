@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-SymbolicName: org.nuxeo.runtime.logging.jcl
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blac
+ klist
+Bundle-Name: org.nuxeo.runtime.logging.jcl
+ExtensionBundle-Activator: org.nuxeo.runtime.logging.jcl.LogAdapterAct
+ ivator
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtim
+ e)",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)",osgi.ee;filter
+ :="(&(osgi.ee=JavaSE)(version=1.8))"
+Fragment-Host: org.apache.commons.logging
+Tool: Bnd-3.0.0.201509101326
+

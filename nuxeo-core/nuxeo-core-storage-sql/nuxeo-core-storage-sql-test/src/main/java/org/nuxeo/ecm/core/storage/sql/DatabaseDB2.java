@@ -32,6 +32,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
 
 public class DatabaseDB2 extends DatabaseHelper {
 
@@ -43,22 +44,17 @@ public class DatabaseDB2 extends DatabaseHelper {
 
     private static final String DEF_PORT = "3700";
 
-    // 8 chars max
-    private static final String DEFAULT_DATABASE_NAME = "nuxeotst";
-
     private static final String DEF_USER = "db2inst1";
 
     private static final String DEF_PASSWORD = "db2inst1pw99";
-
-    private static final String CONTRIB_XML = "OSGI-INF/test-repo-repository-db2-contrib.xml";
 
     private static final String DRIVER = "com.ibm.db2.jcc.DB2Driver";
 
     private static final String XA_DATASOURCE = "com.ibm.db2.jcc.DB2XADataSource";
 
+    @Override
     protected void setProperties() {
-        databaseName = DEFAULT_DATABASE_NAME;
-        setProperty(DATABASE_PROPERTY, databaseName);
+        setProperty(DATABASE_PROPERTY, DEFAULT_DATABASE_NAME);
         setProperty(SERVER_PROPERTY, DEF_SERVER);
         setProperty(PORT_PROPERTY, DEF_PORT);
         setProperty(USER_PROPERTY, DEF_USER);
@@ -71,19 +67,14 @@ public class DatabaseDB2 extends DatabaseHelper {
     }
 
     @Override
-    public void setUp() throws SQLException {
-        super.setUp();
-        try {
-            Class.forName(DRIVER);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
+    public void setUp(FeaturesRunner runner) throws Exception {
+        super.setUp(runner);
         setProperties();
-        Connection connection = DriverManager.getConnection(Framework.getProperty(URL_PROPERTY),
-                Framework.getProperty(USER_PROPERTY), Framework.getProperty(PASSWORD_PROPERTY));
-        doOnAllTables(connection, null, Framework.getProperty(USER_PROPERTY).toUpperCase(), "DROP TABLE \"%s\"");
-        dropSequences(connection);
-        connection.close();
+        try (Connection connection = DriverManager.getConnection(Framework.getProperty(URL_PROPERTY),
+                Framework.getProperty(USER_PROPERTY), Framework.getProperty(PASSWORD_PROPERTY))) {
+            doOnAllTables(connection, null, Framework.getProperty(USER_PROPERTY).toUpperCase(), "DROP TABLE \"%s\"");
+            dropSequences(connection);
+        }
     }
 
     public void dropSequences(Connection connection) throws SQLException {
@@ -104,11 +95,6 @@ public class DatabaseDB2 extends DatabaseHelper {
             st.execute(sql);
         }
         st.close();
-    }
-
-    @Override
-    public String getDeploymentContrib() {
-        return CONTRIB_XML;
     }
 
     @Override

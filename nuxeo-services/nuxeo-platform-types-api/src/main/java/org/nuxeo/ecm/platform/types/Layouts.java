@@ -41,7 +41,7 @@ public class Layouts implements Serializable {
     boolean append;
 
     @XNodeList(value = "layout", type = String[].class, componentType = String.class)
-    String[] layouts = new String[0];
+    public String[] layouts = new String[0];
 
     public String[] getLayouts() {
         return layouts;

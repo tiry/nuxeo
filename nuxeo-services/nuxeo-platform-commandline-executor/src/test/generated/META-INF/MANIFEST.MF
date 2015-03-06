@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.nuxeo.ecm.platform.nuxeo-platform-commandline-executor.
+ tests
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-commandline-e
+ xecutor.tests
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Fragment-Host: org.nuxeo.ecm.platform.nuxeo-platform-commandline-executo
+ r
+Import-Package: org.apache.commons.lang3;version="[3.3,4)",org.apache.co
+ mmons.logging;version="[1.2,2)",org.junit,org.junit.runner,org.nuxeo.co
+ mmon.utils;version="[0.0,1)",org.nuxeo.ecm.platform.commandline.executo
+ r.api,org.nuxeo.ecm.platform.commandline.executor.service.executors,org
+ .nuxeo.runtime.api;version="[0.0,1)",org.nuxeo.runtime.model;version="[
+ 0.0,1)",org.nuxeo.runtime.test,org.nuxeo.runtime.test.runner
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Private-Package: org.nuxeo.ecm.platform.commandline.executor.tests,org.n
+ uxeo.ecm.platform.commandline.executor.tests.aspell,org.nuxeo.ecm.platf
+ orm.commandline.executor.tests.imagemagic
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

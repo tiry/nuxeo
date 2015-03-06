@@ -87,7 +87,7 @@ public class WorkManagerImpl extends DefaultComponent implements WorkManager {
 
     public static final String DEFAULT_CATEGORY = "default";
 
-    protected static final String THREAD_PREFIX = "Nuxeo-Work-";
+    protected static final String THREAD_PREFIX = "work-";
 
     protected final MetricRegistry registry = SharedMetricRegistries.getOrCreate(MetricsService.class.getName());
 
@@ -462,9 +462,8 @@ public class WorkManagerImpl extends DefaultComponent implements WorkManager {
         private final String prefix;
 
         public NamedThreadFactory(String prefix) {
-            SecurityManager sm = System.getSecurityManager();
-            group = sm == null ? Thread.currentThread().getThreadGroup() : sm.getThreadGroup();
-            this.prefix = prefix;
+            group = new ThreadGroup(Thread.currentThread().getThreadGroup(), prefix);
+            this.prefix = Framework.getRuntime().getName() + "-" + prefix;
         }
 
         @Override

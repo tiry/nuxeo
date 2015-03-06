@@ -18,24 +18,20 @@
  */
 package org.nuxeo.ecm.core.blob.binary;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import org.nuxeo.ecm.core.CoreTestCase;
 import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
-public class TestDefaultBinaryManager extends NXRuntimeTestCase {
+public class TestDefaultBinaryManager extends CoreTestCase {
 
     private static final String CONTENT = "this is a file au caf\u00e9";
 
@@ -44,10 +40,8 @@ public class TestDefaultBinaryManager extends NXRuntimeTestCase {
     private static final String CONTENT_SHA1 = "3f3bdf817537faa28483eabc69a4bb3912cf0c6c";
 
     @Test
+    @LocalDeploy("org.nuxeo.ecm.core:OSGI-INF/test-default-blob-provider.xml")
     public void testDefaultBinaryManager() throws Exception {
-        deployBundle("org.nuxeo.ecm.core");
-        deployContrib("org.nuxeo.ecm.core.tests", "OSGI-INF/test-default-blob-provider.xml");
-
         DefaultBinaryManager binaryManager = new DefaultBinaryManager();
         binaryManager.initialize("repo", Collections.emptyMap());
         assertEquals(0, countFiles(binaryManager.getStorageDir()));
@@ -123,6 +117,7 @@ public class TestDefaultBinaryManager extends NXRuntimeTestCase {
         assertEquals(2, countFiles(binaryManager.getStorageDir()));
 
         binaryManager.close();
+        FileUtils.deleteDirectory(binaryManager.getStorageDir());
     }
 
     @Test
@@ -137,6 +132,7 @@ public class TestDefaultBinaryManager extends NXRuntimeTestCase {
         assertTrue(source.getFile().exists());
 
         binaryManager.close();
+        FileUtils.deleteDirectory(binaryManager.getStorageDir());
     }
 
     protected static int countFiles(File dir) {

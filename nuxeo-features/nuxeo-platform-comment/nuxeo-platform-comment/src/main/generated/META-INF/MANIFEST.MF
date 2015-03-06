@@ -1,0 +1,46 @@
+Manifest-Version: 1.0
+Bundle-ActivationPolicy: lazy
+Bundle-Category: web,stateful
+Bundle-ClassPath: .
+Bundle-ManifestVersion: 2
+Bundle-Name: Nuxeo Comment project
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-comment
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Eclipse-LazyStart: true
+Export-Package: doc;version="0.0.0",doc-parent;version="0.0.0",org.nuxeo
+ .ecm.platform.comment.impl;version="0.0.0";uses:="org.nuxeo.ecm.core.ap
+ i,org.nuxeo.ecm.platform.comment.api,org.nuxeo.ecm.platform.comment.ser
+ vice",org.nuxeo.ecm.platform.comment.listener;uses:="org.nuxeo.ecm.core
+ .api,org.nuxeo.ecm.core.event,org.nuxeo.ecm.platform.comment.service,or
+ g.nuxeo.ecm.platform.ec.notification,org.nuxeo.ecm.platform.relations.a
+ pi";version="0.0.0",org.nuxeo.ecm.platform.comment.notification;uses:="
+ org.nuxeo.ecm.core.event,org.nuxeo.ecm.platform.ec.notification";versio
+ n="0.0.0",org.nuxeo.ecm.platform.comment.service;uses:="org.nuxeo.commo
+ n.xmap.annotation,org.nuxeo.ecm.platform.comment.api,org.nuxeo.runtime.
+ model";version="0.0.0",schema;version="0.0.0",templates;version="0.0.0"
+Import-Package: org.apache.commons.logging;version="[1.2,2)",org.nuxeo.c
+ ommon.utils;version="[0.0,1)",org.nuxeo.common.xmap.annotation;version=
+ "[0.0,1)",org.nuxeo.ecm.core.api;version="[0.0,1)",org.nuxeo.ecm.core.a
+ pi.pathsegment;version="[0.0,1)",org.nuxeo.ecm.core.api.security;versio
+ n="[0.0,1)",org.nuxeo.ecm.core.api.security.impl;version="[0.0,1)",org.
+ nuxeo.ecm.core.event;version="[0.0,1)",org.nuxeo.ecm.core.event.impl;ve
+ rsion="[0.0,1)",org.nuxeo.ecm.platform.comment.api;version="[0.0,1)",or
+ g.nuxeo.ecm.platform.comment.impl;version="[0.0,1)",org.nuxeo.ecm.platf
+ orm.comment.service,org.nuxeo.ecm.platform.ec.notification;version="[0.
+ 0,1)",org.nuxeo.ecm.platform.relations.api;version="[0.0,1)",org.nuxeo.
+ ecm.platform.relations.api.impl;version="[0.0,1)",org.nuxeo.ecm.platfor
+ m.relations.jena;version="[0.0,1)",org.nuxeo.ecm.platform.usermanager;v
+ ersion="[0.0,1)",org.nuxeo.runtime;version="[0.0,1)",org.nuxeo.runtime.
+ api;version="[0.0,1)",org.nuxeo.runtime.model;version="[0.0,1)"
+Nuxeo-Component: OSGI-INF/CommentService.xml, OSGI-INF/comment-defaultPe
+ rmissions-contrib.xml, OSGI-INF/comment-life-cycle-contrib.xml, OSGI-IN
+ F/comment-schemas-contrib.xml, OSGI-INF/comment-relation-contrib.xml, O
+ SGI-INF/comment-listener-contrib.xml, OSGI-INF/comment-notification-con
+ trib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Originally-Created-By: 1.6.0_20 (Sun Microsystems Inc.)
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

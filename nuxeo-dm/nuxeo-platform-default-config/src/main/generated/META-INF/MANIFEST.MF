@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-Category: web,stateful
+Bundle-Localization: plugin
+Bundle-ManifestVersion: 2
+Bundle-Name: NuxeoWeb
+Bundle-SymbolicName: org.nuxeo.ecm.platform.nuxeo-platform-default-confi
+ g
+Bundle-Vendor: Nuxeo
+Bundle-Version: 0.0.0.reload-SNAPSHOT
+Export-Package: directories;version="0.0.0",doc;version="0.0.0",doc-pare
+ nt;version="0.0.0",process;version="0.0.0"
+Nuxeo-Component: OSGI-INF/nxdirectories-contrib.xml, OSGI-INF/jbpmServic
+ e-contrib.xml
+Nuxeo-Components: OSGI-INF/*.xml, OSGI-INF/*.properties, OSGI-INF/blackl
+ ist
+Require-Bundle: org.nuxeo.ecm.directory.api, org.nuxeo.ecm.platform.jbpm
+ .core
+Require-Capability: osgi.extender;filter:="(osgi.extender=nuxeo.runtime)
+ ",osgi.extender;filter:="(osgi.extender=nuxeo.osgi)"

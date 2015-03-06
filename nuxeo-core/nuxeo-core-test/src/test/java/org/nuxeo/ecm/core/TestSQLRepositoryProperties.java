@@ -91,15 +91,12 @@ import org.nuxeo.runtime.transaction.TransactionHelper;
 @RunWith(FeaturesRunner.class)
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
-@Deploy({ "org.nuxeo.ecm.core.convert", //
-        "org.nuxeo.ecm.core.convert.plugins", //
-        "org.nuxeo.runtime.reload", //
-})
-@LocalDeploy({ "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-repo-core-types-contrib.xml",
-        "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-restriction-contrib.xml",
+@Deploy("org.nuxeo.runtime.reload")
+@LocalDeploy({ "org.nuxeo.ecm.core.test:OSGI-INF/test-repo-core-types-contrib.xml",
+        "org.nuxeo.ecm.core.test:OSGI-INF/test-restriction-contrib.xml",
         // deploy specific adapter for testing external blobs: files are stored
         // in temporary directory
-        "org.nuxeo.ecm.core.test.tests:OSGI-INF/test-externalblob-adapters-contrib.xml", })
+        "org.nuxeo.ecm.core.test:OSGI-INF/test-externalblob-adapters-contrib.xml", })
 public class TestSQLRepositoryProperties {
 
     @Inject
@@ -603,8 +600,9 @@ public class TestSQLRepositoryProperties {
         coreFeature.releaseCoreSession();
 
         // add complexschema to TestDocument
-        runtimeHarness.deployContrib("org.nuxeo.ecm.core.test.tests", "OSGI-INF/test-schema-update.xml");
-        try {
+
+        try (AutoCloseable context = runtimeHarness.deployContrib("org.nuxeo.ecm.core.test.tests",
+                "OSGI-INF/test-schema-update.xml")) {
             reloadService.reloadRepository();
             // reload repo with new doctype
             session = coreFeature.createCoreSession();
@@ -623,8 +621,6 @@ public class TestSQLRepositoryProperties {
             prop.setValue(Collections.singletonMap("vignettes",
                     Collections.singletonList(Collections.singletonMap("width", Long.valueOf(123)))));
             doc = session.saveDocument(doc);
-        } finally {
-            runtimeHarness.undeployContrib("org.nuxeo.ecm.core.test.tests", "OSGI-INF/test-schema-update.xml");
         }
     }
 

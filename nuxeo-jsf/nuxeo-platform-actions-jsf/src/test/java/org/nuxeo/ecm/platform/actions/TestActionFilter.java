@@ -21,12 +21,6 @@
 
 package org.nuxeo.ecm.platform.actions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import javax.faces.context.FacesContext;
 
 import org.junit.Before;
@@ -34,11 +28,16 @@ import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.platform.actions.jsf.JSFActionContext;
 import org.nuxeo.ecm.platform.ui.web.jsf.MockFacesContext;
+import org.nuxeo.ecm.platform.ui.web.jsf.WebFeature;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.nuxeo.runtime.test.runner.Deploy;
+import org.nuxeo.runtime.test.runner.Features;
 
 /**
  * @author <a href="mailto:at@nuxeo.com">Anahide Tchertchian</a>
  */
+@Features(WebFeature.class)
+@Deploy({"org.nuxeo.ecm.platform.forms.layout.core", "org.nuxeo.ecm.platform.forms.layout.client"})
 public class TestActionFilter extends NXRuntimeTestCase {
 
     protected DocumentModel doc;
@@ -47,13 +46,13 @@ public class TestActionFilter extends NXRuntimeTestCase {
 
     protected MockFacesContext facesContext;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        deployBundle("org.nuxeo.ecm.core.schema");
-        deployContrib("org.nuxeo.ecm.actions", "OSGI-INF/actions-framework.xml");
-        deployContrib("org.nuxeo.ecm.actions.jsf.tests", "test-filters-contrib.xml");
-        deployContrib("org.nuxeo.ecm.actions.jsf.tests", "test-filters-override-contrib.xml");
+        deployBundle("org.nuxeo.ecm.actions.jsf");
+        deployTestContrib("org.nuxeo.ecm.actions.jsf", "test-filters-contrib.xml");
+        deployTestContrib("org.nuxeo.ecm.actions.jsf", "test-filters-override-contrib.xml");
         as = (ActionService) runtime.getComponent(ActionService.ID);
 
         facesContext = new MockFacesContext();
@@ -228,7 +227,7 @@ public class TestActionFilter extends NXRuntimeTestCase {
         DefaultActionFilter dFilter = (DefaultActionFilter) filter;
         assertEquals(1, dFilter.getRules().length);
         FilterRule rule = dFilter.getRules()[0];
-        assertEquals("administrators", rule.groups[0]);
+        assertEquals("administrators", rule.getGroups()[0]);
     }
 
     public void testCheckFilter() {
