@@ -50,21 +50,17 @@ public class JarBuilder {
     }
 
     protected File locateBinaries() {
-
         String classpath = System.getProperty("java.class.path");
-
-        StringTokenizer tokenizer = new StringTokenizer(classpath, ":");
-
+        StringTokenizer tokenizer = new StringTokenizer(classpath, File.pathSeparator);
         while (tokenizer.hasMoreElements()) {
-            File bindir = new File(tokenizer.nextToken());
-            if (!bindir.isDirectory()) {
+            File dir = new File(tokenizer.nextToken());
+            if (!dir.isDirectory()) {
                 continue;
             }
-            if (new File(bindir, pkgdir.getPath()).exists()) {
-                return bindir;
+            if (new File(dir, pkgdir.getPath()).exists()) {
+                return dir;
             }
         }
-
         throw new IllegalStateException("cannot locate binaries");
     }
 
