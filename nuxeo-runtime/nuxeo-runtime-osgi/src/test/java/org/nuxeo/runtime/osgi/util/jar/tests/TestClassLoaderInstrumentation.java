@@ -33,6 +33,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.jar.JarFile;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,6 +52,7 @@ import sun.misc.MetaIndex;
  * @since 5.6
  */
 public class TestClassLoaderInstrumentation {
+    protected static final Log log = LogFactory.getLog(TestClassLoaderInstrumentation.class);
 
     protected JarBuilder jarBuilder;
 
@@ -105,6 +108,13 @@ public class TestClassLoaderInstrumentation {
         URL otherURL = jarBuilder.buildOther();
         URL[] jarURLs = new URL[] { firstURL, otherURL };
         URLClassLoader ucl = new URLClassLoader(jarURLs, null);
+
+        log.debug("firstURL: " + firstURL.toString());
+        log.debug("otherURL: " + otherURL.toString());
+        log.debug("getResource: "
+                + ucl.getResource("org.nuxeo.runtime.osgi.util.jar.tests.JarBuilder$First".replace('.', '/').concat(
+                        ".class")));
+
         assertThat(ucl.loadClass(JarBuilder.First.class.getName()), notNullValue());
         JarFile jarFile = new JarFile(jarURLs[1].getFile());
         jarFile.getManifest();
