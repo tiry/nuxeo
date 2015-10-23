@@ -741,7 +741,7 @@ public abstract class NuxeoLauncher {
     protected void start(boolean logProcessOutput) throws IOException, InterruptedException {
         List<String> startCommand = new ArrayList<>();
         startCommand.add(getJavaExecutable().getPath());
-        startCommand.addAll(Arrays.asList(getJavaOptsProperty().split(" ")));
+        startCommand.addAll(getJavaOptsPropertyAsList());
         startCommand.add("-cp");
         startCommand.add(getClassPath());
         startCommand.addAll(getNuxeoProperties());
@@ -752,12 +752,19 @@ public abstract class NuxeoLauncher {
         }
         ProcessBuilder pb = new ProcessBuilder(getOSCommand(startCommand));
         pb.directory(configurationGenerator.getNuxeoHome());
-        // pb = pb.redirectErrorStream(true);
         log.debug("Server command: " + pb.command());
         nuxeoProcess = pb.start();
         Thread.sleep(1000);
         boolean processExited = false;
         // Check if process exited early
+        if (nuxeoProcess == null) {
+            log.error(String.format("Server start failed with command: %s", pb.command()));
+            if (PlatformUtils.isWindows() && configurationGenerator.getNuxeoHome().getPath().contains(" ")) {
+                // NXP-17679
+                log.error("The server path must not contain spaces under Windows.");
+            }
+            return;
+        }
         try {
             int exitValue = nuxeoProcess.exitValue();
             if (exitValue != 0) {
@@ -787,6 +794,16 @@ public abstract class NuxeoLauncher {
         String ret = System.getProperty(JAVA_OPTS_PROPERTY, JAVA_OPTS_DEFAULT);
         ret = StrSubstitutor.replace(ret, configurationGenerator.getUserConfig());
         return ret;
+    }
+
+    /**
+     * @return Java OPTS split on spaces followed by an even number of quotes (or zero)
+     * @since 7.10
+     */
+    protected List<String> getJavaOptsPropertyAsList() {
+        String javaOptsProperty = getJavaOptsProperty();
+        log.debug("JAVA OPTS:" + javaOptsProperty);
+        return Arrays.asList(javaOptsProperty.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)"));
     }
 
     /**
@@ -836,11 +853,13 @@ public abstract class NuxeoLauncher {
      * @return wrapped command depending on the OS
      */
     private List<String> getOSCommand(List<String> roughCommand) {
-        String linearizedCommand = new String();
         ArrayList<String> osCommand = new ArrayList<>();
         if (PlatformUtils.isLinux() || PlatformUtils.isMac()) {
-            for (Iterator<String> iterator = roughCommand.iterator(); iterator.hasNext();) {
-                String commandToken = iterator.next();
+            String linearizedCommand = new String();
+            for (String commandToken : roughCommand) {
+                if (StringUtils.isBlank(commandToken)) {
+                    continue;
+                }
                 if (commandToken.contains(" ")) {
                     commandToken = commandToken.replaceAll(" ", "\\\\ ");
                 }
@@ -849,28 +868,15 @@ public abstract class NuxeoLauncher {
             osCommand.add("/bin/sh");
             osCommand.add("-c");
             osCommand.add(linearizedCommand);
-            // osCommand.add("&");
-            return osCommand;
-            // return roughCommand;
-        } else if (PlatformUtils.isWindows()) {
-            // for (Iterator<String> iterator = roughCommand.iterator();
-            // iterator.hasNext();) {
-            // String commandToken = iterator.next();
-            // if (commandToken.endsWith("java")) {
-            // commandToken = "^\"" + commandToken + "^\"";
-            // } else if (commandToken.contains(" ")) {
-            // commandToken = commandToken.replaceAll(" ", "^ ");
-            // }
-            // linearizedCommand += " " + commandToken;
-            // }
-            // osCommand.add("cmd");
-            // osCommand.add("/C");
-            // osCommand.add(linearizedCommand);
-            // return osCommand;
-            return roughCommand;
         } else {
-            return roughCommand;
+            for (String commandToken : roughCommand) {
+                if (StringUtils.isBlank(commandToken)) {
+                    continue;
+                }
+                osCommand.add(commandToken);
+            }
         }
+        return osCommand;
     }
 
     protected abstract Collection<? extends String> getServerProperties();
