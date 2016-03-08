@@ -51,7 +51,6 @@ import org.nuxeo.ecm.core.work.api.Work.State;
 import org.nuxeo.runtime.api.Framework;
 
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Protocol;
 import redis.clients.jedis.ScanParams;
 import redis.clients.jedis.ScanResult;
@@ -69,7 +68,7 @@ public class RedisWorkQueuing implements WorkQueuing {
     protected static final String UTF_8 = "UTF-8";
 
     /**
-     * Global hash of Work instance id -> serialized Work instance.
+     * Global hash of Work instance id -> serialoized Work instance.
      */
     protected static final String KEY_DATA = "data";
 
@@ -135,7 +134,6 @@ public class RedisWorkQueuing implements WorkQueuing {
     protected String schedulingWorkSha;
     protected String runningWorkSha;
     protected String completedWorkSha;
-    protected String cleanCompletedWorkSha;
 
     public RedisWorkQueuing(WorkManagerImpl mgr, WorkQueueDescriptorRegistry workQueueDescriptors) {
         this.mgr = mgr;
@@ -147,20 +145,11 @@ public class RedisWorkQueuing implements WorkQueuing {
         redisAdmin = Framework.getService(RedisAdmin.class);
         redisNamespace = redisAdmin.namespace("work");
         try {
-            for (String queueId : getSuspendedQueueIds()) {
-                int n = scheduleSuspendedWork(queueId);
-                log.info("Re-scheduling " + n + " work instances suspended from queue: " + queueId);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
             schedulingWorkSha = redisAdmin.load("org.nuxeo.ecm.core.redis", "scheduling-work");
             runningWorkSha = redisAdmin.load("org.nuxeo.ecm.core.redis", "running-work");
             completedWorkSha = redisAdmin.load("org.nuxeo.ecm.core.redis", "completed-work");
-            cleanCompletedWorkSha = redisAdmin.load("org.nuxeo.ecm.core.redis", "clean-completed-work");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Cannot load LUA scripts", e);
         }
     }
 
@@ -377,15 +366,7 @@ public class RedisWorkQueuing implements WorkQueuing {
 
     @Override
     public void clearCompletedWork(String queueId, long completionTime) {
-        try {
-            if (completionTime <= 0) {
-                removeAllCompletedWork(queueId);
-            } else {
-                removeCompletedWork(queueId, completionTime);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return;
     }
 
     /*
@@ -427,6 +408,10 @@ public class RedisWorkQueuing implements WorkQueuing {
 
     protected byte[] runningKey(String queueId) {
         return keyBytes(KEY_RUNNING_PREFIX, queueId);
+    }
+
+    protected String runningKeyString(String queueId) {
+        return redisNamespace + KEY_RUNNING_PREFIX + queueId;
     }
 
     protected byte[] scheduledKey(String queueId) {
@@ -650,22 +635,19 @@ public class RedisWorkQueuing implements WorkQueuing {
      * Switches a work to state completed, and saves its new state.
      */
     protected void workSetCompleted(final String queueId, final Work work) throws IOException {
-        final byte[] workId = bytes(work.getId());
-        final byte[] workData = serializeWork(work);
-        final byte[] state = bytes(((char) STATE_COMPLETED_B) + String.valueOf(work.getCompletionTime()));
-        final List<byte[]> keys = Arrays.asList(dataKey(), stateKey(), runningKey(queueId), completedKey(queueId));
-        final List<byte[]> args = Arrays.asList(workId, workData, state);
-        redisExecutor.execute(new RedisCallable<Void>() {
+            redisExecutor.execute(new RedisCallable<Void>() {
 
-            @Override
-            public Void call(Jedis jedis) {
-                jedis.evalsha(completedWorkSha.getBytes(), keys, args);
-                if (log.isDebugEnabled()) {
-                    log.debug("Mark work as completed " + work);
+                @Override
+                public Void call(Jedis jedis) {
+                    List<String> keys = Arrays.asList(runningKeyString(queueId), stateKeyString(), dataKeyString());
+                    List<String> args = Arrays.asList(work.getId());
+                    jedis.evalsha(completedWorkSha, keys, args);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Mark work as completed " + work);
+                    }
+                    return null;
                 }
-                return null;
-            }
-        });
+            });
     }
 
     /**
@@ -898,42 +880,6 @@ public class RedisWorkQueuing implements WorkQueuing {
         }
     }
 
-    /**
-     * Don't pass more than approx. this number of parameters to Lua calls.
-     */
-    private static final int BATCH_SIZE = 5000;
 
-    protected void removeAllCompletedWork(final String queueId) throws IOException {
-        removeCompletedWork(queueId, 0);
-    }
-
-    protected void removeCompletedWork(final String queueId, final long completionTime) throws IOException {
-        redisExecutor.execute(new RedisCallable<Void>() {
-
-            @Override
-            public Void call(Jedis jedis) {
-                String completedKey = completedKeyString(queueId);
-                String stateKey = stateKeyString();
-                String dataKey = dataKeyString();
-                SScanner sscanner = new SScanner();
-                ScanParams scanParams = new ScanParams().count(BATCH_SIZE);
-                String cursor = "0";
-                do {
-                    ScanResult<String> scanResult = sscanner.sscan(jedis, completedKey, cursor, scanParams);
-                    cursor = scanResult.getStringCursor();
-                    List<String> workIds = scanResult.getResult();
-                    if (!workIds.isEmpty()) {
-                        // delete these works if before the completion time
-                        List<String> keys = Arrays.asList(completedKey, stateKey, dataKey);
-                        List<String> args = new ArrayList<String>(1 + workIds.size());
-                        args.add(String.valueOf(completionTime));
-                        args.addAll(workIds);
-                        jedis.evalsha(cleanCompletedWorkSha, keys, args);
-                    }
-                } while (!"0".equals(cursor));
-                return null;
-            }
-        });
-    }
 
 }

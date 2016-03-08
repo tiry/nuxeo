@@ -1,16 +1,16 @@
 --
--- Mark work as completed
+-- Deletes completed works with the ids given in ARGV
+-- having a completion time before the given time limit.
 --
-local dataKey = KEYS[1]
+
+local runningKey = KEYS[1]
 local stateKey = KEYS[2]
-local runningKey = KEYS[3]
-local completedKey = KEYS[4]
-
+local dataKey = KEYS[3]
 local workId = ARGV[1]
-local workData = ARGV[2]
-local state = ARGV[3]
+-- the rest of ARGV is the list of work ids to check and delete
 
-redis.call('HSET', dataKey, workId, workData)
+
 redis.call('SREM', runningKey, workId)
-redis.call('SADD', completedKey, workId)
-redis.call('HSET', stateKey, workId, state)
+redis.call('HDEL', stateKey, workId)
+redis.call('HDEL', dataKey, workId)
+
