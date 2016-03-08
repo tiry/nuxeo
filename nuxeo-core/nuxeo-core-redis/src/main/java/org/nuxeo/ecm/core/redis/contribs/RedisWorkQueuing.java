@@ -133,6 +133,8 @@ public class RedisWorkQueuing implements WorkQueuing {
 
     protected String delCompletedSha;
 
+    protected String delRunningSha;
+
     public RedisWorkQueuing(WorkManagerImpl mgr, WorkQueueDescriptorRegistry workQueueDescriptors) {
         this.mgr = mgr;
     }
@@ -143,17 +145,22 @@ public class RedisWorkQueuing implements WorkQueuing {
         redisAdmin = Framework.getService(RedisAdmin.class);
         redisNamespace = redisAdmin.namespace("work");
         try {
+            delCompletedSha = redisAdmin.load("org.nuxeo.ecm.core.redis", "del-completed");
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot load del-completed lua script", e);
+        }
+        try {
+            delRunningSha = redisAdmin.load("org.nuxeo.ecm.core.redis", "del-running");
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot load del-running lua script", e);
+        }
+        try {
             for (String queueId : getSuspendedQueueIds()) {
                 int n = scheduleSuspendedWork(queueId);
                 log.info("Re-scheduling " + n + " work instances suspended from queue: " + queueId);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            delCompletedSha = redisAdmin.load("org.nuxeo.ecm.core.redis", "del-completed");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Cannot re-scheduled suspended works", e);
         }
     }
 
@@ -422,6 +429,10 @@ public class RedisWorkQueuing implements WorkQueuing {
         return keyBytes(KEY_RUNNING_PREFIX, queueId);
     }
 
+    protected String runningKeyString(String queueId) {
+        return redisNamespace + KEY_RUNNING_PREFIX + queueId;
+    }
+
     protected byte[] scheduledKey(String queueId) {
         return keyBytes(KEY_SCHEDULED_PREFIX, queueId);
     }
@@ -659,6 +670,19 @@ public class RedisWorkQueuing implements WorkQueuing {
      * Switches a work to state completed, and saves its new state.
      */
     protected void workSetCompleted(final String queueId, final Work work) throws IOException {
+        if (true) {
+            redisExecutor.execute(new RedisCallable<Void>() {
+
+                @Override
+                public Void call(Jedis jedis) {
+                    List<String> keys = Arrays.asList(runningKeyString(queueId), stateKeyString(), dataKeyString());
+                    List<String> args = Arrays.asList(work.getId());
+                    jedis.evalsha(delRunningSha, keys, args);
+                    return null;
+                }
+            });
+            return;
+        }
         final byte[] workIdBytes = bytes(work.getId());
         final byte[] workBytes = serializeWork(work);
         redisExecutor.execute(new RedisCallable<Void>() {
@@ -955,5 +979,6 @@ public class RedisWorkQueuing implements WorkQueuing {
             }
         });
     }
+
 
 }
