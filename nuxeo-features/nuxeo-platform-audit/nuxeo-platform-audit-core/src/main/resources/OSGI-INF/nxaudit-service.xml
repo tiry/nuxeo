@@ -129,7 +129,7 @@
     point="listener">
 
     <listener name="auditLoggerListener" async="true" postCommit="true"
-      class="org.nuxeo.ecm.platform.audit.listener.AuditEventLogger" />
+      class="org.nuxeo.ecm.platform.audit.listener.AuditEventLogger" enabled="false" />
 
   </extension>
 
