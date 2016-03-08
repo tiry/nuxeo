@@ -561,7 +561,9 @@ public class WorkManagerImpl extends DefaultComponent implements WorkManager {
                 queuing.workSchedule(queueId, work);
                 return;
             }
-            log.warn("running " + work + " ("+work.getId()+")");
+            if (log.isTraceEnabled()) {
+                log.trace("running " + work + " (" + work.getId() + ")");
+            }
             work.setWorkInstanceState(State.RUNNING);
             queuing.workRunning(queueId, work);
             running.add(work);
@@ -584,7 +586,9 @@ public class WorkManagerImpl extends DefaultComponent implements WorkManager {
                 completedCount.inc();
                 workTimer.update(work.getCompletionTime() - work.getStartTime(), TimeUnit.MILLISECONDS);
                 completionSynchronizer.signalCompletedWork();
-                log.warn("completed " + work + " (" + work.getId() + ")");
+                if (log.isTraceEnabled()) {
+                    log.trace("completed " + work + " (" + work.getId() + ")");
+                }
             }
         }
 
