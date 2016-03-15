@@ -452,6 +452,11 @@
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
+        <artifactId>nuxeo-core-storage-marklogic</artifactId>
+        <version>${nuxeo.core.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.ecm.core</groupId>
         <artifactId>nuxeo-core-storage-mem</artifactId>
         <version>${nuxeo.core.version}</version>
       </dependency>
@@ -4606,6 +4611,12 @@
       </dependency>
 
       <dependency>
+        <groupId>com.marklogic</groupId>
+        <artifactId>java-client-api</artifactId>
+        <version>3.0.5</version>
+      </dependency>
+
+      <dependency>
         <groupId>com.duosecurity</groupId>
         <artifactId>com-duosecurity-java-client</artifactId>
         <version>1.0.0</version>
@@ -6225,6 +6236,13 @@
        <properties>
         <nuxeo.test.core>mongodb</nuxeo.test.core>
         <nuxeo.mongodb.server.default>localhost:27017</nuxeo.mongodb.server.default>
+      </properties>
+    </profile>
+    <profile>
+      <id>marklogic</id>
+       <properties>
+        <nuxeo.test.core>marklogic</nuxeo.test.core>
+        <!--<nuxeo.mongodb.server.default>localhost:27017</nuxeo.mongodb.server.default>-->
       </properties>
     </profile>
 
