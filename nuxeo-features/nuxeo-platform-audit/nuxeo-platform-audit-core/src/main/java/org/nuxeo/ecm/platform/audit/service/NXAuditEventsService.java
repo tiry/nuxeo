@@ -34,6 +34,7 @@ import org.nuxeo.ecm.platform.audit.api.DocumentHistoryReader;
 import org.nuxeo.ecm.platform.audit.api.document.DocumentHistoryReaderImpl;
 import org.nuxeo.ecm.platform.audit.service.extension.AdapterDescriptor;
 import org.nuxeo.ecm.platform.audit.service.extension.AuditBackendDescriptor;
+import org.nuxeo.ecm.platform.audit.service.extension.BulkConfigDescriptor;
 import org.nuxeo.ecm.platform.audit.service.extension.EventDescriptor;
 import org.nuxeo.ecm.platform.audit.service.extension.ExtendedInfoDescriptor;
 import org.nuxeo.runtime.model.ComponentContext;
@@ -79,6 +80,8 @@ public class NXAuditEventsService extends DefaultComponent {
     protected final Set<String> eventNames = new HashSet<String>();
 
     protected AuditBackend backend;
+
+    protected BulkConfigDescriptor bulkConfig = new BulkConfigDescriptor();
 
     @Override
     public void applicationStarted(ComponentContext context) {
@@ -214,6 +217,8 @@ public class NXAuditEventsService extends DefaultComponent {
             doRegisterAdapter((AdapterDescriptor) contribution);
         } else if (extensionPoint.equals(BACKEND_EXT_POINT)) {
             doRegisterBackend((AuditBackendDescriptor) contribution);
+        } else if (contribution instanceof BulkConfigDescriptor) {
+            bulkConfig = (BulkConfigDescriptor)contribution;
         }
     }
 

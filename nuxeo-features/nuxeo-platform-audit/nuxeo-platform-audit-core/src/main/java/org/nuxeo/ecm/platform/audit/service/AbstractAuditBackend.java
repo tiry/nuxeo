@@ -81,7 +81,7 @@ public abstract class AbstractAuditBackend implements AuditBackend {
 
     protected NXAuditEventsService component;
 
-    final AuditBulker bulk = new AuditBulker(this);
+    AuditBulker bulker;
 
     @Override
     public void activate(NXAuditEventsService component) {
@@ -95,6 +95,8 @@ public abstract class AbstractAuditBackend implements AuditBackend {
 
     @Override
     public void onApplicationStarted() {
+        bulker = new AuditBulker(this, component.bulkConfig);
+        bulker.startup();
         Framework.addListener(new RuntimeServiceListener() {
 
             @Override
@@ -103,15 +105,18 @@ public abstract class AbstractAuditBackend implements AuditBackend {
                     return;
                 }
                 Framework.removeListener(this);
-                bulk.shutdown();
+                try {
+                    bulker.shutdown();
+                } finally {
+                    bulker = null;
+                }
             }
         });
-        bulk.startup();
     }
 
     @Override
     public boolean await(long time, TimeUnit unit) throws InterruptedException {
-        return bulk.await(time, unit);
+        return bulker.await(time, unit);
     }
 
     protected final ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator(new ExpressionFactoryImpl());
@@ -415,7 +420,7 @@ public abstract class AbstractAuditBackend implements AuditBackend {
         if (entry == null) {
             return;
         }
-        bulk.offer(entry);
+        bulker.offer(entry);
     }
 
     @Override

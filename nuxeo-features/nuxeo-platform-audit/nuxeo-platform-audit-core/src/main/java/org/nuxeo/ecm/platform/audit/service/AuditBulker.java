@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.platform.audit.api.LogEntry;
+import org.nuxeo.ecm.platform.audit.service.extension.BulkConfigDescriptor;
 import org.nuxeo.runtime.metrics.MetricsService;
 
 import com.codahale.metrics.Counter;
@@ -23,21 +24,23 @@ public class AuditBulker {
 
     final AbstractAuditBackend backend;
 
+    protected final BulkConfigDescriptor config;
+
     protected final MetricRegistry registry = SharedMetricRegistries.getOrCreate(MetricsService.class.getName());
 
     protected final Counter queuedCount = registry.counter(MetricRegistry.name("nuxeo", "audit", "queued"));
 
     protected final Counter drainedCount = registry.counter(MetricRegistry.name("nuxeo", "audit", "drained"));
 
-
     Thread thread;
 
-    AuditBulker(AbstractAuditBackend backend) {
+    AuditBulker(AbstractAuditBackend backend, BulkConfigDescriptor config) {
         this.backend = backend;
+        this.config = config;
     }
 
     void startup() {
-        thread = new Thread(new Flusher(), "Nuxeo-Audit-Bulk");
+        thread = new Thread(new Consumer(), "Nuxeo-Audit-Bulker");
         thread.start();
     }
 
@@ -58,7 +61,7 @@ public class AuditBulker {
 
     final Queue<LogEntry> queue = new ConcurrentLinkedQueue<>();
 
-    boolean stopped;
+    volatile boolean stopped;
 
     void offer(LogEntry entry) {
         if (log.isDebugEnabled()) {
@@ -66,7 +69,7 @@ public class AuditBulker {
         }
         queue.add(entry);
         queuedCount.inc();
-        if (queue.size() >= 1000) {
+        if (queue.size() >= config.size) {
             lock.lock();
             try {
                 isFilled.signalAll();
@@ -108,30 +111,34 @@ public class AuditBulker {
     }
 
 
-    class Flusher implements Runnable {
+    class Consumer implements Runnable {
 
         @Override
         public void run() {
             log.info("bulk audit logger started");
             while(!stopped) {
-                log.debug("waiting for events");
-
                 lock.lock();
                 try {
-                    isFilled.await(10, TimeUnit.SECONDS);
+                    isFilled.await(config.timeout, TimeUnit.SECONDS);
                     if (queue.isEmpty()) {
                         continue;
                     }
                 } catch (InterruptedException cause) {
                     Thread.currentThread().interrupt();
-                    LogFactory.getLog(AuditBulker.class).warn("bulk loggger interrupted", cause);
                     return;
                 } finally {
                     lock.unlock();
                 }
-                int count = drain();
-                log.debug("flushed " + count + " events");
+                try {
+                    int count = drain();
+                    if (log.isDebugEnabled()) {
+                        log.debug("flushed " + count + " events");
+                    }
+                } catch (RuntimeException cause) {
+                    log.error("caught error while draining audit queue", cause);
+                }
             }
+            log.info("bulk audit logger stopped");
         }
 
     }
