@@ -9,6 +9,7 @@
 
   <artifactId>nuxeo-runtime-reload</artifactId>
   <name>Nuxeo Runtime Reload</name>
+  <version>6.0-HF27-patch-sharp</version>
   <description>Provides reloading capabilities for nuxeo bundles.</description>
 
   <dependencies>

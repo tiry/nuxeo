@@ -9,6 +9,7 @@
 
   <groupId>org.nuxeo.runtime</groupId>
   <artifactId>nuxeo-runtime</artifactId>
+  <version>6.0-HF27-patch-sharp</version>
   <name>Nuxeo Runtime</name>
 
   <description>Nuxeo Runtime: The Nuxeo Runtime.</description>

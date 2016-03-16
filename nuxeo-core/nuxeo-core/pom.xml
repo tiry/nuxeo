@@ -8,6 +8,7 @@
   </parent>
 
   <artifactId>nuxeo-core</artifactId>
+  <version>6.0-HF27-patch-sharp</version>
   <name>Nuxeo Core</name>
   <description>Nuxeo Core: The Core.</description>
 

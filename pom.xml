@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.nuxeo</groupId>
   <artifactId>nuxeo-ecm</artifactId>
-  <version>6.0-HF27</version>
+  <version>6.0-HF27-patch-sharp</version>
   <packaging>pom</packaging>
   <name>Nuxeo ECM Projects</name>
   <description>Nuxeo ECM Platform and related components.</description>
@@ -217,7 +217,7 @@
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
         <artifactId>nuxeo-runtime</artifactId>
-        <version>${nuxeo.runtime.version}</version>
+        <version>${nuxeo.runtime.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
@@ -269,7 +269,7 @@
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
         <artifactId>nuxeo-runtime-osgi</artifactId>
-        <version>${nuxeo.runtime.version}</version>
+        <version>${nuxeo.runtime.version}-patch-sharp</version>
         <exclusions>
           <exclusion>
             <groupId>org.jboss.jbossas</groupId>
@@ -288,7 +288,7 @@
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
         <artifactId>nuxeo-runtime-reload</artifactId>
-        <version>${nuxeo.runtime.version}</version>
+        <version>${nuxeo.runtime.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
@@ -309,7 +309,7 @@
       <dependency>
         <groupId>org.nuxeo.runtime</groupId>
         <artifactId>nuxeo-runtime-test</artifactId>
-        <version>${nuxeo.runtime.version}</version>
+        <version>${nuxeo.runtime.version}-patch-sharp</version>
         <scope>test</scope>
       </dependency>
       <dependency>
@@ -322,7 +322,7 @@
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
         <artifactId>nuxeo-core</artifactId>
-        <version>${nuxeo.core.version}</version>
+        <version>${nuxeo.core.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
@@ -347,14 +347,14 @@
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
         <artifactId>nuxeo-core-event</artifactId>
-        <version>${nuxeo.core.version}</version>
+        <version>${nuxeo.core.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
         <artifactId>nuxeo-core-event</artifactId>
         <type>test-jar</type>
         <scope>test</scope>
-        <version>${nuxeo.core.version}</version>
+        <version>${nuxeo.core.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
@@ -385,7 +385,7 @@
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
         <artifactId>nuxeo-core-persistence</artifactId>
-        <version>${nuxeo.core.version}</version>
+        <version>${nuxeo.core.version}-patch-jar</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
@@ -452,7 +452,7 @@
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
         <artifactId>nuxeo-core-redis</artifactId>
-        <version>${nuxeo.core.version}</version>
+        <version>${nuxeo.core.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.core</groupId>
@@ -668,7 +668,7 @@
       <dependency>
         <groupId>org.nuxeo.ecm.platform</groupId>
         <artifactId>nuxeo-platform-management</artifactId>
-        <version>${nuxeo.services.version}</version>
+        <version>${nuxeo.services.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.platform</groupId>
@@ -1292,7 +1292,7 @@
       <dependency>
         <groupId>org.nuxeo.ecm.platform</groupId>
         <artifactId>nuxeo-platform-relations-core-listener</artifactId>
-        <version>${nuxeo.features.version}</version>
+        <version>${nuxeo.features.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.platform</groupId>
@@ -1438,7 +1438,7 @@
       <dependency>
         <groupId>org.nuxeo.elasticsearch</groupId>
         <artifactId>nuxeo-elasticsearch-core</artifactId>
-        <version>${nuxeo.features.version}</version>
+        <version>${nuxeo.features.version}-patch-sharp</version>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.elasticsearch</groupId>

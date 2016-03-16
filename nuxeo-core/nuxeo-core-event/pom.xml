@@ -7,6 +7,7 @@
   </parent>
   <artifactId>nuxeo-core-event</artifactId>
   <name>Nuxeo Core Event</name>
+  <version>6.0-HF27-patch-sharp</version>
   <description>Core Events model and implementation</description>
   <dependencies>
    <dependency>

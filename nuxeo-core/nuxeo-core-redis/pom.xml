@@ -9,6 +9,7 @@
   </parent>
 
   <artifactId>nuxeo-core-redis</artifactId>
+  <version>6.0-HF27-patch-sharp</version>
   <name>Nuxeo Core Redis</name>
 
   <dependencies>

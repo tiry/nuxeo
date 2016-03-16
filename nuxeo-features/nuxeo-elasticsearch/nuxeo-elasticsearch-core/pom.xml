@@ -7,6 +7,7 @@
   </parent>
 
   <artifactId>nuxeo-elasticsearch-core</artifactId>
+  <version>6.0-HF27-patch-sharp</version>
   <name>Elasticsearch Connector implementation</name>
 
   <dependencies>

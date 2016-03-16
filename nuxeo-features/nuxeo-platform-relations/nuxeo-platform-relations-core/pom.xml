@@ -9,6 +9,7 @@
 
   <artifactId>nuxeo-platform-relations-core</artifactId>
   <name>Nuxeo Relation Service - Core</name>
+  <version>6.0-HF27-sharp-patch</version>
   <description>Nuxeo Enterprise Platform: Nuxeo Relation Service - Core.
     </description>
 

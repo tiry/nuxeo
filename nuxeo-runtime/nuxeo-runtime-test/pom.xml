@@ -9,6 +9,7 @@
 
   <groupId>org.nuxeo.runtime</groupId>
   <artifactId>nuxeo-runtime-test</artifactId>
+  <version>6.0-HF27-patch-reload</version>
   <name>Nuxeo Runtime Tests</name>
   <description>Nuxeo Runtime: Nuxeo Runtime Tests. This module must only be used
   with a test scope (except in [module]-test where you may use compile scope).</description>
