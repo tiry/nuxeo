@@ -13,7 +13,7 @@ nuxeo.cache.concurrencylevel=50
 elasticsearch.override.pageproviders=default_search,document_content,section_content,document_content,tree_children,default_document_suggestion,simple_search,advanced_search,nxql_search,DEFAULT_DOCUMENT_SUGGESTION
 
 # Disable db fulltext indexing
-nuxeo.vcs.fulltext.search.disabled=true
+#nuxeo.vcs.fulltext.search.disabled=true
 
 # Disable db stored procedure
 nuxeo.vcs.optimizations.acl.enabled=false
