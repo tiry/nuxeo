@@ -20,7 +20,6 @@ package org.nuxeo.ecm.core.storage.mongodb;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ACE_GRANT;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ACL;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ACL_NAME;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ACP;
@@ -68,7 +67,6 @@ import org.nuxeo.ecm.core.query.sql.model.OrderByClause;
 import org.nuxeo.ecm.core.query.sql.model.OrderByExpr;
 import org.nuxeo.ecm.core.query.sql.model.Reference;
 import org.nuxeo.ecm.core.query.sql.model.SelectClause;
-import org.nuxeo.ecm.core.query.sql.model.SelectList;
 import org.nuxeo.ecm.core.query.sql.model.StringLiteral;
 import org.nuxeo.ecm.core.schema.DocumentType;
 import org.nuxeo.ecm.core.schema.SchemaManager;
@@ -81,11 +79,11 @@ import org.nuxeo.ecm.core.schema.types.primitives.BooleanType;
 import org.nuxeo.ecm.core.schema.types.primitives.DateType;
 import org.nuxeo.ecm.core.storage.ExpressionEvaluator;
 import org.nuxeo.ecm.core.storage.ExpressionEvaluator.PathResolver;
-import org.nuxeo.ecm.core.storage.dbs.DBSDocument;
-import org.nuxeo.ecm.core.storage.dbs.DBSSession;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer.FulltextQuery;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer.Op;
+import org.nuxeo.ecm.core.storage.dbs.DBSDocument;
+import org.nuxeo.ecm.core.storage.dbs.DBSSession;
 import org.nuxeo.runtime.api.Framework;
 
 import com.mongodb.BasicDBObject;
@@ -705,8 +703,8 @@ public class MongoDBQueryBuilder {
         }
         // TODO check list fields
         List<Object> list = (List<Object>) right;
-        return new FieldInfoDBObject(fieldInfo,
-                new BasicDBObject(positive ? QueryOperators.IN : QueryOperators.NIN, list));
+        return new FieldInfoDBObject(fieldInfo, new BasicDBObject(positive ? QueryOperators.IN : QueryOperators.NIN,
+                list));
     }
 
     public DBObject walkLike(Operand lvalue, Operand rvalue, boolean positive, boolean caseInsensitive) {
@@ -807,8 +805,7 @@ public class MongoDBQueryBuilder {
         }
         String name = ((Reference) lvalue).name;
         if (!(rvalue instanceof StringLiteral)) {
-            throw new QueryParseException(
-                    "Invalid STARTSWITH query, right hand side must be a literal path: " + rvalue);
+            throw new QueryParseException("Invalid STARTSWITH query, right hand side must be a literal path: " + rvalue);
         }
         String path = ((StringLiteral) rvalue).value;
         if (path.length() > 1 && path.endsWith("/")) {
@@ -955,8 +952,7 @@ public class MongoDBQueryBuilder {
         FieldInfo fieldInfo = walkReference(ref.name);
         if (DATE_CAST.equals(ref.cast)) {
             Type type = fieldInfo.type;
-            if (!(type instanceof DateType
-                    || (type instanceof ListType && ((ListType) type).getFieldType() instanceof DateType))) {
+            if (!(type instanceof DateType || (type instanceof ListType && ((ListType) type).getFieldType() instanceof DateType))) {
                 throw new QueryParseException("Cannot cast to " + ref.cast + ": " + ref.name);
             }
             // fieldInfo.isDateCast = true;
@@ -1145,8 +1141,8 @@ public class MongoDBQueryBuilder {
          * MongoDB query generation.
          */
         // match on primary type
-        DBObject p = new BasicDBObject(DBSDocument.KEY_PRIMARY_TYPE,
-                new BasicDBObject(QueryOperators.IN, matchPrimaryTypes));
+        DBObject p = new BasicDBObject(DBSDocument.KEY_PRIMARY_TYPE, new BasicDBObject(QueryOperators.IN,
+                matchPrimaryTypes));
         // match on mixin types
         // $in/$nin with an array matches if any/no element of the array matches
         String innin = include ? QueryOperators.IN : QueryOperators.NIN;
