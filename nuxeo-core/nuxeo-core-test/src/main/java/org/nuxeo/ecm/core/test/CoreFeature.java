@@ -84,6 +84,7 @@ import com.google.inject.Scope;
         "org.nuxeo.ecm.core.storage.dbs", //
         "org.nuxeo.ecm.core.storage.mem", //
         "org.nuxeo.ecm.core.storage.mongodb", //
+        "org.nuxeo.ecm.core.storage.marklogic", //
 })
 @Features({ RuntimeFeature.class, TransactionalFeature.class })
 @LocalDeploy("org.nuxeo.ecm.core.event:test-queuing.xml")

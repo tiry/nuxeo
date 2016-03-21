@@ -33,6 +33,9 @@
     <appender-ref ref="FILE"/>
   </category>
 
+  <logger name="org.nuxeo.ecm.core.storage.marklogic.MarkLogicRepository">
+    <level value="WARN" />
+  </logger>
   <logger name="org.nuxeo.ecm.core.storage.mongodb.MongoDBRepository">
     <level value="WARN" />
   </logger>

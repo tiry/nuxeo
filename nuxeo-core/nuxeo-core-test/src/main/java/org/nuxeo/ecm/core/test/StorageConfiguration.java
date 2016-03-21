@@ -23,6 +23,20 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.DEFAULT_MARKLOGIC_DBNAME;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.DEFAULT_MARKLOGIC_HOST;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.DEFAULT_MARKLOGIC_PASSWORD;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.DEFAULT_MARKLOGIC_PORT;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.DEFAULT_MARKLOGIC_USER;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.MARKLOGIC_DBNAME_PROPERTY;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.MARKLOGIC_HOST_PROPERTY;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.MARKLOGIC_PASSWORD_PROPERTY;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.MARKLOGIC_PORT_PROPERTY;
+import static org.nuxeo.ecm.core.test.MarkLogicConstants.MARKLOGIC_USER_PROPERTY;
+import static org.nuxeo.ecm.core.test.MongoDBConstants.DEFAULT_MONGODB_DBNAME;
+import static org.nuxeo.ecm.core.test.MongoDBConstants.DEFAULT_MONGODB_SERVER;
+import static org.nuxeo.ecm.core.test.MongoDBConstants.MONGODB_DBNAME_PROPERTY;
+import static org.nuxeo.ecm.core.test.MongoDBConstants.MONGODB_SERVER_PROPERTY;
 
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -33,6 +47,9 @@ import java.util.function.BiConsumer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.NuxeoException;
+import org.nuxeo.ecm.core.event.EventService;
+import org.nuxeo.ecm.core.storage.marklogic.MarkLogicRepository;
+import org.nuxeo.ecm.core.storage.marklogic.MarkLogicRepositoryDescriptor;
 import org.nuxeo.ecm.core.storage.mongodb.MongoDBRepository;
 import org.nuxeo.ecm.core.storage.mongodb.MongoDBRepositoryDescriptor;
 import org.nuxeo.ecm.core.storage.sql.DatabaseDB2;
@@ -49,6 +66,8 @@ import org.nuxeo.runtime.test.runner.RuntimeFeature;
 import org.nuxeo.runtime.test.runner.RuntimeHarness;
 import org.osgi.framework.Bundle;
 
+import com.marklogic.client.DatabaseClient;
+import com.marklogic.client.query.QueryManager;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
@@ -70,15 +89,9 @@ public class StorageConfiguration {
 
     public static final String CORE_MONGODB = "mongodb";
 
+    public static final String CORE_MARKLOGIC = "marklogic";
+
     public static final String DEFAULT_CORE = CORE_VCS;
-
-    private static final String MONGODB_SERVER_PROPERTY = "nuxeo.test.mongodb.server";
-
-    private static final String MONGODB_DBNAME_PROPERTY = "nuxeo.test.mongodb.dbname";
-
-    private static final String DEFAULT_MONGODB_SERVER = "localhost:27017";
-
-    private static final String DEFAULT_MONGODB_DBNAME = "unittests";
 
     private String coreType;
 
@@ -124,6 +137,10 @@ public class StorageConfiguration {
         case CORE_MONGODB:
             isDBS = true;
             initMongoDB();
+            break;
+        case CORE_MARKLOGIC:
+            isDBS = true;
+            initMarkLogic();
             break;
         default:
             throw new ExceptionInInitializerError("Unknown test core mode: " + coreType);
@@ -176,6 +193,30 @@ public class StorageConfiguration {
         }
     }
 
+    protected void initMarkLogic() {
+        String host = defaultProperty(MARKLOGIC_HOST_PROPERTY, DEFAULT_MARKLOGIC_HOST);
+        int port = Integer.parseInt(defaultProperty(MARKLOGIC_PORT_PROPERTY, DEFAULT_MARKLOGIC_PORT));
+        String dbname = defaultProperty(MARKLOGIC_DBNAME_PROPERTY, DEFAULT_MARKLOGIC_DBNAME);
+        String user = defaultProperty(MARKLOGIC_USER_PROPERTY, DEFAULT_MARKLOGIC_USER);
+        String password = defaultProperty(MARKLOGIC_PASSWORD_PROPERTY, DEFAULT_MARKLOGIC_PASSWORD);
+        MarkLogicRepositoryDescriptor descriptor = new MarkLogicRepositoryDescriptor();
+        descriptor.name = getRepositoryName();
+        descriptor.host = host;
+        descriptor.port = port;
+        descriptor.dbname = dbname;
+        descriptor.user = user;
+        descriptor.password = password;
+
+        clearMarkLogic(descriptor);
+    }
+
+    protected void clearMarkLogic(MarkLogicRepositoryDescriptor descriptor) {
+        DatabaseClient markLogicClient = MarkLogicRepository.newMarkLogicClient(descriptor);
+        QueryManager queryManager = markLogicClient.newQueryManager();
+        queryManager.delete(queryManager.newDeleteDefinition());
+        markLogicClient.release();
+    }
+
     public boolean isVCS() {
         return isVCS;
     }
@@ -218,6 +259,10 @@ public class StorageConfiguration {
 
     public boolean isDBSMongoDB() {
         return isDBS && CORE_MONGODB.equals(coreType);
+    }
+
+    public boolean isDBSMarkLogic() {
+        return isDBS && CORE_MARKLOGIC.equals(coreType);
     }
 
     public String getRepositoryName() {
@@ -318,8 +363,10 @@ public class StorageConfiguration {
                 contribPath = "OSGI-INF/test-storage-repo-mem-contrib.xml";
             } else if (isDBSMongoDB()) {
                 contribPath = "OSGI-INF/test-storage-repo-mongodb-contrib.xml";
+            } else if (isDBSMarkLogic()) {
+                contribPath = "OSGI-INF/test-storage-repo-marklogic-contrib.xml";
             } else {
-                throw new NuxeoException("Unkown DBS test configuration (not mem/mongodb)");
+                throw new NuxeoException("Unkown DBS test configuration (not mem/mongodb/marklogic/...)");
             }
         }
         RuntimeHarness harness = runner.getFeature(RuntimeFeature.class).getHarness();
