@@ -18,9 +18,13 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import static java.lang.Boolean.TRUE;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ID;
+import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_IS_PROXY;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_NAME;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PARENT_ID;
+import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PROXY_IDS;
+import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PROXY_TARGET_ID;
 import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicQueryBuilder.QUERY;
 
 import java.io.Serializable;
@@ -53,6 +57,7 @@ import com.marklogic.client.DatabaseClient;
 import com.marklogic.client.DatabaseClientFactory;
 import com.marklogic.client.DatabaseClientFactory.Authentication;
 import com.marklogic.client.document.DocumentPage;
+import com.marklogic.client.document.DocumentRecord;
 import com.marklogic.client.io.JacksonHandle;
 import com.marklogic.client.io.marker.StructureWriteHandle;
 import com.marklogic.client.query.QueryDefinition;
@@ -209,7 +214,31 @@ public class MarkLogicRepository extends DBSRepositoryBase {
     @Override
     public void queryKeyValueArray(String key, Object value, Set<String> ids, Map<String, String> proxyTargets,
             Map<String, Object[]> targetProxies) {
-        throw new IllegalStateException("Not implemented yet");
+        // TODO retrieve only some field
+        ObjectNode root = FACTORY.objectNode();
+        ObjectNode query = FACTORY.objectNode();
+        query.set(key, FACTORY.textNode(value.toString()));
+        root.set(QUERY, query);
+        if (log.isTraceEnabled()) {
+            logQuery(query);
+        }
+        try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
+            for (DocumentRecord record : page) {
+                State state = record.getContent(new StateHandle()).get();
+                String id = (String) state.get(KEY_ID);
+                ids.add(id);
+                if (proxyTargets != null && TRUE.equals(state.get(KEY_IS_PROXY))) {
+                    String targetId = (String) state.get(KEY_PROXY_TARGET_ID);
+                    proxyTargets.put(id, targetId);
+                }
+                if (targetProxies != null) {
+                    Object[] proxyIds = (Object[]) state.get(KEY_PROXY_IDS);
+                    if (proxyIds != null) {
+                        targetProxies.put(id, proxyIds);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -264,7 +293,9 @@ public class MarkLogicRepository extends DBSRepositoryBase {
         if (log.isTraceEnabled()) {
             logQuery(query);
         }
-        return markLogicClient.newJSONDocumentManager().search(init(query), 0).nextContent(new StateHandle()).get();
+        try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
+            return page.nextContent(new StateHandle()).get();
+        }
     }
 
     private QueryDefinition init(StructureWriteHandle query) {
