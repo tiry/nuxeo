@@ -18,23 +18,15 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
-import org.nuxeo.ecm.core.repository.RepositoryFactory;
-import org.nuxeo.ecm.core.storage.dbs.DBSRepositoryFactory;
+import org.nuxeo.ecm.core.query.sql.model.Expression;
 
 /**
- * MarkLogic implementation of a {@link RepositoryFactory}, creating a {@link MarkLogicRepository}.
+ * Query builder for a MarkLogic query from an {@link Expression}.
  *
  * @since 8.2
  */
-public class MarkLogicRepositoryFactory extends DBSRepositoryFactory {
+public class MarkLogicQueryBuilder {
 
-    public MarkLogicRepositoryFactory(String repositoryName) {
-        super(repositoryName);
-    }
-
-    @Override
-    public Object call() {
-        return new MarkLogicRepository(installPool(), (MarkLogicRepositoryDescriptor) getRepositoryDescriptor());
-    }
+    public static final String QUERY = "$query";
 
 }

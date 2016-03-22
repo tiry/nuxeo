@@ -24,15 +24,19 @@ import com.google.common.base.Charsets;
 import com.marklogic.client.io.BaseHandle;
 import com.marklogic.client.io.Format;
 import com.marklogic.client.io.marker.ContentHandle;
+import com.marklogic.client.io.marker.JSONReadHandle;
+import com.marklogic.client.io.marker.JSONWriteHandle;
 
 /**
  * Handler to represent {@link State} content in MarkLogic for reading and writing.
  *
  * @since 8.2
  */
-class StateHandle extends BaseHandle<byte[], String> implements ContentHandle<State> {
+class StateHandle extends BaseHandle<byte[], String> implements ContentHandle<State>, JSONReadHandle, JSONWriteHandle {
 
     private static final MarkLogicStateSerializer SERIALIZER = new MarkLogicStateSerializer();
+
+    private static final MarkLogicStateDeserializer DESERIALIZER = new MarkLogicStateDeserializer();
 
     private State state;
 
@@ -75,6 +79,7 @@ class StateHandle extends BaseHandle<byte[], String> implements ContentHandle<St
             return;
         }
         String stateString = new String(bytes, Charsets.UTF_8);
+        this.state = DESERIALIZER.apply(stateString);
     }
 
     @Override
