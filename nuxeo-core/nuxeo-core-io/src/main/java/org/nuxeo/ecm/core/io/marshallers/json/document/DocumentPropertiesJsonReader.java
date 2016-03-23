@@ -32,6 +32,7 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 
 import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.model.Property;
 import org.nuxeo.ecm.core.api.model.impl.ArrayProperty;
@@ -86,6 +87,8 @@ import org.nuxeo.ecm.core.schema.types.resolver.ObjectResolver;
 public class DocumentPropertiesJsonReader extends AbstractJsonReader<List<Property>> {
 
     public static String DEFAULT_SCHEMA_NAME = "DEFAULT_SCHEMA_NAME";
+
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Inject
     private SchemaManager schemaManager;
@@ -232,18 +235,22 @@ public class DocumentPropertiesJsonReader extends AbstractJsonReader<List<Proper
         if (property instanceof ArrayProperty) {
             fillScalarProperty(property, jn);
         } else {
-            JsonNode elNode = null;
+            JsonNode elNode;
+            Property child;
+            if (!jn.isContainerNode()) {
+                jn = mapper.readTree(jn.getTextValue());
+            }
             Iterator<JsonNode> it = jn.getElements();
             while (it.hasNext()) {
                 elNode = it.next();
-                Property child = readProperty(property, listType.getField(), elNode);
+                child = readProperty(property, listType.getField(), elNode);
                 property.addValue(child.getValue());
             }
         }
     }
 
     private void fillComplexProperty(Property property, JsonNode jn) throws IOException {
-        Entry<String, JsonNode> elNode = null;
+        Entry<String, JsonNode> elNode;
         Iterator<Entry<String, JsonNode>> it = jn.getFields();
         ComplexProperty complexProperty = (ComplexProperty) property;
         ComplexType type = complexProperty.getType();
