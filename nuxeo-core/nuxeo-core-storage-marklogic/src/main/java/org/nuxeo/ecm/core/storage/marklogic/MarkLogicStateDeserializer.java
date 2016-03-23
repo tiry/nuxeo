@@ -44,6 +44,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
  */
 class MarkLogicStateDeserializer implements Function<String, State> {
 
+    public static final MarkLogicStateDeserializer DESERIALIZER = new MarkLogicStateDeserializer();
+
     public static final String DATE_REGEXP = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}?\\.\\d{3}?";
 
     private final ObjectMapper objectMapper = new ObjectMapper();

@@ -18,6 +18,10 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+
+import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicStateSerializer.SERIALIZER;
+import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicStateDeserializer.DESERIALIZER;
+
 import org.nuxeo.ecm.core.storage.State;
 
 import com.google.common.base.Charsets;
@@ -33,10 +37,6 @@ import com.marklogic.client.io.marker.JSONWriteHandle;
  * @since 8.2
  */
 class StateHandle extends BaseHandle<byte[], String> implements ContentHandle<State>, JSONReadHandle, JSONWriteHandle {
-
-    private static final MarkLogicStateSerializer SERIALIZER = new MarkLogicStateSerializer();
-
-    private static final MarkLogicStateDeserializer DESERIALIZER = new MarkLogicStateDeserializer();
 
     private State state;
 

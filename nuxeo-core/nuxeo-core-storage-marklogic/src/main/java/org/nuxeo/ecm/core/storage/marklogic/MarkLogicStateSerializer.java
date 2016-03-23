@@ -44,6 +44,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  */
 class MarkLogicStateSerializer implements Function<State, String> {
 
+    public static final MarkLogicStateSerializer SERIALIZER = new MarkLogicStateSerializer();
+
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.instance;
 
     private final Function<State, ObjectNode> stateSerializer;
@@ -61,6 +63,10 @@ class MarkLogicStateSerializer implements Function<State, String> {
     @Override
     public String apply(State state) {
         return stateSerializer.apply(state).toString();
+    }
+
+    public Function<Serializable, Optional<String>> getValueSerializer() {
+        return valueSerializer.andThen(node -> node.map(JsonNode::toString));
     }
 
     private class StateSerializer implements Function<State, ObjectNode> {

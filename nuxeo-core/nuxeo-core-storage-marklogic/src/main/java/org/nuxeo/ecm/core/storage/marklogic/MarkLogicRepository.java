@@ -56,8 +56,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.marklogic.client.DatabaseClient;
 import com.marklogic.client.DatabaseClientFactory;
 import com.marklogic.client.DatabaseClientFactory.Authentication;
+import com.marklogic.client.document.DocumentMetadataPatchBuilder.PatchHandle;
 import com.marklogic.client.document.DocumentPage;
 import com.marklogic.client.document.DocumentRecord;
+import com.marklogic.client.document.JSONDocumentManager;
 import com.marklogic.client.io.JacksonHandle;
 import com.marklogic.client.io.marker.StructureWriteHandle;
 import com.marklogic.client.query.QueryDefinition;
@@ -72,10 +74,6 @@ public class MarkLogicRepository extends DBSRepositoryBase {
     private static final Log log = LogFactory.getLog(MarkLogicRepository.class);
 
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.instance;
-
-    private static final MarkLogicStateSerializer SERIALIZER = new MarkLogicStateSerializer();
-
-    private static final MarkLogicStateDeserializer DESERIALIZER = new MarkLogicStateDeserializer();
 
     private static final Function<String, String> ID_FORMATTER = id -> String.format("/%s.json", id);
 
@@ -117,7 +115,7 @@ public class MarkLogicRepository extends DBSRepositoryBase {
 
     @Override
     protected void initBlobsPaths() {
-        //throw new IllegalStateException("Not implemented yet");
+        // throw new IllegalStateException("Not implemented yet");
     }
 
     @Override
@@ -156,7 +154,12 @@ public class MarkLogicRepository extends DBSRepositoryBase {
 
     @Override
     public void updateState(String id, StateDiff diff) {
-        throw new IllegalStateException("Not implemented yet");
+        JSONDocumentManager docManager = markLogicClient.newJSONDocumentManager();
+        PatchHandle patch = new MarkLogicUpdateBuilder(docManager::newPatchBuilder).apply(diff);
+        if (log.isTraceEnabled()) {
+            log.trace("MarkLogic: UPDATE " + id + ": " + patch.toString());
+        }
+        docManager.patch(ID_FORMATTER.apply(id), patch);
     }
 
     @Override
