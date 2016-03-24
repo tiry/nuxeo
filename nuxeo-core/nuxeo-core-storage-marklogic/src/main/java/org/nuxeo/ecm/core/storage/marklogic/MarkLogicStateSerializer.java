@@ -65,8 +65,12 @@ class MarkLogicStateSerializer implements Function<State, String> {
         return stateSerializer.apply(state).toString();
     }
 
-    public Function<Serializable, Optional<String>> getValueSerializer() {
-        return valueSerializer.andThen(node -> node.map(JsonNode::toString));
+    public Function<Object, Optional<JsonNode>> getValueNodeSerializer() {
+        return valueSerializer;
+    }
+
+    public Function<Object, Optional<String>> getValueSerializer() {
+        return getValueNodeSerializer().andThen(node -> node.map(JsonNode::toString));
     }
 
     private class StateSerializer implements Function<State, ObjectNode> {

@@ -20,6 +20,7 @@ package org.nuxeo.ecm.core.storage.marklogic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ID;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -44,19 +45,20 @@ public class TestMarkLogicStateDeserializer {
 
     @Test
     public void testStateWithSimpleValue() {
-        State state = deserializer.apply("{\"ecm:id\":\"ID\"}");
+        State state = deserializer.apply(String.format("{\"%s\":\"ID\"}", KEY_ID));
         assertNotNull(state);
         State expectedState = new State();
-        expectedState.put("ecm:id", "ID");
+        expectedState.put(KEY_ID, "ID");
         assertEquals(expectedState, state);
     }
 
     @Test
     public void testStateWithSimpleCalendarValue() {
-        State state = deserializer.apply("{\"ecm:id\":\"ID\",\"dub:creationDate\":\"1970-01-01T00:00:00.001\"}");
+        State state = deserializer.apply(String.format(
+                "{\"%s\":\"ID\",\"dub:creationDate\":\"1970-01-01T00:00:00.001\"}", KEY_ID));
         assertNotNull(state);
         State expectedState = new State();
-        expectedState.put("ecm:id", "ID");
+        expectedState.put(KEY_ID, "ID");
         Calendar creationDate = Calendar.getInstance();
         ZonedDateTime zonedCreationDate = ZonedDateTime.of(1970, 1, 1, 0, 0, 0, 1000000, ZoneId.systemDefault());
         creationDate.setTime(Date.from(zonedCreationDate.toInstant()));
@@ -66,11 +68,11 @@ public class TestMarkLogicStateDeserializer {
 
     @Test
     public void testStateWithSubState() {
-        String json = "{\"ecm:id\":\"ID\",\"subState\":{\"nbValues\":2,\"valuesPresent\":false}}";
+        String json = String.format("{\"%s\":\"ID\",\"subState\":{\"nbValues\":2,\"valuesPresent\":false}}", KEY_ID);
         State state = deserializer.apply(json);
         assertNotNull(state);
         State expectedState = new State();
-        expectedState.put("ecm:id", "ID");
+        expectedState.put(KEY_ID, "ID");
         State subState = new State();
         subState.put("nbValues", 2);
         subState.put("valuesPresent", false);
@@ -80,11 +82,13 @@ public class TestMarkLogicStateDeserializer {
 
     @Test
     public void testStateWithList() {
-        String json = "{\"ecm:id\":\"ID\",\"nbValues\":2,\"values\":[{\"item\":\"itemState1\",\"read\":true,\"write\":true},{\"item\":\"itemState2\",\"read\":true,\"write\":false}]}";
+        String json = String.format(
+                "{\"%s\":\"ID\",\"nbValues\":2,\"values\":[{\"item\":\"itemState1\",\"read\":true,\"write\":true},{\"item\":\"itemState2\",\"read\":true,\"write\":false}]}",
+                KEY_ID);
         State state = deserializer.apply(json);
         assertNotNull(state);
         State expectedState = new State();
-        expectedState.put("ecm:id", "ID");
+        expectedState.put(KEY_ID, "ID");
         expectedState.put("nbValues", 2);
         State state1 = new State();
         state1.put("item", "itemState1");
@@ -100,11 +104,11 @@ public class TestMarkLogicStateDeserializer {
 
     @Test
     public void testStateWithArray() {
-        String json = "{\"ecm:id\":\"ID\",\"nbValues\":2,\"values\":[3,4]}";
+        String json = String.format("{\"%s\":\"ID\",\"nbValues\":2,\"values\":[3,4]}", KEY_ID);
         State state = deserializer.apply(json);
         assertNotNull(state);
         State expectedState = new State();
-        expectedState.put("ecm:id", "ID");
+        expectedState.put(KEY_ID, "ID");
         expectedState.put("nbValues", 2);
         expectedState.put("values", new Integer[] { 3, 4 });
         assertEquals(expectedState, state);
@@ -112,7 +116,9 @@ public class TestMarkLogicStateDeserializer {
 
     @Test
     public void testBijunction() {
-        String json = "{\"ecm:id\":\"ID\",\"dub:creationDate\":\"2016-03-21T18:01:43.113\",\"subState\":{\"nbValues\":2,\"values\":[{\"item\":\"itemState1\",\"read\":true,\"write\":true},{\"item\":\"itemState2\",\"read\":true,\"write\":false}],\"valuesAsArray\":[3,4]}}";
+        String json = String.format(
+                "{\"%s\":\"ID\",\"dub:creationDate\":\"2016-03-21T18:01:43.113\",\"subState\":{\"nbValues\":2,\"values\":[{\"item\":\"itemState1\",\"read\":true,\"write\":true},{\"item\":\"itemState2\",\"read\":true,\"write\":false}],\"valuesAsArray\":[3,4]}}",
+                KEY_ID);
         assertEquals(json, deserializer.andThen(new MarkLogicStateSerializer()).apply(json));
     }
 

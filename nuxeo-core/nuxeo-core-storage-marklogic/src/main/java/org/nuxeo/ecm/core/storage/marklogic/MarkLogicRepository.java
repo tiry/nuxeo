@@ -25,7 +25,6 @@ import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_NAME;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PARENT_ID;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PROXY_IDS;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PROXY_TARGET_ID;
-import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicQueryBuilder.QUERY;
 
 import java.io.Serializable;
 import java.util.List;
@@ -50,9 +49,6 @@ import org.nuxeo.ecm.core.storage.State.StateDiff;
 import org.nuxeo.ecm.core.storage.dbs.DBSExpressionEvaluator;
 import org.nuxeo.ecm.core.storage.dbs.DBSRepositoryBase;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.marklogic.client.DatabaseClient;
 import com.marklogic.client.DatabaseClientFactory;
 import com.marklogic.client.DatabaseClientFactory.Authentication;
@@ -60,7 +56,6 @@ import com.marklogic.client.document.DocumentMetadataPatchBuilder.PatchHandle;
 import com.marklogic.client.document.DocumentPage;
 import com.marklogic.client.document.DocumentRecord;
 import com.marklogic.client.document.JSONDocumentManager;
-import com.marklogic.client.io.JacksonHandle;
 import com.marklogic.client.io.marker.StructureWriteHandle;
 import com.marklogic.client.query.QueryDefinition;
 
@@ -72,8 +67,6 @@ import com.marklogic.client.query.QueryDefinition;
 public class MarkLogicRepository extends DBSRepositoryBase {
 
     private static final Log log = LogFactory.getLog(MarkLogicRepository.class);
-
-    private static final JsonNodeFactory FACTORY = JsonNodeFactory.instance;
 
     private static final Function<String, String> ID_FORMATTER = id -> String.format("/%s.json", id);
 
@@ -184,44 +177,33 @@ public class MarkLogicRepository extends DBSRepositoryBase {
     }
 
     private StructureWriteHandle getChildQuery(String parentId, String name, Set<String> ignored) {
-        ObjectNode root = FACTORY.objectNode();
-        ObjectNode query = FACTORY.objectNode();
-        query.set(KEY_PARENT_ID, FACTORY.textNode(parentId));
-        query.set(KEY_NAME, FACTORY.textNode(name));
-        addIgnoredIds(query, ignored);
-        root.set(QUERY, query);
-        return new JacksonHandle(root);
-    }
-
-    private void addIgnoredIds(ObjectNode query, Set<String> ignored) {
-        if (!ignored.isEmpty()) {
-            ArrayNode array = ignored.stream()
-                                     .map(FACTORY::textNode)
-                                     .reduce(FACTORY.arrayNode(), ArrayNode::add, ArrayNode::addAll);
-            ObjectNode notIn = FACTORY.objectNode();
-            notIn.set(KEY_ID, array);
-            query.set(KEY_ID, notIn);
-        }
+        MarkLogicQueryBuilder builder = new MarkLogicQueryBuilder();
+        builder.eq(KEY_PARENT_ID, parentId);
+        builder.eq(KEY_NAME, name);
+        builder.notIn(KEY_ID, ignored);
+        return builder.build();
     }
 
     @Override
     public List<State> queryKeyValue(String key, Object value, Set<String> ignored) {
-        throw new IllegalStateException("Not implemented yet");
+        return queryKeyValue(key, value, ignored, this::findAll);
     }
 
     @Override
     public List<State> queryKeyValue(String key1, Object value1, String key2, Object value2, Set<String> ignored) {
-        throw new IllegalStateException("Not implemented yet");
+        MarkLogicQueryBuilder builder = new MarkLogicQueryBuilder();
+        builder.eq(key1, value1);
+        builder.eq(key2, value2);
+        builder.notIn(KEY_ID, ignored);
+        return findAll(builder.build());
     }
 
     @Override
     public void queryKeyValueArray(String key, Object value, Set<String> ids, Map<String, String> proxyTargets,
             Map<String, Object[]> targetProxies) {
         // TODO retrieve only some field
-        ObjectNode root = FACTORY.objectNode();
-        ObjectNode query = FACTORY.objectNode();
-        query.set(key, FACTORY.textNode(value.toString()));
-        root.set(QUERY, query);
+        // https://docs.marklogic.com/guide/search-dev/qbe#id_54044
+        StructureWriteHandle query = new MarkLogicQueryBuilder().eq(key, value).build();
         if (log.isTraceEnabled()) {
             logQuery(query);
         }
@@ -246,7 +228,7 @@ public class MarkLogicRepository extends DBSRepositoryBase {
 
     @Override
     public boolean queryKeyValuePresence(String key, String value, Set<String> ignored) {
-        throw new IllegalStateException("Not implemented yet");
+        return queryKeyValue(key, value, ignored, this::exist);
     }
 
     @Override
@@ -285,6 +267,14 @@ public class MarkLogicRepository extends DBSRepositoryBase {
         throw new IllegalStateException("Not implemented yet");
     }
 
+    private <T> T queryKeyValue(String key, Object value, Set<String> ignored,
+            Function<StructureWriteHandle, T> executor) {
+        MarkLogicQueryBuilder builder = new MarkLogicQueryBuilder();
+        builder.eq(key, value);
+        builder.notIn(KEY_ID, ignored);
+        return executor.apply(builder.build());
+    }
+
     private boolean exist(StructureWriteHandle query) {
         if (log.isTraceEnabled()) {
             logQuery(query);
@@ -298,6 +288,17 @@ public class MarkLogicRepository extends DBSRepositoryBase {
         }
         try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
             return page.nextContent(new StateHandle()).get();
+        }
+    }
+
+    private List<State> findAll(StructureWriteHandle query) {
+        if (log.isTraceEnabled()) {
+            logQuery(query);
+        }
+        try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
+            return StreamSupport.stream(page.spliterator(), false)
+                                .map(record -> record.getContent(new StateHandle()).get())
+                                .collect(Collectors.toList());
         }
     }
 
