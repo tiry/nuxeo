@@ -1,0 +1,72 @@
+{
+  "$query": {
+    "$or": [
+      {
+        "ecm:primaryType": "OrderedFolder"
+      },
+      {
+        "ecm:primaryType": "HiddenFile"
+      },
+      {
+        "ecm:primaryType": "DocWithAge"
+      },
+      {
+        "ecm:primaryType": "TemplateRoot"
+      },
+      {
+        "ecm:primaryType": "TestDocument2"
+      },
+      {
+        "ecm:primaryType": "TestDocumentWithDefaultPrefetch"
+      },
+      {
+        "ecm:primaryType": "SectionRoot"
+      },
+      {
+        "ecm:primaryType": "Document"
+      },
+      {
+        "ecm:primaryType": "Folder"
+      },
+      {
+        "ecm:primaryType": "WorkspaceRoot"
+      },
+      {
+        "ecm:primaryType": "HiddenFolder"
+      },
+      {
+        "ecm:primaryType": "Section"
+      },
+      {
+        "ecm:primaryType": "TestDocument"
+      },
+      {
+        "ecm:primaryType": "Relation"
+      },
+      {
+        "ecm:primaryType": "FolderWithSearch"
+      },
+      {
+        "ecm:primaryType": "MyDocType"
+      },
+      {
+        "ecm:primaryType": "Book"
+      },
+      {
+        "ecm:primaryType": "Note"
+      },
+      {
+        "ecm:primaryType": "ComplexDoc"
+      },
+      {
+        "ecm:primaryType": "Domain"
+      },
+      {
+        "ecm:primaryType": "File"
+      },
+      {
+        "ecm:primaryType": "Workspace"
+      }
+    ]
+  }
+}

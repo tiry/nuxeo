@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.joda.time.DateTime;
 import org.nuxeo.ecm.core.storage.State;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -104,6 +105,8 @@ class MarkLogicStateSerializer implements Function<State, String> {
                     LocalDateTime dateTime = LocalDateTime.ofInstant(((Calendar) value).toInstant(),
                             ZoneId.systemDefault());
                     result = Optional.of(FACTORY.textNode(dateTime.toString()));
+                } else if (value instanceof DateTime) {
+                    result = Optional.of(FACTORY.textNode(value.toString()));
                 } else if (value instanceof String) {
                     result = Optional.of(FACTORY.textNode((String) value));
                 } else if (value instanceof Boolean) {
@@ -138,7 +141,7 @@ class MarkLogicStateSerializer implements Function<State, String> {
         public ArrayNode apply(List<Object> list) {
             return list.stream()
                        .map(valueSerializer)
-                       .map(value -> value.orElse(null))
+                       .map(value -> value.orElseGet(FACTORY::nullNode))
                        .collect(FACTORY::arrayNode, ArrayNode::add, ArrayNode::addAll);
         }
 

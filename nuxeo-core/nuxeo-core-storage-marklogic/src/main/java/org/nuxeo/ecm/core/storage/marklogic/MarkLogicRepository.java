@@ -48,6 +48,7 @@ import org.nuxeo.ecm.core.storage.State;
 import org.nuxeo.ecm.core.storage.State.StateDiff;
 import org.nuxeo.ecm.core.storage.dbs.DBSExpressionEvaluator;
 import org.nuxeo.ecm.core.storage.dbs.DBSRepositoryBase;
+import org.nuxeo.ecm.core.storage.dbs.DBSStateFlattener;
 
 import com.marklogic.client.DatabaseClient;
 import com.marklogic.client.DatabaseClientFactory;
@@ -69,6 +70,8 @@ public class MarkLogicRepository extends DBSRepositoryBase {
     private static final Log log = LogFactory.getLog(MarkLogicRepository.class);
 
     private static final Function<String, String> ID_FORMATTER = id -> String.format("/%s.json", id);
+
+    private static final DBSStateFlattener STATE_FLATTENER = DBSStateFlattener.STATE_FLATTENER;
 
     public static final String DB_DEFAULT = "nuxeo";
 
@@ -234,7 +237,43 @@ public class MarkLogicRepository extends DBSRepositoryBase {
     @Override
     public PartialList<Map<String, Serializable>> queryAndFetch(DBSExpressionEvaluator evaluator,
             OrderByClause orderByClause, boolean distinctDocuments, int limit, int offset, int countUpTo) {
-        throw new IllegalStateException("Not implemented yet");
+        MarkLogicQueryExpressionBuilder builder = new MarkLogicQueryExpressionBuilder(evaluator.getExpression(), evaluator.getSelectClause(),
+                orderByClause, evaluator.pathResolver, evaluator.fulltextSearchDisabled);
+        // TODO add select
+        StructureWriteHandle query = builder.buildQuery();
+        try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
+            List<Map<String, Serializable>> projections = StreamSupport.stream(page.spliterator(), false)
+                         .map(record -> record.getContent(new StateHandle()).get())
+                         .map(STATE_FLATTENER)
+                         .collect(Collectors.toList());
+            long totalSize;
+            if (countUpTo == -1) {
+                // count full size
+                if (limit == 0) {
+                    totalSize = projections.size();
+                } else {
+                    totalSize = page.getTotalSize();
+                }
+            } else if (countUpTo == 0) {
+                // no count
+                totalSize = -1; // not counted
+            } else {
+                // count only if less than countUpTo
+                if (limit == 0) {
+                    totalSize = projections.size();
+                } else {
+                    totalSize = page.getTotalSize();
+                }
+                if (totalSize > countUpTo) {
+                    totalSize = -2; // truncated
+                }
+            }
+
+            if (log.isTraceEnabled() && projections.size() != 0) {
+                log.trace("MarkLogic:    -> " + projections.size());
+            }
+            return new PartialList<>(projections, totalSize);
+        }
     }
 
     @Override
