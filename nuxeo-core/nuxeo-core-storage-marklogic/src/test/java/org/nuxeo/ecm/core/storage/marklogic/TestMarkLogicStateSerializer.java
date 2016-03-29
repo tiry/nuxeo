@@ -80,7 +80,7 @@ public class TestMarkLogicStateSerializer {
         State state = new State();
         state.put("ecm:id", "ID");
         State subState = new State();
-        subState.put("nbValues", 2);
+        subState.put("nbValues", 2L);
         subState.put("valuesPresent", false);
         state.put("subState", subState);
         String json = serializer.apply(state);
@@ -93,7 +93,7 @@ public class TestMarkLogicStateSerializer {
     public void testStateWithList() {
         State state = new State();
         state.put("ecm:id", "ID");
-        state.put("nbValues", 2);
+        state.put("nbValues", 2L);
         State state1 = new State();
         state1.put("item", "itemState1");
         state1.put("read", true);
@@ -115,8 +115,8 @@ public class TestMarkLogicStateSerializer {
     public void testStateWithArray() {
         State state = new State();
         state.put("ecm:id", "ID");
-        state.put("nbValues", 2);
-        state.put("values", new Integer[] { 3, 4 });
+        state.put("nbValues", 2L);
+        state.put("values", new Long[] { 3L, 4L });
         String json = serializer.apply(state);
         assertNotNull(json);
         assertEquals(String.format("{\"%s\":\"ID\",\"nbValues\":2,\"values\":[3,4]}", KEY_ID), json);
@@ -128,7 +128,7 @@ public class TestMarkLogicStateSerializer {
         state.put("ecm:id", "ID");
         state.put("dub:creationDate", Calendar.getInstance());
         State subState = new State();
-        subState.put("nbValues", 2);
+        subState.put("nbValues", 2L);
         State state1 = new State();
         state1.put("item", "itemState1");
         state1.put("read", true);
@@ -138,7 +138,7 @@ public class TestMarkLogicStateSerializer {
         state2.put("read", true);
         state2.put("write", false);
         subState.put("values", new ArrayList<>(Arrays.asList(state1, state2)));
-        subState.put("valuesAsArray", new Integer[] { 3, 4 });
+        subState.put("valuesAsArray", new Long[] { 3L, 4L });
         state.put("subState", subState);
         assertEquals(state, serializer.andThen(new MarkLogicStateDeserializer()).apply(state));
     }

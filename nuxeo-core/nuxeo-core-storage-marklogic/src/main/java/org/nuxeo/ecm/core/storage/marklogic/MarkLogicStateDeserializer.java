@@ -108,7 +108,11 @@ class MarkLogicStateDeserializer implements Function<String, State> {
                 } else if (jsonNode.isBoolean()) {
                     result = jsonNode.booleanValue();
                 } else if (jsonNode.isNumber()) {
-                    result = jsonNode.numberValue();
+                    if (jsonNode.isDouble()) {
+                        result = jsonNode.doubleValue();
+                    } else {
+                        result = jsonNode.longValue();
+                    }
                 } else {
                     result = jsonNode.textValue();
                 }
@@ -152,7 +156,11 @@ class MarkLogicStateDeserializer implements Function<String, State> {
             } else if (jsonNode.isBoolean()) {
                 result = Boolean.class;
             } else if (jsonNode.isNumber()) {
-                result = jsonNode.numberValue().getClass();
+                if (jsonNode.isDouble()) {
+                    result = Double.class;
+                } else {
+                    result = Long.class;
+                }
             } else {
                 result = String.class;
             }

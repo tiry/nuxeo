@@ -74,7 +74,7 @@ public class TestMarkLogicStateDeserializer {
         State expectedState = new State();
         expectedState.put(KEY_ID, "ID");
         State subState = new State();
-        subState.put("nbValues", 2);
+        subState.put("nbValues", 2L);
         subState.put("valuesPresent", false);
         expectedState.put("subState", subState);
         assertEquals(expectedState, state);
@@ -89,7 +89,7 @@ public class TestMarkLogicStateDeserializer {
         assertNotNull(state);
         State expectedState = new State();
         expectedState.put(KEY_ID, "ID");
-        expectedState.put("nbValues", 2);
+        expectedState.put("nbValues", 2L);
         State state1 = new State();
         state1.put("item", "itemState1");
         state1.put("read", true);
@@ -109,8 +109,8 @@ public class TestMarkLogicStateDeserializer {
         assertNotNull(state);
         State expectedState = new State();
         expectedState.put(KEY_ID, "ID");
-        expectedState.put("nbValues", 2);
-        expectedState.put("values", new Integer[] { 3, 4 });
+        expectedState.put("nbValues", 2L);
+        expectedState.put("values", new Long[] { 3L, 4L });
         assertEquals(expectedState, state);
     }
 
