@@ -21,8 +21,6 @@ package org.nuxeo.ecm.core.storage.marklogic;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -31,6 +29,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.nuxeo.ecm.core.storage.State;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -47,9 +47,13 @@ class MarkLogicStateSerializer implements Function<State, String> {
 
     public static final MarkLogicStateSerializer SERIALIZER = new MarkLogicStateSerializer();
 
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.instance;
 
     private final Function<State, ObjectNode> stateSerializer;
+
+    private final Function<Entry<String, Serializable>, Optional<ObjectNode>> entrySerializer;
 
     private final Function<Object, Optional<JsonNode>> valueSerializer;
 
@@ -57,6 +61,7 @@ class MarkLogicStateSerializer implements Function<State, String> {
 
     public MarkLogicStateSerializer() {
         this.stateSerializer = new StateSerializer();
+        this.entrySerializer = new EntrySerializer();
         this.valueSerializer = new ValueSerializer();
         this.listSerializer = new ListSerializer();
     }
@@ -74,15 +79,29 @@ class MarkLogicStateSerializer implements Function<State, String> {
         return getValueNodeSerializer().andThen(node -> node.map(JsonNode::toString));
     }
 
+    public Function<Entry<String, Serializable>, Optional<String>> getEntrySerializer() {
+        return entrySerializer.andThen(node -> node.map(ObjectNode::toString));
+    }
+
     private class StateSerializer implements Function<State, ObjectNode> {
 
         @Override
         public ObjectNode apply(State state) {
             ObjectNode object = FACTORY.objectNode();
             for (Entry<String, Serializable> entry : state.entrySet()) {
-                valueSerializer.apply(entry.getValue()).ifPresent(value -> object.set(entry.getKey(), value));
+                entrySerializer.apply(entry).ifPresent(object::setAll);
             }
             return object;
+        }
+
+    }
+
+    private class EntrySerializer implements Function<Entry<String, Serializable>, Optional<ObjectNode>> {
+
+        @Override
+        public Optional<ObjectNode> apply(Entry<String, Serializable> entry) {
+            return valueSerializer.apply(entry.getValue()).map(
+                    value -> (ObjectNode) FACTORY.objectNode().set(entry.getKey(), value));
         }
 
     }
@@ -102,11 +121,10 @@ class MarkLogicStateSerializer implements Function<State, String> {
                 result = Optional.of(listSerializer.apply(Arrays.asList((Object[]) value)));
             } else {
                 if (value instanceof Calendar) {
-                    LocalDateTime dateTime = LocalDateTime.ofInstant(((Calendar) value).toInstant(),
-                            ZoneId.systemDefault());
-                    result = Optional.of(FACTORY.textNode(dateTime.toString()));
+                    DateTime dateTime = DateTime.now().withMillis(((Calendar) value).getTimeInMillis());
+                    result = Optional.of(FACTORY.textNode(dateTime.toString(DATE_TIME_FORMATTER)));
                 } else if (value instanceof DateTime) {
-                    result = Optional.of(FACTORY.textNode(value.toString()));
+                    result = Optional.of(FACTORY.textNode(((DateTime) value).toString(DATE_TIME_FORMATTER)));
                 } else if (value instanceof String) {
                     result = Optional.of(FACTORY.textNode((String) value));
                 } else if (value instanceof Boolean) {
@@ -133,6 +151,7 @@ class MarkLogicStateSerializer implements Function<State, String> {
             }
             return result;
         }
+
     }
 
     private class ListSerializer implements Function<List<Object>, ArrayNode> {

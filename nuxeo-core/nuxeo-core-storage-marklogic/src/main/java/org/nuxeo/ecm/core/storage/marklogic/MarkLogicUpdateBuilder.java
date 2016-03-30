@@ -18,6 +18,7 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ID;
 import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicStateSerializer.SERIALIZER;
 
 import java.io.Serializable;
@@ -57,7 +58,8 @@ class MarkLogicUpdateBuilder implements Function<StateDiff, PatchHandle> {
 
     private void fillPatch(DocumentPatchBuilder patchBuilder, String path, StateDiff diff) {
         for (Entry<String, Serializable> entry : diff.entrySet()) {
-            String subPath = path + "/node('" + entry.getKey() + "')";
+            String key = entry.getKey();
+            String subPath = path + "/" + key;
             Serializable value = entry.getValue();
             if (value instanceof StateDiff) {
                 fillPatch(patchBuilder, subPath, (StateDiff) value);
@@ -66,10 +68,17 @@ class MarkLogicUpdateBuilder implements Function<StateDiff, PatchHandle> {
             } else if (value instanceof Delta) {
 
             } else {
-                Optional<String> fragment = SERIALIZER.getValueSerializer().apply(value);
+                Optional<String> fragment = SERIALIZER.getEntrySerializer().apply(entry);
                 if (fragment.isPresent()) {
-                    patchBuilder.replaceInsertFragment(subPath, StringUtils.defaultIfBlank(path, "/"), Position.AFTER,
-                            fragment.get());
+                    String selectPath = path + "/node('" + key + "')";
+                    String contextPath = path;
+                    Position position = Position.LAST_CHILD;
+                    // handle root case
+                    if (StringUtils.isBlank(contextPath)) {
+                        contextPath = "/" + KEY_ID;
+                        position = Position.AFTER;
+                    }
+                    patchBuilder.replaceInsertFragment(selectPath, contextPath, position, fragment.get());
                 } else {
                     patchBuilder.delete(subPath);
                 }

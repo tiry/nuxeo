@@ -1,0 +1,48 @@
+{
+  "pathlang": "xpath",
+  "patch": [
+    {
+      "replace-insert": {
+        "select": "/node('dc:modified')",
+        "context": "/node('ecm:id')",
+        "position": "after",
+        "content": {
+          "dc:modified": "1970-01-01T00:00:00.000"
+        }
+      }
+    },
+    {
+      "replace-insert": {
+        "select": "/node('dc:title')",
+        "context": "/node('ecm:id')",
+        "position": "after",
+        "content": {
+          "dc:title": "The title"
+        }
+      }
+    },
+    {
+      "replace-insert": {
+        "select": "/node('ecm:fulltextJobId')",
+        "context": "/node('ecm:id')",
+        "position": "after",
+        "content": {
+          "ecm:fulltextJobId": "6306c216-ef0c-4168-9a36-14ef96ebbcce"
+        }
+      }
+    },
+    {
+      "replace-insert": {
+        "select": "/node('ecm:acl')",
+        "context": "/node('ecm:id')",
+        "position": "after",
+        "content": {
+          "ecm__acl": [
+            "Administrator",
+            "Members"
+          ]
+        }
+      }
+    }
+  ]
+}

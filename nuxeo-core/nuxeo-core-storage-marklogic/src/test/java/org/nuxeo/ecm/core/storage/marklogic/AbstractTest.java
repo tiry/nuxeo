@@ -18,12 +18,31 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import static org.junit.Assert.assertEquals;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.junit.BeforeClass;
+import org.mockito.Answers;
+import org.mockito.Mockito;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.marklogic.client.DatabaseClient;
+import com.marklogic.client.impl.DatabaseClientImpl;
 
 public class AbstractTest {
+
+    protected static DatabaseClient client;
+
+    @BeforeClass
+    public static void beforeClass() {
+        client = Mockito.mock(DatabaseClientImpl.class, Answers.CALLS_REAL_METHODS.get());
+    }
+
+    public void assertJSONEquals(String file, String actual) throws Exception {
+        assertEquals(readJSONFile(file), new ObjectMapper().reader().readTree(actual).toString());
+    }
 
     public String readFile(String file) throws Exception {
         return new String(Files.readAllBytes(Paths.get(this.getClass().getResource("/" + file).toURI())));
