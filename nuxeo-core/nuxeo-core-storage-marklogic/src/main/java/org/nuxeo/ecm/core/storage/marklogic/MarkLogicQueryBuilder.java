@@ -64,7 +64,7 @@ public class MarkLogicQueryBuilder {
      * @return the builder for convenient chaining
      */
     public MarkLogicQueryBuilder eq(String key, Object value) {
-        query.set(key, VALUE_SERIALIZER.apply(value));
+        query.set(MarkLogicHelper.KEY_SERIALIZER.apply(key), VALUE_SERIALIZER.apply(value));
         return this;
     }
 
@@ -72,7 +72,8 @@ public class MarkLogicQueryBuilder {
         if (!values.isEmpty()) {
             ArrayNode andArray = values.stream()
                                        .map(VALUE_SERIALIZER)
-                                       .map(value -> NODE_FACTORY.objectNode().set(key, value))
+                                       .map(value -> NODE_FACTORY.objectNode().set(
+                                               MarkLogicHelper.KEY_SERIALIZER.apply(key), value))
                                        .reduce(NODE_FACTORY.arrayNode(), ArrayNode::add, ArrayNode::addAll);
             JsonNode andObject = NODE_FACTORY.objectNode().set(OR, andArray);
             query.set(NOT, andObject);

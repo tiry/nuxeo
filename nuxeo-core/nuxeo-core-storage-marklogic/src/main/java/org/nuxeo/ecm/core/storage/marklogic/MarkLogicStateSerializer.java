@@ -100,8 +100,9 @@ class MarkLogicStateSerializer implements Function<State, String> {
 
         @Override
         public Optional<ObjectNode> apply(Entry<String, Serializable> entry) {
+            String key = MarkLogicHelper.KEY_SERIALIZER.apply(entry.getKey());
             return valueSerializer.apply(entry.getValue()).map(
-                    value -> (ObjectNode) FACTORY.objectNode().set(entry.getKey(), value));
+                    value -> (ObjectNode) FACTORY.objectNode().set(key, value));
         }
 
     }

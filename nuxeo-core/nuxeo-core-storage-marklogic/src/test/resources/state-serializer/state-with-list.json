@@ -1,0 +1,16 @@
+{
+  "ecm__id": "ID",
+  "nbValues": 2,
+  "values": [
+    {
+      "item": "itemState1",
+      "read": true,
+      "write": true
+    },
+    {
+      "item": "itemState2",
+      "read": true,
+      "write": false
+    }
+  ]
+}

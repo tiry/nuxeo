@@ -32,7 +32,7 @@ import java.util.Date;
 import org.junit.Test;
 import org.nuxeo.ecm.core.storage.State;
 
-public class TestMarkLogicStateDeserializer {
+public class TestMarkLogicStateDeserializer extends AbstractTest {
 
     private MarkLogicStateDeserializer deserializer = new MarkLogicStateDeserializer();
 
@@ -115,10 +115,8 @@ public class TestMarkLogicStateDeserializer {
     }
 
     @Test
-    public void testBijunction() {
-        String json = String.format(
-                "{\"%s\":\"ID\",\"dub:creationDate\":\"2016-03-21T18:01:43.113\",\"subState\":{\"nbValues\":2,\"values\":[{\"item\":\"itemState1\",\"read\":true,\"write\":true},{\"item\":\"itemState2\",\"read\":true,\"write\":false}],\"valuesAsArray\":[3,4]}}",
-                KEY_ID);
+    public void testBijunction() throws Exception {
+        String json = readJSONFile("state-deserializer/bijunction.json");
         assertEquals(json, deserializer.andThen(new MarkLogicStateSerializer()).apply(json));
     }
 

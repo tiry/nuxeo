@@ -20,7 +20,6 @@ package org.nuxeo.ecm.core.storage.marklogic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ID;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -32,7 +31,7 @@ import java.util.Calendar;
 import org.junit.Test;
 import org.nuxeo.ecm.core.storage.State;
 
-public class TestMarkLogicStateSerializer {
+public class TestMarkLogicStateSerializer extends AbstractTest {
 
     private MarkLogicStateSerializer serializer = new MarkLogicStateSerializer();
 
@@ -50,7 +49,7 @@ public class TestMarkLogicStateSerializer {
         state.put("subState", null);
         String json = serializer.apply(state);
         assertNotNull(json);
-        assertEquals(String.format("{\"%s\":\"ID\"}", KEY_ID), json);
+        assertEquals("{\"ecm__id\":\"ID\"}", json);
     }
 
     @Test
@@ -59,7 +58,7 @@ public class TestMarkLogicStateSerializer {
         state.put("ecm:id", "ID");
         String json = serializer.apply(state);
         assertNotNull(json);
-        assertEquals(String.format("{\"%s\":\"ID\"}", KEY_ID), json);
+        assertEquals("{\"ecm__id\":\"ID\"}", json);
     }
 
     @Test
@@ -72,7 +71,7 @@ public class TestMarkLogicStateSerializer {
         String json = serializer.apply(state);
         assertNotNull(json);
         String date = LocalDateTime.ofInstant(Instant.ofEpochMilli(1), ZoneId.systemDefault()).toString();
-        assertEquals(String.format("{\"%s\":\"ID\",\"dub:creationDate\":\"%s\"}", KEY_ID, date), json);
+        assertEquals(String.format("{\"ecm__id\":\"ID\",\"dub__creationDate\":\"%s\"}", date), json);
     }
 
     @Test
@@ -85,12 +84,11 @@ public class TestMarkLogicStateSerializer {
         state.put("subState", subState);
         String json = serializer.apply(state);
         assertNotNull(json);
-        assertEquals(String.format("{\"%s\":\"ID\",\"subState\":{\"nbValues\":2,\"valuesPresent\":false}}", KEY_ID),
-                json);
+        assertEquals("{\"ecm__id\":\"ID\",\"subState\":{\"nbValues\":2,\"valuesPresent\":false}}", json);
     }
 
     @Test
-    public void testStateWithList() {
+    public void testStateWithList() throws Exception {
         State state = new State();
         state.put("ecm:id", "ID");
         state.put("nbValues", 2L);
@@ -105,10 +103,7 @@ public class TestMarkLogicStateSerializer {
         state.put("values", new ArrayList<>(Arrays.asList(state1, state2)));
         String json = serializer.apply(state);
         assertNotNull(json);
-        assertEquals(
-                String.format(
-                        "{\"%s\":\"ID\",\"nbValues\":2,\"values\":[{\"item\":\"itemState1\",\"read\":true,\"write\":true},{\"item\":\"itemState2\",\"read\":true,\"write\":false}]}",
-                        KEY_ID), json);
+        assertJSONEquals("state-serializer/state-with-list.json", json);
     }
 
     @Test
@@ -119,7 +114,7 @@ public class TestMarkLogicStateSerializer {
         state.put("values", new Long[] { 3L, 4L });
         String json = serializer.apply(state);
         assertNotNull(json);
-        assertEquals(String.format("{\"%s\":\"ID\",\"nbValues\":2,\"values\":[3,4]}", KEY_ID), json);
+        assertEquals("{\"ecm__id\":\"ID\",\"nbValues\":2,\"values\":[3,4]}", json);
     }
 
     @Test

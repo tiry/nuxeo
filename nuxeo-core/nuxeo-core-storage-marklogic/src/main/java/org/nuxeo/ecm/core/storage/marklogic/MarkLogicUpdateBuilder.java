@@ -58,7 +58,7 @@ class MarkLogicUpdateBuilder implements Function<StateDiff, PatchHandle> {
 
     private void fillPatch(DocumentPatchBuilder patchBuilder, String path, StateDiff diff) {
         for (Entry<String, Serializable> entry : diff.entrySet()) {
-            String key = entry.getKey();
+            String key = MarkLogicHelper.KEY_SERIALIZER.apply(entry.getKey());
             String subPath = path + "/" + key;
             Serializable value = entry.getValue();
             if (value instanceof StateDiff) {
@@ -75,7 +75,7 @@ class MarkLogicUpdateBuilder implements Function<StateDiff, PatchHandle> {
                     Position position = Position.LAST_CHILD;
                     // handle root case
                     if (StringUtils.isBlank(contextPath)) {
-                        contextPath = "/" + KEY_ID;
+                        contextPath = "/" + MarkLogicHelper.KEY_SERIALIZER.apply(KEY_ID);
                         position = Position.AFTER;
                     }
                     patchBuilder.replaceInsertFragment(selectPath, contextPath, position, fragment.get());

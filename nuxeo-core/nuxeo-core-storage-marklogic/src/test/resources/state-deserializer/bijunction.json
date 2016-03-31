@@ -1,0 +1,23 @@
+{
+  "ecm$-$id": "ID",
+  "dub$-$creationDate": "2016-03-21T18:01:43.113",
+  "subState": {
+    "nbValues": 2,
+    "values": [
+      {
+        "item": "itemState1",
+        "read": true,
+        "write": true
+      },
+      {
+        "item": "itemState2",
+        "read": true,
+        "write": false
+      }
+    ],
+    "valuesAsArray": [
+      3,
+      4
+    ]
+  }
+}

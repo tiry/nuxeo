@@ -311,6 +311,8 @@ public class MarkLogicQueryExpressionBuilder {
         /** MarkLogic field including wildcards (not used as-is). */
         private final String fullField;
 
+        private final String field;
+
         private final Type type;
 
         /** Boolean system properties only use TRUE or NULL, not FALSE, so queries must be updated accordingly. */
@@ -327,6 +329,7 @@ public class MarkLogicQueryExpressionBuilder {
         public FieldInfo(String prop, String fullField, Type type, boolean isTrueOrNullBoolean) {
             this.prop = prop;
             this.fullField = fullField;
+            this.field = MarkLogicHelper.KEY_SERIALIZER.apply(fullField);
             this.type = type;
             this.isTrueOrNullBoolean = isTrueOrNullBoolean;
         }
@@ -346,7 +349,7 @@ public class MarkLogicQueryExpressionBuilder {
                     throw new QueryParseException("Invalid boolean: " + rightValue);
                 }
             }
-            return NODE_FACTORY.objectNode().set(fullField, right);
+            return NODE_FACTORY.objectNode().set(field, right);
         }
 
     }

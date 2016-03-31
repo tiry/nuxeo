@@ -2,70 +2,70 @@
   "$query": {
     "$or": [
       {
-        "ecm:primaryType": "OrderedFolder"
+        "ecm__primaryType": "OrderedFolder"
       },
       {
-        "ecm:primaryType": "HiddenFile"
+        "ecm__primaryType": "HiddenFile"
       },
       {
-        "ecm:primaryType": "DocWithAge"
+        "ecm__primaryType": "DocWithAge"
       },
       {
-        "ecm:primaryType": "TemplateRoot"
+        "ecm__primaryType": "TemplateRoot"
       },
       {
-        "ecm:primaryType": "TestDocument2"
+        "ecm__primaryType": "TestDocument2"
       },
       {
-        "ecm:primaryType": "TestDocumentWithDefaultPrefetch"
+        "ecm__primaryType": "TestDocumentWithDefaultPrefetch"
       },
       {
-        "ecm:primaryType": "SectionRoot"
+        "ecm__primaryType": "SectionRoot"
       },
       {
-        "ecm:primaryType": "Document"
+        "ecm__primaryType": "Document"
       },
       {
-        "ecm:primaryType": "Folder"
+        "ecm__primaryType": "Folder"
       },
       {
-        "ecm:primaryType": "WorkspaceRoot"
+        "ecm__primaryType": "WorkspaceRoot"
       },
       {
-        "ecm:primaryType": "HiddenFolder"
+        "ecm__primaryType": "HiddenFolder"
       },
       {
-        "ecm:primaryType": "Section"
+        "ecm__primaryType": "Section"
       },
       {
-        "ecm:primaryType": "TestDocument"
+        "ecm__primaryType": "TestDocument"
       },
       {
-        "ecm:primaryType": "Relation"
+        "ecm__primaryType": "Relation"
       },
       {
-        "ecm:primaryType": "FolderWithSearch"
+        "ecm__primaryType": "FolderWithSearch"
       },
       {
-        "ecm:primaryType": "MyDocType"
+        "ecm__primaryType": "MyDocType"
       },
       {
-        "ecm:primaryType": "Book"
+        "ecm__primaryType": "Book"
       },
       {
-        "ecm:primaryType": "Note"
+        "ecm__primaryType": "Note"
       },
       {
-        "ecm:primaryType": "ComplexDoc"
+        "ecm__primaryType": "ComplexDoc"
       },
       {
-        "ecm:primaryType": "Domain"
+        "ecm__primaryType": "Domain"
       },
       {
-        "ecm:primaryType": "File"
+        "ecm__primaryType": "File"
       },
       {
-        "ecm:primaryType": "Workspace"
+        "ecm__primaryType": "Workspace"
       }
     ]
   }

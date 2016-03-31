@@ -18,26 +18,23 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
-import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ID;
+import java.util.function.Function;
 
-import java.util.Arrays;
+/**
+ * MarkLogic helper centralizes all common actions needed in different services.
+ *
+ * @since 8.2
+ */
+class MarkLogicHelper {
 
-import org.junit.Test;
+    public static final String SCHEMA_ORIGINAL_DELEMITER = ":";
 
-import com.marklogic.client.io.marker.StructureWriteHandle;
+    public static final String SCHEMA_MARKLOGIC_DELEMITER = "__";
 
-public class TestMarkLogicQueryBuilder extends AbstractTest {
+    public static final Function<String, String> KEY_SERIALIZER = key -> key.replace(SCHEMA_ORIGINAL_DELEMITER,
+            SCHEMA_MARKLOGIC_DELEMITER);
 
-    @Test
-    public void testEq() throws Exception {
-        StructureWriteHandle query = new MarkLogicQueryBuilder().eq(KEY_ID, "ID").build();
-        assertJSONEquals("query-builder/eq.json", query.toString());
-    }
-
-    @Test
-    public void testNotIn() throws Exception {
-        StructureWriteHandle query = new MarkLogicQueryBuilder().notIn(KEY_ID, Arrays.asList("ID1", "ID2")).build();
-        assertJSONEquals("query-builder/not-in.json", query.toString());
-    }
+    public static final Function<String, String> KEY_DESERIALIZER = key -> key.replace(SCHEMA_MARKLOGIC_DELEMITER,
+            SCHEMA_ORIGINAL_DELEMITER);
 
 }

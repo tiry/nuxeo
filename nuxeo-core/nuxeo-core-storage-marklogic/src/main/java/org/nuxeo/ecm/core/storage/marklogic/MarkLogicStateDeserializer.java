@@ -79,7 +79,9 @@ class MarkLogicStateDeserializer implements Function<String, State> {
             Iterator<Entry<String, JsonNode>> elements = jsonNode.fields();
             while (elements.hasNext()) {
                 Entry<String, JsonNode> element = elements.next();
-                state.put(element.getKey(), valueDeserializer.apply(element.getValue()));
+                String key = MarkLogicHelper.KEY_DESERIALIZER.apply(element.getKey());
+                Serializable value = valueDeserializer.apply(element.getValue());
+                state.put(key, value);
             }
             return state;
         }
