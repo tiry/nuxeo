@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<component name="perf-workmanager-config">
+  <require>org.nuxeo.ecm.core.work.config</require>
+    <extension target="org.nuxeo.ecm.core.work.service" point="queues">
+    <queue id="default">
+      <name>Default queue</name>
+      <maxThreads>8</maxThreads>
+      <clearCompletedAfterSeconds>60</clearCompletedAfterSeconds>
+    </queue>
+   </extension>
+</component>
