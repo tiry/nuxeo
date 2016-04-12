@@ -25,8 +25,10 @@ import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_NAME;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PARENT_ID;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PROXY_IDS;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PROXY_TARGET_ID;
+import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicHelper.ID_FORMATTER;
 
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,10 +56,12 @@ import org.nuxeo.ecm.core.storage.dbs.DBSStateFlattener;
 import com.marklogic.client.DatabaseClient;
 import com.marklogic.client.DatabaseClientFactory;
 import com.marklogic.client.DatabaseClientFactory.Authentication;
-import com.marklogic.client.document.DocumentMetadataPatchBuilder.PatchHandle;
+import com.marklogic.client.admin.ExtensionMetadata;
+import com.marklogic.client.admin.ResourceExtensionsManager;
+import com.marklogic.client.admin.ResourceExtensionsManager.MethodParameters;
 import com.marklogic.client.document.DocumentPage;
 import com.marklogic.client.document.DocumentRecord;
-import com.marklogic.client.document.JSONDocumentManager;
+import com.marklogic.client.io.FileHandle;
 import com.marklogic.client.io.marker.StructureWriteHandle;
 import com.marklogic.client.query.QueryDefinition;
 
@@ -69,8 +73,6 @@ import com.marklogic.client.query.QueryDefinition;
 public class MarkLogicRepository extends DBSRepositoryBase {
 
     private static final Log log = LogFactory.getLog(MarkLogicRepository.class);
-
-    private static final Function<String, String> ID_FORMATTER = id -> String.format("/%s.json", id);
 
     private static final DBSStateFlattener STATE_FLATTENER = DBSStateFlattener.STATE_FLATTENER;
 
@@ -107,7 +109,28 @@ public class MarkLogicRepository extends DBSRepositoryBase {
     }
 
     protected void initRepository() {
+        initResourceExtensions();
         initRoot();
+    }
+
+    private void initResourceExtensions() {
+        ResourceExtensionsManager resourceExtensionsManager = markLogicClient.newServerConfigManager()
+                                                                             .newResourceExtensionsManager();
+        // Install or update extensions
+        initResourceExtension(resourceExtensionsManager, MarkLogicStateUpdaterManager.DEFINITION);
+    }
+
+    private void initResourceExtension(ResourceExtensionsManager resourceExtensionsManager,
+            MarkLogicResourceExtension resourceExtension) {
+        try {
+            FileHandle fileHandle = new FileHandle(resourceExtension.getResource());
+            ExtensionMetadata metadata = resourceExtension.getMetadata();
+            MethodParameters[] methodParams = resourceExtension.getMethodParameters();
+            resourceExtensionsManager.writeServices(resourceExtension.getName(), fileHandle, metadata, methodParams);
+        } catch (URISyntaxException e) {
+            throw new NuxeoException("Cannot install resource extension service '" + resourceExtension.getName()
+                    + "' to MarkLogic", e);
+        }
     }
 
     @Override
@@ -151,12 +174,12 @@ public class MarkLogicRepository extends DBSRepositoryBase {
 
     @Override
     public void updateState(String id, StateDiff diff) {
-        JSONDocumentManager docManager = markLogicClient.newJSONDocumentManager();
-        PatchHandle patch = new MarkLogicUpdateBuilder(docManager::newPatchBuilder).apply(diff);
         if (log.isTraceEnabled()) {
-            log.trace("MarkLogic: UPDATE " + id + ": " + patch.toString());
+            log.trace("MarkLogic: UPDATE " + id + ": " + diff);
         }
-        docManager.patch(ID_FORMATTER.apply(id), patch);
+        MarkLogicStateUpdaterManager updateManager = markLogicClient.init(
+                MarkLogicStateUpdaterManager.DEFINITION.getName(), new MarkLogicStateUpdaterManager());
+        updateManager.update(id, diff);
     }
 
     @Override
@@ -238,15 +261,16 @@ public class MarkLogicRepository extends DBSRepositoryBase {
     @Override
     public PartialList<Map<String, Serializable>> queryAndFetch(DBSExpressionEvaluator evaluator,
             OrderByClause orderByClause, boolean distinctDocuments, int limit, int offset, int countUpTo) {
-        MarkLogicQueryExpressionBuilder builder = new MarkLogicQueryExpressionBuilder(evaluator.getExpression(), evaluator.getSelectClause(),
-                orderByClause, evaluator.pathResolver, evaluator.fulltextSearchDisabled);
+        MarkLogicQueryExpressionBuilder builder = new MarkLogicQueryExpressionBuilder(evaluator.getExpression(),
+                evaluator.getSelectClause(), orderByClause, evaluator.pathResolver, evaluator.fulltextSearchDisabled);
         // TODO add select
         StructureWriteHandle query = builder.buildQuery();
         try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
             List<Map<String, Serializable>> projections = StreamSupport.stream(page.spliterator(), false)
-                         .map(record -> record.getContent(new StateHandle()).get())
-                         .map(STATE_FLATTENER)
-                         .collect(Collectors.toList());
+                                                                       .map(record -> record.getContent(
+                                                                               new StateHandle()).get())
+                                                                       .map(STATE_FLATTENER)
+                                                                       .collect(Collectors.toList());
             long totalSize;
             if (countUpTo == -1) {
                 // count full size

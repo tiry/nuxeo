@@ -27,6 +27,8 @@ import java.util.function.Function;
  */
 class MarkLogicHelper {
 
+    public static final Function<String, String> ID_FORMATTER = id -> String.format("/%s.json", id);
+
     public static final String SCHEMA_ORIGINAL_DELEMITER = ":";
 
     public static final String SCHEMA_MARKLOGIC_DELEMITER = "__";
