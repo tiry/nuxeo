@@ -56,6 +56,7 @@ import org.nuxeo.ecm.core.storage.dbs.DBSStateFlattener;
 import com.marklogic.client.DatabaseClient;
 import com.marklogic.client.DatabaseClientFactory;
 import com.marklogic.client.DatabaseClientFactory.Authentication;
+import com.marklogic.client.ResourceNotFoundException;
 import com.marklogic.client.admin.ExtensionMetadata;
 import com.marklogic.client.admin.ResourceExtensionsManager;
 import com.marklogic.client.admin.ResourceExtensionsManager.MethodParameters;
@@ -148,7 +149,11 @@ public class MarkLogicRepository extends DBSRepositoryBase {
         if (log.isTraceEnabled()) {
             log.trace("MarkLogic: READ " + id);
         }
-        return markLogicClient.newJSONDocumentManager().read(ID_FORMATTER.apply(id), new StateHandle()).get();
+        try {
+            return markLogicClient.newJSONDocumentManager().read(ID_FORMATTER.apply(id), new StateHandle()).get();
+        } catch (ResourceNotFoundException e) {
+            return null;
+        }
     }
 
     @Override
