@@ -21,16 +21,19 @@ package org.nuxeo.ecm.core.storage.marklogic;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.nuxeo.ecm.core.storage.State;
+import org.nuxeo.ecm.core.storage.State.ListDiff;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -55,6 +58,8 @@ class MarkLogicStateSerializer implements Function<State, String> {
     private final Function<Object, JsonNode> valueSerializer = new ValueSerializer();
 
     private final Function<List<Object>, ArrayNode> listSerializer = new ListSerializer();
+
+    private final Function<ListDiff, ObjectNode> listDiffSerializer = new ListDiffSerializer();
 
     @Override
     public String apply(State state) {
@@ -87,6 +92,8 @@ class MarkLogicStateSerializer implements Function<State, String> {
             JsonNode result;
             if (value instanceof State) {
                 result = stateSerializer.apply((State) value);
+            } else if (value instanceof ListDiff) {
+                result = listDiffSerializer.apply((ListDiff) value);
             } else if (value instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> values = (List<Object>) value;
@@ -135,6 +142,18 @@ class MarkLogicStateSerializer implements Function<State, String> {
         @Override
         public ArrayNode apply(List<Object> list) {
             return list.stream().map(valueSerializer).collect(FACTORY::arrayNode, ArrayNode::add, ArrayNode::addAll);
+        }
+
+    }
+
+    private class ListDiffSerializer implements Function<ListDiff, ObjectNode> {
+
+        @Override
+        public ObjectNode apply(ListDiff listDiff) {
+            ObjectNode diff = FACTORY.objectNode();
+            diff.set("diff", listSerializer.apply(Optional.ofNullable(listDiff.diff).orElseGet(ArrayList::new)));
+            diff.set("rpush", listSerializer.apply(Optional.ofNullable(listDiff.rpush).orElseGet(ArrayList::new)));
+            return diff;
         }
 
     }

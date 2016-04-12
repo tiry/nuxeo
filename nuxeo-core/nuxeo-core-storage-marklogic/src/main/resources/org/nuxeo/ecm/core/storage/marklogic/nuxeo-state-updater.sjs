@@ -17,7 +17,6 @@ function put(context, params, input) {
   }
 
   var document = cts.doc(uri).toObject();
-  xdmp.log("Path the document.");
   patchDocument(document, input.toObject());
   xdmp.documentInsert(uri, document);
 
@@ -32,7 +31,6 @@ function returnErrToClient(statusCode, statusMsg, body) {
 }
 
 function patchDocument(document, patch) {
-  xdmp.log("Patch this part : document=" + document + ", patch=" + patch + ", typeof document=" + typeof document);
   for (var key in patch) {
     if (patch[key] === null) {
       // Remove the node from document
@@ -42,9 +40,36 @@ function patchDocument(document, patch) {
         // Object doesn't exist in document
         document[key] = patch[key];
       } else {
-        // TODO handle array
-        // Loop on sub structure
-        patchDocument(document[key], patch[key]);
+        var subDocument = document[key];
+        var subPatch = patch[key];
+        if (subPatch.hasOwnProperty("diff") && subPatch.hasOwnProperty("rpush")) {
+          // List diff case
+          var iDoc = 0;
+          for (var iDiff in subPatch['diff']) {
+            var diff = subPatch['diff'][iDiff];
+            if (diff === null) {
+              subDocument.splice(iDoc, 1);
+            } else if (diff === 'NOP') {
+              // Do nothing
+              iDoc++;
+            } else {
+              if (typeof diff === 'object') {
+                // Loop on sub structure
+                patchDocument(subDocument[iDoc], diff);
+              } else {
+                // Primitive value
+                subDocument[iDoc] = diff;
+              }
+              iDoc++;
+            }
+          }
+          for (var rpush in subPatch['rpush']) {
+            subDocument.push(rpush);
+          }
+        } else {
+          // Loop on sub structure
+          patchDocument(subDocument, subPatch);
+        }
       }
     } else {
       // Primitive value
