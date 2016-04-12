@@ -359,10 +359,18 @@ public class MarkLogicRepository extends DBSRepositoryBase {
         if (log.isTraceEnabled()) {
             logQuery(query);
         }
-        try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
-            return StreamSupport.stream(page.spliterator(), false)
-                                .map(record -> record.getContent(new StateHandle()).get())
-                                .collect(Collectors.toList());
+        return findAll(init(query), 1);
+    }
+
+    private List<State> findAll(QueryDefinition query, long start) {
+        try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(query, start)) {
+            List<State> states = StreamSupport.stream(page.spliterator(), false)
+                                              .map(record -> record.getContent(new StateHandle()).get())
+                                              .collect(Collectors.toList());
+            if (page.hasNextPage()) {
+                states.addAll(findAll(query, start + page.getPageSize()));
+            }
+            return states;
         }
     }
 
