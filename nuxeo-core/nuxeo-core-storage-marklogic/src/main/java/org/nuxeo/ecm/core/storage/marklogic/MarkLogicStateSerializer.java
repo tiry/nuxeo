@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.joda.time.DateTime;
@@ -51,27 +50,18 @@ class MarkLogicStateSerializer implements Function<State, String> {
 
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.instance;
 
-    private final Function<State, ObjectNode> stateSerializer;
+    private final Function<State, ObjectNode> stateSerializer = new StateSerializer();
 
-    private final Function<Entry<String, Serializable>, Optional<ObjectNode>> entrySerializer;
+    private final Function<Object, JsonNode> valueSerializer = new ValueSerializer();
 
-    private final Function<Object, Optional<JsonNode>> valueSerializer;
-
-    private final Function<List<Object>, ArrayNode> listSerializer;
-
-    public MarkLogicStateSerializer() {
-        this.stateSerializer = new StateSerializer();
-        this.entrySerializer = new EntrySerializer();
-        this.valueSerializer = new ValueSerializer();
-        this.listSerializer = new ListSerializer();
-    }
+    private final Function<List<Object>, ArrayNode> listSerializer = new ListSerializer();
 
     @Override
     public String apply(State state) {
         return stateSerializer.apply(state).toString();
     }
 
-    public Function<Object, Optional<JsonNode>> getValueNodeSerializer() {
+    public Function<Object, JsonNode> getValueNodeSerializer() {
         return valueSerializer;
     }
 
@@ -81,65 +71,58 @@ class MarkLogicStateSerializer implements Function<State, String> {
         public ObjectNode apply(State state) {
             ObjectNode object = FACTORY.objectNode();
             for (Entry<String, Serializable> entry : state.entrySet()) {
-                entrySerializer.apply(entry).ifPresent(object::setAll);
+                String key = MarkLogicHelper.KEY_SERIALIZER.apply(entry.getKey());
+                JsonNode value = valueSerializer.apply(entry.getValue());
+                object.set(key, value);
             }
             return object;
         }
 
     }
 
-    private class EntrySerializer implements Function<Entry<String, Serializable>, Optional<ObjectNode>> {
+    private class ValueSerializer implements Function<Object, JsonNode> {
 
         @Override
-        public Optional<ObjectNode> apply(Entry<String, Serializable> entry) {
-            String key = MarkLogicHelper.KEY_SERIALIZER.apply(entry.getKey());
-            return valueSerializer.apply(entry.getValue()).map(
-                    value -> (ObjectNode) FACTORY.objectNode().set(key, value));
-        }
-
-    }
-
-    private class ValueSerializer implements Function<Object, Optional<JsonNode>> {
-
-        @Override
-        public Optional<JsonNode> apply(Object value) {
-            Optional<JsonNode> result;
+        public JsonNode apply(Object value) {
+            JsonNode result;
             if (value instanceof State) {
-                result = Optional.of(stateSerializer.apply((State) value));
+                result = stateSerializer.apply((State) value);
             } else if (value instanceof List) {
                 @SuppressWarnings("unchecked")
                 List<Object> values = (List<Object>) value;
-                result = Optional.of(listSerializer.apply(values));
+                result = listSerializer.apply(values);
             } else if (value instanceof Object[]) {
-                result = Optional.of(listSerializer.apply(Arrays.asList((Object[]) value)));
+                result = listSerializer.apply(Arrays.asList((Object[]) value));
             } else {
                 if (value instanceof Calendar) {
                     DateTime dateTime = DateTime.now().withMillis(((Calendar) value).getTimeInMillis());
-                    result = Optional.of(FACTORY.textNode(dateTime.toString(DATE_TIME_FORMATTER)));
+                    result = FACTORY.textNode(dateTime.toString(DATE_TIME_FORMATTER));
                 } else if (value instanceof DateTime) {
-                    result = Optional.of(FACTORY.textNode(((DateTime) value).toString(DATE_TIME_FORMATTER)));
+                    result = FACTORY.textNode(((DateTime) value).toString(DATE_TIME_FORMATTER));
                 } else if (value instanceof String) {
-                    result = Optional.of(FACTORY.textNode((String) value));
+                    result = FACTORY.textNode((String) value);
                 } else if (value instanceof Boolean) {
-                    result = Optional.of(FACTORY.booleanNode((boolean) value));
+                    result = FACTORY.booleanNode((boolean) value);
                 } else if (value instanceof Byte) {
-                    result = Optional.of(FACTORY.numberNode((byte) value));
+                    result = FACTORY.numberNode((byte) value);
                 } else if (value instanceof Short) {
-                    result = Optional.of(FACTORY.numberNode((short) value));
+                    result = FACTORY.numberNode((short) value);
                 } else if (value instanceof Integer) {
-                    result = Optional.of(FACTORY.numberNode((int) value));
+                    result = FACTORY.numberNode((int) value);
                 } else if (value instanceof Long) {
-                    result = Optional.of(FACTORY.numberNode((long) value));
+                    result = FACTORY.numberNode((long) value);
                 } else if (value instanceof Float) {
-                    result = Optional.of(FACTORY.numberNode((float) value));
+                    result = FACTORY.numberNode((float) value);
                 } else if (value instanceof Double) {
-                    result = Optional.of(FACTORY.numberNode((double) value));
+                    result = FACTORY.numberNode((double) value);
                 } else if (value instanceof BigInteger) {
-                    result = Optional.of(FACTORY.numberNode((BigInteger) value));
+                    result = FACTORY.numberNode((BigInteger) value);
                 } else if (value instanceof BigDecimal) {
-                    result = Optional.of(FACTORY.numberNode((BigDecimal) value));
+                    result = FACTORY.numberNode((BigDecimal) value);
                 } else {
-                    result = Optional.empty();
+                    // Valid case cause State don't have null values, except StateDiff do and we want null node to
+                    // server-side javascript for update
+                    result = FACTORY.nullNode();
                 }
             }
             return result;
@@ -151,10 +134,7 @@ class MarkLogicStateSerializer implements Function<State, String> {
 
         @Override
         public ArrayNode apply(List<Object> list) {
-            return list.stream()
-                       .map(valueSerializer)
-                       .map(value -> value.orElseGet(FACTORY::nullNode))
-                       .collect(FACTORY::arrayNode, ArrayNode::add, ArrayNode::addAll);
+            return list.stream().map(valueSerializer).collect(FACTORY::arrayNode, ArrayNode::add, ArrayNode::addAll);
         }
 
     }

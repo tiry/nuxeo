@@ -63,9 +63,7 @@ public class MarkLogicQueryExpressionBuilder {
 
     private static final JsonNodeFactory NODE_FACTORY = JsonNodeFactory.instance;
 
-    private static final java.util.function.Function<Object, JsonNode> VALUE_SERIALIZER = MarkLogicStateSerializer.SERIALIZER.getValueNodeSerializer()
-                                                                                                                             .andThen(
-                                                                                                                                     node -> node.orElseGet(NODE_FACTORY::nullNode));
+    private static final java.util.function.Function<Object, JsonNode> VALUE_SERIALIZER = MarkLogicStateSerializer.SERIALIZER.getValueNodeSerializer();
 
     private static final String QUERY = "$query";
 

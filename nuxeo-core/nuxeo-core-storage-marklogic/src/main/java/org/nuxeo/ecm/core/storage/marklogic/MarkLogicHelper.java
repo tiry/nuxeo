@@ -29,14 +29,14 @@ class MarkLogicHelper {
 
     public static final Function<String, String> ID_FORMATTER = id -> String.format("/%s.json", id);
 
-    public static final String SCHEMA_ORIGINAL_DELEMITER = ":";
+    public static final String SCHEMA_ORIGINAL_DELIMITER = ":";
 
-    public static final String SCHEMA_MARKLOGIC_DELEMITER = "__";
+    public static final String SCHEMA_MARKLOGIC_DELIMITER = "__";
 
-    public static final Function<String, String> KEY_SERIALIZER = key -> key.replace(SCHEMA_ORIGINAL_DELEMITER,
-            SCHEMA_MARKLOGIC_DELEMITER);
+    public static final Function<String, String> KEY_SERIALIZER = key -> key.replace(SCHEMA_ORIGINAL_DELIMITER,
+            SCHEMA_MARKLOGIC_DELIMITER);
 
-    public static final Function<String, String> KEY_DESERIALIZER = key -> key.replace(SCHEMA_MARKLOGIC_DELEMITER,
-            SCHEMA_ORIGINAL_DELEMITER);
+    public static final Function<String, String> KEY_DESERIALIZER = key -> key.replace(SCHEMA_MARKLOGIC_DELIMITER,
+            SCHEMA_ORIGINAL_DELIMITER);
 
 }
