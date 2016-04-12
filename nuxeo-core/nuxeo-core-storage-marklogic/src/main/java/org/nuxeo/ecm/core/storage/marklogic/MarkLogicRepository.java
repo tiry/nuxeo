@@ -351,7 +351,10 @@ public class MarkLogicRepository extends DBSRepositoryBase {
             logQuery(query);
         }
         try (DocumentPage page = markLogicClient.newJSONDocumentManager().search(init(query), 0)) {
-            return page.nextContent(new StateHandle()).get();
+            if (page.hasNext()) {
+                return page.nextContent(new StateHandle()).get();
+            }
+            return null;
         }
     }
 
