@@ -32,6 +32,7 @@ import java.util.function.Function;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.nuxeo.ecm.core.api.model.Delta;
 import org.nuxeo.ecm.core.storage.State;
 import org.nuxeo.ecm.core.storage.State.ListDiff;
 
@@ -126,6 +127,9 @@ class MarkLogicStateSerializer implements Function<State, String> {
                     result = FACTORY.numberNode((BigInteger) value);
                 } else if (value instanceof BigDecimal) {
                     result = FACTORY.numberNode((BigDecimal) value);
+                } else if (value instanceof Delta) {
+                    // TODO better handling for delta
+                    result = FACTORY.numberNode(((Delta) value).longValue());
                 } else {
                     // Valid case cause State don't have null values, except StateDiff do and we want null node to
                     // server-side javascript for update
