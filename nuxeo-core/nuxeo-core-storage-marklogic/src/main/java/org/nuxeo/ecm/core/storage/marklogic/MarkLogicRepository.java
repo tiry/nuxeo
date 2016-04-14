@@ -21,6 +21,8 @@ package org.nuxeo.ecm.core.storage.marklogic;
 import static java.lang.Boolean.TRUE;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_ID;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_IS_PROXY;
+import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_LOCK_CREATED;
+import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_LOCK_OWNER;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_NAME;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PARENT_ID;
 import static org.nuxeo.ecm.core.storage.dbs.DBSDocument.KEY_PROXY_IDS;
@@ -29,6 +31,7 @@ import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicHelper.ID_FORMATTER;
 
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +45,7 @@ import javax.resource.spi.ConnectionManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.ecm.core.api.DocumentNotFoundException;
 import org.nuxeo.ecm.core.api.Lock;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.PartialList;
@@ -119,6 +123,7 @@ public class MarkLogicRepository extends DBSRepositoryBase {
                                                                              .newResourceExtensionsManager();
         // Install or update extensions
         initResourceExtension(resourceExtensionsManager, MarkLogicStateUpdaterManager.DEFINITION);
+        initResourceExtension(resourceExtensionsManager, MarkLogicLockManager.DEFINITION);
     }
 
     private void initResourceExtension(ResourceExtensionsManager resourceExtensionsManager,
@@ -308,27 +313,43 @@ public class MarkLogicRepository extends DBSRepositoryBase {
 
     @Override
     public Lock getLock(String id) {
-        throw new IllegalStateException("Not implemented yet");
+        // TODO test performance : retrieve document with read or search document with extract
+        // TODO retrieve only some field
+        // https://docs.marklogic.com/guide/search-dev/qbe#id_54044
+        State state = readState(id);
+        if (state == null) {
+            // document not found
+            throw new DocumentNotFoundException(id);
+        }
+        String owner = (String) state.get(KEY_LOCK_OWNER);
+        if (owner == null) {
+            // not locked
+            return null;
+        }
+        Calendar created = (Calendar) state.get(KEY_LOCK_CREATED);
+        return new Lock(owner, created);
     }
 
     @Override
     public Lock setLock(String id, Lock lock) {
-        throw new IllegalStateException("Not implemented yet");
+        MarkLogicLockManager lockManager = markLogicClient.init(MarkLogicLockManager.DEFINITION.getName(),
+                new MarkLogicLockManager());
+        return lockManager.set(id, lock);
     }
 
     @Override
     public Lock removeLock(String id, String owner) {
-        throw new IllegalStateException("Not implemented yet");
+        MarkLogicLockManager lockManager = markLogicClient.init(MarkLogicLockManager.DEFINITION.getName(),
+                new MarkLogicLockManager());
+        return lockManager.remove(id, owner);
     }
 
     @Override
     public void closeLockManager() {
-        throw new IllegalStateException("Not implemented yet");
     }
 
     @Override
     public void clearLockManagerCaches() {
-        throw new IllegalStateException("Not implemented yet");
     }
 
     @Override

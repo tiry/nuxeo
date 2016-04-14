@@ -6,6 +6,8 @@
  * @param input The data from the request body. The update to apply to document.
  */
 function put(context, params, input) {
+  // TODO find why the method below raises : Internal Server Error. Server Message: declareUpdate(); -- Operation not allowed on the currently executing transaction with identifier declareUpdate .
+  //declareUpdate();
   // Validate input
   if (input instanceof ValueIterator) {
     returnErrToClient(400, 'Bad Request', 'Only one state is allowed in updater.');
@@ -16,7 +18,11 @@ function put(context, params, input) {
     returnErrToClient(400, 'Bad Request', 'Document uri to patch is missing.');
   }
 
-  var document = cts.doc(uri).toObject();
+  var document = cts.doc(uri);
+  if (typeof document === 'undefined' || document === null) {
+    returnErrToClient(404, 'Document Not Found', 'Document with uri=' + uri + ' could not be found.');
+  }
+  document = document.toObject();
   patchDocument(document, input.toObject());
   xdmp.documentInsert(uri, document);
 

@@ -18,7 +18,10 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,6 +30,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.marklogic.client.io.JacksonHandle;
 import com.marklogic.client.io.marker.StructureWriteHandle;
+import com.marklogic.client.query.QueryManager;
 
 /**
  * Query builder for a MarkLogic query.
@@ -77,6 +81,42 @@ public class MarkLogicQueryBuilder {
             query.set(NOT, andObject);
         }
         return this;
+    }
+
+    /**
+     * This constraint does something only on {@link QueryManager}.
+     */
+    public MarkLogicQueryBuilder extract(String key1, String... key2) {
+        if (key2 == null) {
+            return extract(new String[] { key1 });
+        }
+        List<String> keys = new ArrayList<>(Arrays.asList(key2));
+        keys.add(0, key1);
+        return extract(keys.toArray(new String[keys.size()]));
+    }
+
+    /**
+     * This constraint does something only on {@link QueryManager}.
+     * "$snippet": { "$none": {} }
+     */
+    public MarkLogicQueryBuilder extract(String[] keys) {
+        ObjectNode response = getOrInitNode(root, "$response");
+        ObjectNode snippet = getOrInitNode(response, "$snippet");
+        getOrInitNode(snippet, "$none");
+        ObjectNode extract = getOrInitNode(response, "$extract");
+        for (String key : keys) {
+            extract.set(MarkLogicHelper.KEY_SERIALIZER.apply(key), NODE_FACTORY.objectNode());
+        }
+        return this;
+    }
+
+    private ObjectNode getOrInitNode(ObjectNode root, String key) {
+        ObjectNode node = (ObjectNode) root.get(key);
+        if (node == null)  {
+            node = NODE_FACTORY.objectNode();
+            root.set(key, node);
+        }
+        return node;
     }
 
     /**

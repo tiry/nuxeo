@@ -18,7 +18,12 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import java.util.Calendar;
 import java.util.function.Function;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 /**
  * MarkLogic helper centralizes all common actions needed in different services.
@@ -38,5 +43,19 @@ class MarkLogicHelper {
 
     public static final Function<String, String> KEY_DESERIALIZER = key -> key.replace(SCHEMA_MARKLOGIC_DELIMITER,
             SCHEMA_ORIGINAL_DELIMITER);
+
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
+    public static final Function<Calendar, String> CALENDAR_SERIALIZER = cal -> DateTime.now()
+                                                                                        .withMillis(
+                                                                                                cal.getTimeInMillis())
+                                                                                        .toString(DATE_TIME_FORMATTER);
+
+    public static final Function<String, Calendar> CALENDAR_DESERIALIZER = calString -> {
+        DateTime dateTime = DATE_TIME_FORMATTER.parseDateTime(calString);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dateTime.toDate());
+        return cal;
+    };
 
 }

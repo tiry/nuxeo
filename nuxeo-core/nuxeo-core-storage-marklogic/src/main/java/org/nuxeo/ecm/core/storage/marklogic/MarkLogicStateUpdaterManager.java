@@ -18,8 +18,10 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import org.nuxeo.ecm.core.api.DocumentNotFoundException;
 import org.nuxeo.ecm.core.storage.State.StateDiff;
 
+import com.marklogic.client.ResourceNotFoundException;
 import com.marklogic.client.admin.ExtensionMetadata.ScriptLanguage;
 import com.marklogic.client.admin.MethodType;
 import com.marklogic.client.extensions.ResourceManager;
@@ -44,9 +46,13 @@ class MarkLogicStateUpdaterManager extends ResourceManager {
     }
 
     public void update(String id, StateDiff diff) {
-        RequestParameters requestParameters = new RequestParameters();
-        requestParameters.add("uri", MarkLogicHelper.ID_FORMATTER.apply(id));
-        getServices().put(requestParameters, new StateHandle(diff), new StringHandle());
+        try {
+            RequestParameters requestParameters = new RequestParameters();
+            requestParameters.add("uri", MarkLogicHelper.ID_FORMATTER.apply(id));
+            getServices().put(requestParameters, new StateHandle(diff), new StringHandle());
+        } catch (ResourceNotFoundException e) {
+            throw new DocumentNotFoundException(id);
+        }
     }
 
 }

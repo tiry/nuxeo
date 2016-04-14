@@ -18,6 +18,9 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicHelper.CALENDAR_SERIALIZER;
+import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicHelper.DATE_TIME_FORMATTER;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,8 +33,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.nuxeo.ecm.core.api.model.Delta;
 import org.nuxeo.ecm.core.storage.State;
 import org.nuxeo.ecm.core.storage.State.ListDiff;
@@ -49,8 +50,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 class MarkLogicStateSerializer implements Function<State, String> {
 
     public static final MarkLogicStateSerializer SERIALIZER = new MarkLogicStateSerializer();
-
-    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.instance;
 
@@ -103,8 +102,7 @@ class MarkLogicStateSerializer implements Function<State, String> {
                 result = listSerializer.apply(Arrays.asList((Object[]) value));
             } else {
                 if (value instanceof Calendar) {
-                    DateTime dateTime = DateTime.now().withMillis(((Calendar) value).getTimeInMillis());
-                    result = FACTORY.textNode(dateTime.toString(DATE_TIME_FORMATTER));
+                    result = FACTORY.textNode(CALENDAR_SERIALIZER.apply((Calendar) value));
                 } else if (value instanceof DateTime) {
                     result = FACTORY.textNode(((DateTime) value).toString(DATE_TIME_FORMATTER));
                 } else if (value instanceof String) {

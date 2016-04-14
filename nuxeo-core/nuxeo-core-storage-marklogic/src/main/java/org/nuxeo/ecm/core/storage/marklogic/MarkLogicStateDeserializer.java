@@ -18,6 +18,8 @@
  */
 package org.nuxeo.ecm.core.storage.marklogic;
 
+import static org.nuxeo.ecm.core.storage.marklogic.MarkLogicHelper.CALENDAR_DESERIALIZER;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -28,7 +30,6 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
-import org.joda.time.DateTime;
 import org.nuxeo.ecm.core.storage.State;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -101,10 +102,7 @@ class MarkLogicStateDeserializer implements Function<String, State> {
                 // Test if it's an ISO-8601 date
                 // TODO change this check
                 if (jsonNode.isTextual() && jsonNode.textValue().matches(DATE_REGEXP)) {
-                    DateTime dateTime = MarkLogicStateSerializer.DATE_TIME_FORMATTER.parseDateTime(jsonNode.textValue());
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(dateTime.toDate());
-                    result = cal;
+                    result = CALENDAR_DESERIALIZER.apply(jsonNode.textValue());
                 } else if (jsonNode.isBoolean()) {
                     result = jsonNode.booleanValue();
                 } else if (jsonNode.isNumber()) {
