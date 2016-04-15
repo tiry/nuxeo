@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.nuxeo.ecm.core.query.QueryParseException;
 import org.nuxeo.ecm.core.query.sql.NXQL;
 import org.nuxeo.ecm.core.query.sql.model.BooleanLiteral;
@@ -42,10 +43,14 @@ import org.nuxeo.ecm.core.query.sql.model.OrderByClause;
 import org.nuxeo.ecm.core.query.sql.model.Reference;
 import org.nuxeo.ecm.core.query.sql.model.SelectClause;
 import org.nuxeo.ecm.core.query.sql.model.StringLiteral;
+import org.nuxeo.ecm.core.schema.SchemaManager;
+import org.nuxeo.ecm.core.schema.types.Field;
+import org.nuxeo.ecm.core.schema.types.Schema;
 import org.nuxeo.ecm.core.schema.types.Type;
 import org.nuxeo.ecm.core.schema.types.primitives.BooleanType;
 import org.nuxeo.ecm.core.storage.ExpressionEvaluator.PathResolver;
 import org.nuxeo.ecm.core.storage.dbs.DBSSession;
+import org.nuxeo.runtime.api.Framework;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -78,6 +83,8 @@ public class MarkLogicQueryExpressionBuilder {
             + "\\[(\\d+|\\*|\\*\\d+)\\]" // index in brackets
     );
 
+    private final SchemaManager schemaManager;
+
     private final Expression expression;
 
     private final SelectClause selectClause;
@@ -97,6 +104,7 @@ public class MarkLogicQueryExpressionBuilder {
         this.orderByClause = orderByClause;
         this.pathResolver = pathResolver;
         this.fulltextSearchDisabled = fulltextSearchDisabled;
+        this.schemaManager = Framework.getLocalService(SchemaManager.class);
     }
 
     public StructureWriteHandle buildQuery() {
@@ -137,7 +145,7 @@ public class MarkLogicQueryExpressionBuilder {
         } else if (op == Operator.EQ) {
             return walkEq(lvalue, rvalue);
         } else if (op == Operator.NOTEQ) {
-            // walkNotEq(lvalue, rvalue);
+            return walkNotEq(lvalue, rvalue);
         } else if (op == Operator.LTEQ) {
             // walkLtEq(lvalue, rvalue);
         } else if (op == Operator.GTEQ) {
@@ -182,6 +190,13 @@ public class MarkLogicQueryExpressionBuilder {
         // TODO implements mixinTypes
         return leftInfo.build(right);
         //return NODE_FACTORY.objectNode().set(((StringLiteral) lvalue).value, right);
+    }
+
+    private JsonNode walkNotEq(Operand lvalue, Operand rvalue) {
+        JsonNode eq = walkEq(lvalue, rvalue);
+        ObjectNode neq = NODE_FACTORY.objectNode();
+        neq.set("$not", eq);
+        return neq;
     }
 
     private JsonNode walkMultiExpression(MultiExpression expression) {
@@ -274,8 +289,33 @@ public class MarkLogicQueryExpressionBuilder {
             if (prop.startsWith(NXQL.ECM_ACL + "/")) {
                 // return parseACP(prop, parts);
             }
+            // simple field
             String field = DBSSession.convToInternal(prop);
             return new FieldInfo(prop, field);
+        }
+        String first = parts[0];
+        Field field = schemaManager.getField(first);
+        if (field == null) {
+            if (first.indexOf(':') > -1) {
+                throw new QueryParseException("No such property: " + name);
+            }
+            // check without prefix
+            // TODO precompute this in SchemaManagerImpl
+            for (Schema schema : schemaManager.getSchemas()) {
+                if (!StringUtils.isBlank(schema.getNamespace().prefix)) {
+                    // schema with prefix, do not consider as candidate
+                    continue;
+                }
+                if (schema != null) {
+                    field = schema.getField(first);
+                    if (field != null) {
+                        break;
+                    }
+                }
+            }
+            if (field == null) {
+                throw new QueryParseException("No such property: " + name);
+            }
         }
         throw new IllegalStateException("Not implemented yet");
     }
