@@ -51,11 +51,7 @@
           </predicate>
           <predicate parameter="ecm:tag" operator="IN">
             <field schema="default_search" name="ecm_tags" />
-          </predicate>
-          <predicate parameter="collectionMember:collectionIds"
-            operator="IN">
-            <field schema="default_search" name="ecm_collections" />
-          </predicate>
+          </predicate>colle
         </whereClause>
         <aggregates>
           <aggregate id="dc_nature_agg" type="terms" parameter="dc:nature">

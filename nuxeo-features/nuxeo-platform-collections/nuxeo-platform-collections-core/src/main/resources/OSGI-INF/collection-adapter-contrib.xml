@@ -5,8 +5,6 @@
     point="adapters">
     <adapter class="org.nuxeo.ecm.collections.core.adapter.Collection"
       factory="org.nuxeo.ecm.collections.core.adapter.CollectionAdapterFactory" />
-    <adapter class="org.nuxeo.ecm.collections.core.adapter.CollectionMember"
-      factory="org.nuxeo.ecm.collections.core.adapter.CollectionMemberAdapterFactory" />
   </extension>
 
 </component>

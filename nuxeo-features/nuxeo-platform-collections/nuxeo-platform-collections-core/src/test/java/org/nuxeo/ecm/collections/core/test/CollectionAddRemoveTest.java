@@ -27,10 +27,10 @@ import java.util.List;
 
 import org.junit.Test;
 import org.nuxeo.ecm.collections.core.adapter.Collection;
-import org.nuxeo.ecm.collections.core.adapter.CollectionMember;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.PathRef;
+import org.nuxeo.runtime.transaction.TransactionHelper;
 
 /**
  * @since 5.9.3
@@ -66,14 +66,9 @@ public class CollectionAddRemoveTest extends CollectionTestCase {
 
         testFile = session.getDocument(testFile.getRef());
 
-        CollectionMember collectionMemberAdapter = testFile.getAdapter(CollectionMember.class);
-
-        assertTrue(collectionMemberAdapter.getCollectionIds().contains(newlyCreatedCollectionId));
-
         collectionManager.removeFromCollection(newlyCreatedCollection, testFile, session);
 
         assertFalse(collectionAdapter.getCollectedDocumentIds().contains(testFile.getId()));
-        assertFalse(collectionMemberAdapter.getCollectionIds().contains(newlyCreatedCollectionId));
     }
 
     @Test
@@ -107,9 +102,6 @@ public class CollectionAddRemoveTest extends CollectionTestCase {
 
             assertTrue(collectionAdapter.getCollectedDocumentIds().contains(file.getId()));
 
-            CollectionMember collectionMemberAdapter = file.getAdapter(CollectionMember.class);
-
-            assertTrue(collectionMemberAdapter.getCollectionIds().contains(newlyCreatedCollectionId));
         }
 
         collectionManager.removeAllFromCollection(newlyCreatedCollection, files, session);
@@ -119,9 +111,6 @@ public class CollectionAddRemoveTest extends CollectionTestCase {
 
             assertFalse(collectionAdapter.getCollectedDocumentIds().contains(file.getId()));
 
-            CollectionMember collectionMemberAdapter = file.getAdapter(CollectionMember.class);
-
-            assertFalse(collectionMemberAdapter.getCollectionIds().contains(newlyCreatedCollectionId));
         }
 
     }
@@ -194,11 +183,17 @@ public class CollectionAddRemoveTest extends CollectionTestCase {
         DocumentModel copiedTestFile = session.copy(testFile.getRef(), testFile.getParentRef(),
                 TEST_FILE_NAME + "_BIS");
 
-        assertFalse(collectionManager.isCollected(copiedTestFile));
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
+        assertFalse(collectionManager.isCollected(copiedTestFile, session));
 
         // Let's add to another collection and see it still does not belong to the original one.
         collectionManager.addToNewCollection(COLLECTION_NAME + "_BIS", COLLECTION_DESCRIPTION + "_BIS", copiedTestFile,
                 session);
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
 
         copiedTestFile = session.getDocument(copiedTestFile.getRef());
 
@@ -212,8 +207,8 @@ public class CollectionAddRemoveTest extends CollectionTestCase {
         final DocumentModel collection = session.getDocument(collectionPathRef);
         final DocumentModel collectionBis = session.getDocument(collectionPathRefBis);
 
-        assertFalse(copiedTestFile.getAdapter(CollectionMember.class).getCollectionIds().contains(collection.getId()));
-        assertTrue(copiedTestFile.getAdapter(CollectionMember.class).getCollectionIds().contains(collectionBis.getId()));
+        assertFalse(collection.getAdapter(Collection.class).getCollectedDocumentIds().contains(copiedTestFile.getId()));
+        assertTrue(collectionBis.getAdapter(Collection.class).getCollectedDocumentIds().contains(copiedTestFile.getId()));
     }
 
 }

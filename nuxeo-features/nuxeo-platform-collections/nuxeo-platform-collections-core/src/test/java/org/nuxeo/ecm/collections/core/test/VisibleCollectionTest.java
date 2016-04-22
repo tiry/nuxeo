@@ -19,6 +19,7 @@
 package org.nuxeo.ecm.collections.core.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ import org.junit.Test;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.LifeCycleConstants;
 import org.nuxeo.ecm.core.api.PathRef;
+import org.nuxeo.runtime.transaction.TransactionHelper;
 
 /**
  * @since 6.0
@@ -42,36 +44,52 @@ public class VisibleCollectionTest extends CollectionTestCase {
         collectionManager.addToNewCollection(COLLECTION_NAME, COLLECTION_DESCRIPTION, testFile, session);
         collectionManager.addToNewCollection(COLLECTION_NAME_2, COLLECTION_DESCRIPTION, testFile, session);
 
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
+        DocumentModel testCollection = session.getDocument(new PathRef(COLLECTION_FOLDER_PATH + "/" + COLLECTION_NAME));
+        DocumentModel testCollection2 = session.getDocument(new PathRef(COLLECTION_FOLDER_PATH + "/"
+                + COLLECTION_NAME_2));
+
         // Check visible collections limited to 1
         testFile = session.getDocument(testFile.getRef());
         List<DocumentModel> collections = collectionManager.getVisibleCollection(testFile, 1, session);
         assertEquals(1, collections.size());
-        DocumentModel testCollection = session.getDocument(new PathRef(COLLECTION_FOLDER_PATH + "/" + COLLECTION_NAME));
-        assertEquals(testCollection.getId(), collections.get(0).getId());
+        assertEquals(testCollection2.getId(), collections.get(0).getId());
 
         // Check visible collections limited to 2
         collections = collectionManager.getVisibleCollection(testFile, 2, session);
         assertEquals(2, collections.size());
-        DocumentModel testCollection2 = session.getDocument(new PathRef(COLLECTION_FOLDER_PATH + "/"
-                + COLLECTION_NAME_2));
-        assertEquals(testCollection.getId(), collections.get(0).getId());
-        assertEquals(testCollection2.getId(), collections.get(1).getId());
+        assertTrue(collections.get(0).equals(testCollection2));
+        assertTrue(collections.get(1).equals(testCollection));
 
         // Send one collection to the trash
         testCollection.followTransition(LifeCycleConstants.DELETE_TRANSITION);
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
         collections = collectionManager.getVisibleCollection(testFile, 2, session);
         assertEquals(1, collections.size());
         assertEquals(testCollection2.getId(), collections.get(0).getId());
 
         // Restore collection from the trash
         testCollection.followTransition(LifeCycleConstants.UNDELETE_TRANSITION);
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
         collections = collectionManager.getVisibleCollection(testFile, 2, session);
         assertEquals(2, collections.size());
-        assertEquals(testCollection.getId(), collections.get(0).getId());
-        assertEquals(testCollection2.getId(), collections.get(1).getId());
+        assertTrue(collections.contains(testCollection));
+        assertTrue(collections.contains(testCollection2));
 
         // Delete one collection permanently
         session.removeDocument(testCollection.getRef());
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
         collections = collectionManager.getVisibleCollection(testFile, 1, session);
         assertEquals(1, collections.size());
         assertEquals(testCollection2.getId(), collections.get(0).getId());

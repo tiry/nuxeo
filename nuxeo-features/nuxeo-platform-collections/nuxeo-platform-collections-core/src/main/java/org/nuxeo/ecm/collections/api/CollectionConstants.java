@@ -33,11 +33,7 @@ public class CollectionConstants {
 
     public static final String COLLECTION_DOCUMENT_IDS_PROPERTY_NAME = "collection:documentIds";
 
-    public static final String DOCUMENT_COLLECTION_IDS_PROPERTY_NAME = "collectionMember:collectionIds";
-
     public static final String COLLECTION_SCHEMA_NAME = "collection";
-
-    public static final String COLLECTION_MEMBER_SCHEMA_NAME = "collectionMember";
 
     public static final String CAN_COLLECT_PERMISSION = "ReadCanCollect";
 
@@ -94,5 +90,17 @@ public class CollectionConstants {
      * @since 6.0
      */
     public static final String COLLECTION_REF_EVENT_CTX_PROP = "collectionRef";
+
+    /**
+     * @since 8.3
+     */
+    public static final String QUERY_FOR_VISIBLE_COLLECTION = "SELECT * FROM Document WHERE collection:documentIds/* = ?"
+            + " AND ecm:mixinType != 'HiddenInNavigation' AND"
+            + " ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState != 'deleted' ORDER BY dc:modified DESC";
+
+    /**
+     * @since 8.3
+     */
+    public static final String QUERY_FOR_ALL_COLLECTION = "SELECT * FROM Document WHERE collection:documentIds/* = ?";
 
 }

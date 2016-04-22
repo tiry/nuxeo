@@ -129,12 +129,14 @@ public interface CollectionManager {
     boolean isCollectable(final DocumentModel document);
 
     /**
-     * Check that a document has already been added to a collection.
-     *
-     * @param document the document
-     * @return true if the document has already been added to a collection
-     */
-    boolean isCollected(final DocumentModel document);
+      * Check that a document has already been added to a collection.
+      *
+      * @param document the document
+      * @param session the session
+      * @return true if the document has already been added to a collection
+      */
+     boolean isCollected(final DocumentModel document, final CoreSession session);
+
 
     /**
      * Check that a document is a collection.
@@ -155,39 +157,12 @@ public interface CollectionManager {
     boolean isInCollection(final DocumentModel collection, final DocumentModel document, final CoreSession session);
 
     /**
-     * Update all documents referenced by a collection to add a reference back the collection. This is used when a
-     * creation is created by copy in order to tell the members of a copied collection that they also belongs to the
-     * newly created collection.
-     *
-     * @param collection the collection
-     */
-    void processCopiedCollection(final DocumentModel collection);
-
-    /**
-     * Update all documents referenced by a collection to remove the reference to the collection. This is used after the
-     * complete deletion of a collection.
-     *
-     * @param collection the collection
-     */
-    void processRemovedCollection(final DocumentModel collection);
-
-    /**
      * Update all collections referenced by a document. This is used after the complete deletion of a document to remove
      * its reference from all collections it belongs to.
      *
      * @param collectionMember the document
      */
     void processRemovedCollectionMember(final DocumentModel collectionMember);
-
-    /**
-     * Restore the collection members of the version.
-     *
-     * @param collection the collection
-     * @param collection the version
-     *
-     * @since 7.3
-     */
-    void processRestoredCollection(final DocumentModel collection, final DocumentModel version);
 
     /**
      * Remove a list of document from a given collection.
@@ -230,13 +205,5 @@ public interface CollectionManager {
      * @since 6.0
      */
     DocumentModel getUserDefaultCollections(final DocumentModel context, final CoreSession session);
-
-    /**
-     * @param documentToBeRemoved
-     * @param collectionId
-     * @param session
-     * @since 6.0
-     */
-    void doRemoveFromCollection(DocumentModel documentToBeRemoved, String collectionId, CoreSession session);
 
 }

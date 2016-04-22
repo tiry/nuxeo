@@ -25,30 +25,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.apache.commons.lang.StringUtils;
 import org.nuxeo.common.utils.i18n.I18NUtils;
 import org.nuxeo.ecm.collections.api.CollectionConstants;
 import org.nuxeo.ecm.collections.api.CollectionManager;
 import org.nuxeo.ecm.collections.core.adapter.Collection;
-import org.nuxeo.ecm.collections.core.adapter.CollectionMember;
-import org.nuxeo.ecm.collections.core.listener.CollectionAsynchrnonousQuery;
-import org.nuxeo.ecm.collections.core.worker.DuplicateCollectionMemberWork;
-import org.nuxeo.ecm.collections.core.worker.RemoveFromCollectionWork;
-import org.nuxeo.ecm.collections.core.worker.RemovedAbstractWork;
 import org.nuxeo.ecm.collections.core.worker.RemovedCollectionMemberWork;
-import org.nuxeo.ecm.collections.core.worker.RemovedCollectionWork;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.DocumentSecurityException;
 import org.nuxeo.ecm.core.api.IdRef;
-import org.nuxeo.ecm.core.api.LifeCycleConstants;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.PathRef;
-import org.nuxeo.ecm.core.api.UnrestrictedSessionRunner;
 import org.nuxeo.ecm.core.api.event.CoreEventConstants;
 import org.nuxeo.ecm.core.api.event.DocumentEventCategories;
 import org.nuxeo.ecm.core.api.security.ACE;
@@ -65,6 +54,7 @@ import org.nuxeo.ecm.core.work.api.WorkManager;
 import org.nuxeo.ecm.platform.audit.service.NXAuditEventsService;
 import org.nuxeo.ecm.platform.dublincore.listener.DublinCoreListener;
 import org.nuxeo.ecm.platform.ec.notification.NotificationConstants;
+import org.nuxeo.ecm.platform.query.nxql.NXQLQueryBuilder;
 import org.nuxeo.ecm.platform.userworkspace.api.UserWorkspaceService;
 import org.nuxeo.ecm.platform.web.common.locale.LocaleProvider;
 import org.nuxeo.runtime.api.Framework;
@@ -93,33 +83,10 @@ public class CollectionManagerImpl extends DefaultComponent implements Collectio
         props.put(CollectionConstants.COLLECTION_REF_EVENT_CTX_PROP, collection.getRef());
         fireEvent(documentToBeAdded, session, CollectionConstants.BEFORE_ADDED_TO_COLLECTION, props);
         Collection colAdapter = collection.getAdapter(Collection.class);
-        colAdapter.addDocument(documentToBeAdded.getId());
-        collection.getCoreSession().saveDocument(colAdapter.getDocument());
-
-        new UnrestrictedSessionRunner(session) {
-
-            @Override
-            public void run() {
-
-                DocumentModel temp = documentToBeAdded;
-
-                temp.addFacet(CollectionConstants.COLLECTABLE_FACET);
-
-                disableEvents(temp);
-
-                temp = session.saveDocument(temp);
-
-                // We want to disable the following listener on a
-                // collection member when it is added to a collection
-                disableEvents(temp);
-
-                CollectionMember docAdapter = temp.getAdapter(CollectionMember.class);
-                docAdapter.addToCollection(collection.getId());
-                DocumentModel addedDoc = session.saveDocument(docAdapter.getDocument());
-                fireEvent(addedDoc, session, CollectionConstants.ADDED_TO_COLLECTION, props);
-            }
-
-        }.runUnrestricted();
+        if (colAdapter.addDocument(documentToBeAdded.getId())) {
+            collection.getCoreSession().saveDocument(colAdapter.getDocument());
+            fireEvent(documentToBeAdded, session, CollectionConstants.ADDED_TO_COLLECTION, props);
+        }
     }
 
     @Override
@@ -250,34 +217,21 @@ public class CollectionManagerImpl extends DefaultComponent implements Collectio
     public List<DocumentModel> getVisibleCollection(final DocumentModel collectionMember, int maxResult,
             CoreSession session) {
         List<DocumentModel> result = new ArrayList<DocumentModel>();
-        CollectionMember collectionMemberAdapter = collectionMember.getAdapter(CollectionMember.class);
-        List<String> collectionIds = collectionMemberAdapter.getCollectionIds();
-        for (int i = 0; i < collectionIds.size() && result.size() < maxResult; i++) {
-            final String collectionId = collectionIds.get(i);
-            DocumentRef documentRef = new IdRef(collectionId);
-            if (session.exists(documentRef) && session.hasPermission(documentRef, SecurityConstants.READ)
-                    && !LifeCycleConstants.DELETED_STATE.equals(session.getCurrentLifeCycleState(documentRef))) {
-                DocumentModel collection = session.getDocument(documentRef);
-                if (!collection.isVersion()) {
-                    result.add(collection);
-                }
-            }
-        }
+        Object[] parameters = new Object[1];
+        parameters[0] = collectionMember.getId();
+
+        String query = NXQLQueryBuilder.getQuery(CollectionConstants.QUERY_FOR_VISIBLE_COLLECTION, parameters, true,
+                false, null);
+
+        result = session.query(query, null, maxResult, 0, maxResult);
+
         return result;
     }
 
     @Override
     public boolean hasVisibleCollection(final DocumentModel collectionMember, CoreSession session)
             {
-        CollectionMember collectionMemberAdapter = collectionMember.getAdapter(CollectionMember.class);
-        List<String> collectionIds = collectionMemberAdapter.getCollectionIds();
-        for (final String collectionId : collectionIds) {
-            DocumentRef documentRef = new IdRef(collectionId);
-            if (session.exists(documentRef) && session.hasPermission(documentRef, SecurityConstants.READ)) {
-                return true;
-            }
-        }
-        return false;
+        return !getVisibleCollection(collectionMember, 1, session).isEmpty();
     }
 
     @Override
@@ -286,8 +240,17 @@ public class CollectionManagerImpl extends DefaultComponent implements Collectio
     }
 
     @Override
-    public boolean isCollected(final DocumentModel doc) {
-        return doc.hasFacet(CollectionConstants.COLLECTABLE_FACET);
+    public boolean isCollected(DocumentModel document, CoreSession session) {
+        List<DocumentModel> result = new ArrayList<DocumentModel>();
+        Object[] parameters = new Object[1];
+        parameters[0] = document.getId();
+
+        String query = NXQLQueryBuilder.getQuery(CollectionConstants.QUERY_FOR_ALL_COLLECTION, parameters, true,
+                false, null);
+
+        result = session.query(query, null, 1, 0, 1);
+
+        return !result.isEmpty();
     }
 
     @Override
@@ -298,79 +261,16 @@ public class CollectionManagerImpl extends DefaultComponent implements Collectio
     @Override
     public boolean isInCollection(DocumentModel collection, DocumentModel document, CoreSession session)
             {
-        if (isCollected(document)) {
-            final CollectionMember collectionMemberAdapter = document.getAdapter(CollectionMember.class);
-            return collectionMemberAdapter.getCollectionIds().contains(collection.getId());
-        }
-        return false;
-    }
-
-    @Override
-    public void processCopiedCollection(final DocumentModel collection) {
         Collection collectionAdapter = collection.getAdapter(Collection.class);
-        List<String> documentIds = collectionAdapter.getCollectedDocumentIds();
-
-        int i = 0;
-        while (i < documentIds.size()) {
-            int limit = (int) (((i + CollectionAsynchrnonousQuery.MAX_RESULT) > documentIds.size()) ? documentIds.size()
-                    : (i + CollectionAsynchrnonousQuery.MAX_RESULT));
-            DuplicateCollectionMemberWork work = new DuplicateCollectionMemberWork(collection.getRepositoryName(),
-                    collection.getId(), documentIds.subList(i, limit), i);
-            WorkManager workManager = Framework.getLocalService(WorkManager.class);
-            workManager.schedule(work, WorkManager.Scheduling.IF_NOT_SCHEDULED, true);
-
-            i = limit;
-        }
-    }
-
-    @Override
-    public void processRemovedCollection(final DocumentModel collection) {
-        final WorkManager workManager = Framework.getLocalService(WorkManager.class);
-        final RemovedAbstractWork work = new RemovedCollectionWork();
-        work.setDocument(collection.getRepositoryName(), collection.getId());
-        workManager.schedule(work, WorkManager.Scheduling.IF_NOT_SCHEDULED, true);
+        return collectionAdapter.getCollectedDocumentIds().contains(document.getId());
     }
 
     @Override
     public void processRemovedCollectionMember(final DocumentModel collectionMember) {
         final WorkManager workManager = Framework.getLocalService(WorkManager.class);
-        final RemovedAbstractWork work = new RemovedCollectionMemberWork();
+        final RemovedCollectionMemberWork work = new RemovedCollectionMemberWork();
         work.setDocument(collectionMember.getRepositoryName(), collectionMember.getId());
         workManager.schedule(work, WorkManager.Scheduling.IF_NOT_SCHEDULED, true);
-    }
-
-    @Override
-    public void processRestoredCollection(DocumentModel collection, DocumentModel version) {
-        final Set<String> collectionMemberIdsToBeRemoved = new TreeSet<String>(
-                collection.getAdapter(Collection.class).getCollectedDocumentIds());
-        collectionMemberIdsToBeRemoved.removeAll(version.getAdapter(Collection.class).getCollectedDocumentIds());
-
-        final Set<String> collectionMemberIdsToBeAdded = new TreeSet<String>(
-                version.getAdapter(Collection.class).getCollectedDocumentIds());
-        collectionMemberIdsToBeAdded.removeAll(collection.getAdapter(Collection.class).getCollectedDocumentIds());
-
-        int i = 0;
-        while (i < collectionMemberIdsToBeRemoved.size()) {
-            int limit = (int) (((i + CollectionAsynchrnonousQuery.MAX_RESULT) > collectionMemberIdsToBeRemoved.size())
-                    ? collectionMemberIdsToBeRemoved.size() : (i + CollectionAsynchrnonousQuery.MAX_RESULT));
-            RemoveFromCollectionWork work = new RemoveFromCollectionWork(collection.getRepositoryName(),
-                    collection.getId(), new ArrayList<String>(collectionMemberIdsToBeRemoved).subList(i, limit), i);
-            WorkManager workManager = Framework.getLocalService(WorkManager.class);
-            workManager.schedule(work, WorkManager.Scheduling.IF_NOT_SCHEDULED, true);
-
-            i = limit;
-        }
-        i = 0;
-        while (i < collectionMemberIdsToBeAdded.size()) {
-            int limit = (int) (((i + CollectionAsynchrnonousQuery.MAX_RESULT) > collectionMemberIdsToBeAdded.size())
-                    ? collectionMemberIdsToBeAdded.size() : (i + CollectionAsynchrnonousQuery.MAX_RESULT));
-            DuplicateCollectionMemberWork work = new DuplicateCollectionMemberWork(collection.getRepositoryName(),
-                    collection.getId(), new ArrayList<String>(collectionMemberIdsToBeAdded).subList(i, limit), i);
-            WorkManager workManager = Framework.getLocalService(WorkManager.class);
-            workManager.schedule(work, WorkManager.Scheduling.IF_NOT_SCHEDULED, true);
-
-            i = limit;
-        }
     }
 
     @Override
@@ -389,31 +289,10 @@ public class CollectionManagerImpl extends DefaultComponent implements Collectio
         props.put(CollectionConstants.COLLECTION_REF_EVENT_CTX_PROP, new IdRef(collection.getId()));
         fireEvent(documentToBeRemoved, session, CollectionConstants.BEFORE_REMOVED_FROM_COLLECTION, props);
         Collection colAdapter = collection.getAdapter(Collection.class);
-        colAdapter.removeDocument(documentToBeRemoved.getId());
-        collection.getCoreSession().saveDocument(colAdapter.getDocument());
-
-        new UnrestrictedSessionRunner(session) {
-
-            @Override
-            public void run() {
-                doRemoveFromCollection(documentToBeRemoved, collection.getId(), session);
-            }
-
-        }.runUnrestricted();
-    }
-
-    @Override
-    public void doRemoveFromCollection(DocumentModel documentToBeRemoved, String collectionId, CoreSession session) {
-        // We want to disable the following listener on a
-        // collection member when it is removed from a collection
-        disableEvents(documentToBeRemoved);
-
-        CollectionMember docAdapter = documentToBeRemoved.getAdapter(CollectionMember.class);
-        docAdapter.removeFromCollection(collectionId);
-        DocumentModel removedDoc = session.saveDocument(docAdapter.getDocument());
-        Map<String, Serializable> props = new HashMap<>();
-        props.put(CollectionConstants.COLLECTION_REF_EVENT_CTX_PROP, new IdRef(collectionId));
-        fireEvent(removedDoc, session, CollectionConstants.REMOVED_FROM_COLLECTION, props);
+        if (colAdapter.removeDocument(documentToBeRemoved.getId())) {
+            collection.getCoreSession().saveDocument(colAdapter.getDocument());
+            fireEvent(documentToBeRemoved, session, CollectionConstants.REMOVED_FROM_COLLECTION, props);
+        }
     }
 
     @Override

@@ -273,11 +273,8 @@ public class CollectionActionsBean implements Serializable {
         if (doc == null || !collectionManager.isCollectable(doc)) {
             return false;
         }
-        if (collectionManager.isCollected(doc)) {
-            final CoreSession session = (CoreSession) Component.getInstance("documentManager", true);
-            return collectionManager.hasVisibleCollection(doc, session);
-        }
-        return false;
+        final CoreSession session = (CoreSession) Component.getInstance("documentManager", true);
+        return collectionManager.hasVisibleCollection(doc, session);
     }
 
     public boolean isCreateNewCollection() {

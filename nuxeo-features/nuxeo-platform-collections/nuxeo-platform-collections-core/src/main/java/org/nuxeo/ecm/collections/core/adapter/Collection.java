@@ -45,20 +45,30 @@ public class Collection {
         return collected;
     }
 
-    public void addDocument(final String documentId) {
+    /**
+     * @return true if the document was not already in the collection and successfully added else false
+     */
+    public boolean addDocument(final String documentId) {
         List<String> documentIds = getCollectedDocumentIds();
         if (!documentIds.contains(documentId)) {
             documentIds.add(documentId);
+            setDocumentIds(documentIds);
+            return true;
         }
-        setDocumentIds(documentIds);
+        return false;
     }
 
-    public void removeDocument(final String documentId) {
+    /**
+     * @return true if the document was in the collection and removed else false
+     */
+    public boolean removeDocument(final String documentId) {
         List<String> documentIds = getCollectedDocumentIds();
         if (!documentIds.remove(documentId)) {
             log.warn(String.format("Element '%s' is not present in the specified collection.", documentId));
+            return false;
         }
         setDocumentIds(documentIds);
+        return true;
     }
 
     public void setDocumentIds(final List<String> documentIds) {

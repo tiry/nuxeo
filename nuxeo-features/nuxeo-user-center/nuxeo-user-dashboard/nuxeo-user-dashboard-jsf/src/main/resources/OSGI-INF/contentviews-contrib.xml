@@ -209,7 +209,7 @@
     <contentView name="user_favorites">
       <title>title.dashboard.userFavorites</title>
       <translateTitle>true</translateTitle>
-      <pageProvider name="user_favorites">
+      <pageProvider name="default_content_collection">
         <property name="coreSession">#{documentManager}</property>
         <parameter>#{currentUserFavorites.id}</parameter>
       </pageProvider>

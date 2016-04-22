@@ -35,9 +35,9 @@ import org.nuxeo.runtime.api.Framework;
  *
  * @since 5.9.3
  */
-public class RemovedCollectionListener implements PostCommitEventListener {
+public class RemovedCollectionMemberListener implements PostCommitEventListener {
 
-    private static final Log log = LogFactory.getLog(RemovedCollectionListener.class);
+    private static final Log log = LogFactory.getLog(RemovedCollectionMemberListener.class);
 
     @Override
     public void handleEvent(EventBundle bundle) {
@@ -64,17 +64,9 @@ public class RemovedCollectionListener implements PostCommitEventListener {
 
         final CollectionManager collectionManager = Framework.getLocalService(CollectionManager.class);
 
-        final boolean isCollectionRemoved = collectionManager.isCollection(doc);
-        final boolean isCollectionMemberRemoved = collectionManager.isCollected(doc);
-
-        if (isCollectionRemoved || isCollectionMemberRemoved) {
-            if (isCollectionRemoved) {
-                log.trace(String.format("Collection %s removed", doc.getId()));
-                collectionManager.processRemovedCollection(doc);
-            } else if (isCollectionMemberRemoved) {
-                log.trace(String.format("CollectionMember %s removed", doc.getId()));
-                collectionManager.processRemovedCollectionMember(doc);
-            }
+        if (collectionManager.isCollected(doc, docCxt.getCoreSession())) {
+            log.trace(String.format("CollectionMember %s removed", doc.getId()));
+            collectionManager.processRemovedCollectionMember(doc);
         }
     }
 

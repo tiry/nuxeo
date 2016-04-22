@@ -12,20 +12,10 @@
       <emptySentence>label.content.empty.search</emptySentence>
       <translateEmptySentence>true</translateEmptySentence>
 
-      <coreQueryPageProvider>
+      <pageProvider name="default_content_collection">
         <property name="coreSession">#{documentManager}</property>
-        <whereClause docType="Document">
-          <fixedPart>
-            ecm:mixinType != 'HiddenInNavigation' AND
-            ecm:isCheckedInVersion = 0 AND ecm:currentLifeCycleState !=
-            'deleted' AND
-            collectionMember:collectionIds/* = ?
-          </fixedPart>
-        </whereClause>
         <parameter>#{currentUserFavorites.id}</parameter>
-        <sort column="dc:title" ascending="true" />
-        <pageSize>20</pageSize>
-      </coreQueryPageProvider>
+      </pageProvider>
 
       <searchLayout name="collection_content_default" />
 

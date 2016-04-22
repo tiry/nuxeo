@@ -20,7 +20,6 @@ package org.nuxeo.ftest.cap;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -59,8 +58,6 @@ public class ITSearchTabTest extends AbstractTest {
             + new Date().getTime();
 
     private static final String SEARCH_PATH = "/Domain/Workspaces/" + WORKSPACE1_TITLE;
-
-    private static final String MY_FAVORITES_COLLECTION = "My Favorites";
 
     public final static String[] SUBJECTS = { "Comics", "Religion", "Education" };
 
@@ -173,18 +170,6 @@ public class ITSearchTabTest extends AbstractTest {
         searchPage = searchLayoutSubPage.filter();
         resultPanelSubPage = searchPage.getSearchResultsSubPage();
         assertEquals(nbCurrentDoc, resultPanelSubPage.getNumberOfDocumentInCurrentPage());
-
-        // Test Collections Widget
-        resultPanelSubPage = searchPage.getSearchResultsSubPage();
-        searchLayoutSubPage = searchPage.getDefaultSearch();
-        searchLayoutSubPage.selectCollections(new String[] { MY_FAVORITES_COLLECTION });
-        searchPage = searchLayoutSubPage.filter();
-        searchLayoutSubPage = searchPage.getDefaultSearch();
-        resultPanelSubPage = searchPage.getSearchResultsSubPage();
-        assertEquals(0, resultPanelSubPage.getNumberOfDocumentInCurrentPage());
-        List<String> selectedCollections = searchLayoutSubPage.getSelectedCollections();
-        assertEquals(1, selectedCollections.size());
-        assertEquals(MY_FAVORITES_COLLECTION, selectedCollections.get(0));
 
         // save this search
         String saveAsPath = "//input[contains(@id, 'nxw_saveSearch_link')]";

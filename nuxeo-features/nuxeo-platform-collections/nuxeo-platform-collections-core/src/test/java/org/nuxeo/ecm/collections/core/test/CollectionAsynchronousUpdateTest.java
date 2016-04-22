@@ -18,16 +18,12 @@
  */
 package org.nuxeo.ecm.collections.core.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
 import org.nuxeo.ecm.collections.core.adapter.Collection;
-import org.nuxeo.ecm.collections.core.adapter.CollectionMember;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.PathRef;
@@ -36,50 +32,6 @@ import org.nuxeo.ecm.core.api.PathRef;
  * @since 5.9.3
  */
 public class CollectionAsynchronousUpdateTest extends CollectionTestCase {
-
-    @Test
-    public void testUpdateCollectionMemberOnCollectionRemoved() throws InterruptedException {
-
-        List<DocumentModel> files = createTestFiles(session, MAX_CARDINALITY);
-
-        collectionManager.addToNewCollection(COLLECTION_NAME, COLLECTION_DESCRIPTION, files, session);
-
-        final String newlyCreatedCollectionPath = COLLECTION_FOLDER_PATH + "/" + COLLECTION_NAME;
-
-        final DocumentRef newCollectionRef = new PathRef(newlyCreatedCollectionPath);
-
-        assertTrue(session.exists(newCollectionRef));
-
-        DocumentModel newlyCreatedCollection = session.getDocument(newCollectionRef);
-
-        final String newCollectionId = newlyCreatedCollection.getId();
-
-        Collection collectionAdapter = newlyCreatedCollection.getAdapter(Collection.class);
-
-        for (DocumentModel file : files) {
-
-            file = session.getDocument(file.getRef());
-
-            assertTrue(collectionAdapter.getCollectedDocumentIds().contains(file.getId()));
-
-            CollectionMember collectionMemberAdapter = file.getAdapter(CollectionMember.class);
-
-            assertTrue(collectionMemberAdapter.getCollectionIds().contains(newCollectionId));
-        }
-
-        List<DocumentRef> toBePurged = new ArrayList<DocumentRef>();
-        toBePurged.add(newCollectionRef);
-        trashService.purgeDocuments(session, toBePurged);
-
-        awaitCollectionWorks();
-
-        for (DocumentModel file : files) {
-            CollectionMember collectionMemberAdapter = session.getDocument(file.getRef()).getAdapter(
-                    CollectionMember.class);
-
-            assertFalse(collectionMemberAdapter.getCollectionIds().contains(newCollectionId));
-        }
-    }
 
     @Test
     public void testUpdateCollectionOnCollectionMemberRemoved() throws InterruptedException {
@@ -97,10 +49,6 @@ public class CollectionAsynchronousUpdateTest extends CollectionTestCase {
         }
 
         testFile = session.getDocument(testFile.getRef());
-
-        CollectionMember collectionMember = testFile.getAdapter(CollectionMember.class);
-
-        assertEquals(nbCollection, collectionMember.getCollectionIds().size());
 
         List<DocumentRef> toBePurged = new ArrayList<DocumentRef>();
         toBePurged.add(new PathRef(testFile.getPath().toString()));

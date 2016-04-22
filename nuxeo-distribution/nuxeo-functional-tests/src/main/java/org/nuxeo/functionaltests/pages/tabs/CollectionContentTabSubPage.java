@@ -31,10 +31,10 @@ import org.openqa.selenium.support.FindBy;
 public class CollectionContentTabSubPage extends ContentTabSubPage {
 
     @Required
-    @FindBy(id = "collection_content_contentview")
+    @FindBy(id = "default_content_collection")
     WebElement documentContentForm;
 
-    @FindBy(xpath = "//form[@id=\"collection_content_contentview\"]//tbody//tr")
+    @FindBy(xpath = "//form[@id=\"default_content_collection\"]//tbody//tr")
     List<WebElement> childDocumentRows;
 
     public CollectionContentTabSubPage(final WebDriver driver) {

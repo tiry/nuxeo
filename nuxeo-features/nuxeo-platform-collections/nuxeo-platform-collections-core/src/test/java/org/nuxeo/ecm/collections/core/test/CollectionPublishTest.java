@@ -39,16 +39,12 @@ import org.nuxeo.ecm.core.event.EventService;
 import org.nuxeo.ecm.platform.query.api.PageProvider;
 import org.nuxeo.ecm.platform.query.api.PageProviderService;
 import org.nuxeo.ecm.platform.query.nxql.CoreQueryDocumentPageProvider;
-import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
 @RunWith(FeaturesRunner.class)
 @Features(CollectionFeature.class)
-@Deploy({
-    "org.nuxeo.ecm.user.center.dashboard"
-})
 public class CollectionPublishTest {
 
     protected static final String TEST_FILE_NAME = "testFile";
@@ -56,11 +52,11 @@ public class CollectionPublishTest {
     @Inject FavoritesManager favoritesManager;
 
     @Inject CoreSession session;
-    
+
     @Inject PageProviderService pps;
-    
+
     @Inject protected EventService eventService;
-    
+
     @Test public void addToFavoritesAndPublish() throws Exception {
         DocumentModel testWorkspace = session.createDocumentModel("/default-domain/workspaces", "testWorkspace", "Workspace");
         testWorkspace = session.createDocument(testWorkspace);
@@ -69,16 +65,16 @@ public class CollectionPublishTest {
         favoritesManager.addToFavorites(testFile, session);
         testFile = session.getDocument(testFile.getRef());
         assertTrue(favoritesManager.isFavorite(testFile, session));
-        
+
         waitForAsyncCompletion();
         List<SortInfo> sortInfos = null;
         Map<String, Serializable> props = new HashMap<String, Serializable>();
         props.put(CoreQueryDocumentPageProvider.CORE_SESSION_PROPERTY, (Serializable) session);
         DocumentModel favoritesDoc = favoritesManager.getFavorites(null, session);
-        PageProvider<DocumentModel> pageProvider = (PageProvider<DocumentModel>) pps.getPageProvider("user_favorites", sortInfos, null, null, props, new Object[] { favoritesDoc.getId() });
+        PageProvider<DocumentModel> pageProvider = (PageProvider<DocumentModel>) pps.getPageProvider("default_content_collection", sortInfos, null, null, props, new Object[] { favoritesDoc.getId() });
         List<DocumentModel> list = pageProvider.getCurrentPage();
         assertEquals(1, list.size());
-        
+
         PathRef sectionsRootRef = new PathRef("/default-domain/sections");
         assertTrue(session.exists(sectionsRootRef));
         DocumentModel sectionDoc = session.getDocument(sectionsRootRef);

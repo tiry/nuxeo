@@ -20,8 +20,6 @@ package org.nuxeo.ecm.collections.core.test.operations;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -116,6 +114,11 @@ public class RemoveFromCollectionTest extends CollectionOperationsTestCase {
         session.createDocument(doc);
         session.save();
 
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
+        doc = session.getDocument(doc.getRef());
+
         chain = new OperationChain("test-chain");
         chain.add(RemoveFromCollectionOperation.ID).set("collection", collection);
 
@@ -124,13 +127,9 @@ public class RemoveFromCollectionTest extends CollectionOperationsTestCase {
 
         try {
             service.run(ctx, chain);
-        } catch (Exception e) {
-            // Behavior expected
-            return;
         } finally {
             TransactionHelper.commitOrRollbackTransaction();
             TransactionHelper.startTransaction();
         }
-        fail("Document not in collection");
     }
 }
