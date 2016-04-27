@@ -163,9 +163,17 @@ public class CollectionManagerImpl extends DefaultComponent implements Collectio
             throw new IllegalArgumentException(String.format("Document %s is not collectable",
                     documentToBeAdded.getTitle()));
         }
+        checkCanCollectInCollection(collection, session);
+    }
+
+    /**
+     * @since 8.3
+     */
+    protected void checkCanCollectInCollection(final DocumentModel collection,
+            final CoreSession session) {
         if (!isCollection(collection)) {
             throw new IllegalArgumentException(String.format("Document %s is not a collection",
-                    documentToBeAdded.getTitle()));
+                    collection.getTitle()));
         }
         if (!session.hasPermission(collection.getRef(), SecurityConstants.WRITE_PROPERTIES)) {
             throw new DocumentSecurityException(String.format(PERMISSION_ERROR_MESSAGE,
@@ -458,6 +466,18 @@ public class CollectionManagerImpl extends DefaultComponent implements Collectio
         ctx.setProperties(props);
         Event event = ctx.newEvent(eventName);
         eventService.fireEvent(event);
+    }
+
+    @Override
+    public boolean moveMembers(final CoreSession session, final DocumentModel collection, final DocumentModel member1,
+            final DocumentModel member2) {
+        checkCanCollectInCollection(collection, session);;
+        Collection collectionAdapter = collection.getAdapter(Collection.class);
+        boolean result = collectionAdapter.moveMembers(member1.getId(), member2 != null ? member2.getId() : null);
+        if (result) {
+            session.saveDocument(collectionAdapter.getDocument());
+        }
+        return result;
     }
 
 }
