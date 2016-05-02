@@ -73,7 +73,6 @@ import org.nuxeo.ecm.core.io.registry.MarshallingException;
  */
 public class RenderingContextImpl implements RenderingContext {
 
-
     private String baseUrl = DEFAULT_URL;
 
     private Locale locale = DEFAULT_LOCALE;
@@ -171,12 +170,13 @@ public class RenderingContextImpl implements RenderingContext {
         for (String subCategory : subCategories) {
             paramKey += separator + subCategory;
         }
+        paramKey = paramKey.toLowerCase();
         List<Object> dirty = getParameters(paramKey);
         dirty.addAll(getParameters(HEADER_PREFIX + paramKey));
         // backward compatibility, supports X-NXDocumentProperties and X-NXContext-Category
-        if (EMBED_PROPERTIES.equals(paramKey)) {
+        if (EMBED_PROPERTIES.toLowerCase().equals(paramKey)) {
             dirty.addAll(getParameters(MarshallingConstants.DOCUMENT_PROPERTIES_HEADER));
-        } else if ((EMBED_ENRICHERS + separator + ENTITY_TYPE).equals(paramKey)) {
+        } else if ((EMBED_ENRICHERS + separator + ENTITY_TYPE).toLowerCase().equals(paramKey)) {
             dirty.addAll(getParameters(MarshallingConstants.NXCONTENT_CATEGORY_HEADER));
         }
         Set<String> result = new TreeSet<String>();
@@ -204,16 +204,17 @@ public class RenderingContextImpl implements RenderingContext {
         if (StringUtils.isEmpty(name)) {
             return null;
         }
-        List<Object> values = parameters.get(name);
+        String realName = name.toLowerCase().trim();
+        List<Object> values = parameters.get(realName);
         if (values != null && values.size() > 0) {
             @SuppressWarnings("unchecked")
             T value = (T) values.get(0);
             return value;
         }
-        if (WRAPPED_CONTEXT.equals(name)) {
+        if (WRAPPED_CONTEXT.toLowerCase().equals(realName)) {
             return null;
         } else {
-            return getWrappedEntity(name);
+            return getWrappedEntity(realName);
         }
     }
 
@@ -239,7 +240,7 @@ public class RenderingContextImpl implements RenderingContext {
         if (StringUtils.isEmpty(name)) {
             return null;
         }
-        String realName = name;
+        String realName = name.toLowerCase().trim();
         @SuppressWarnings("unchecked")
         List<T> values = (List<T>) parameters.get(realName);
         if (values != null) {
@@ -270,7 +271,7 @@ public class RenderingContextImpl implements RenderingContext {
         if (StringUtils.isEmpty(name)) {
             return;
         }
-        String realName = name;
+        String realName = name.toLowerCase().trim();
         if (values.length == 0) {
             parameters.remove(realName);
             return;
@@ -283,10 +284,11 @@ public class RenderingContextImpl implements RenderingContext {
         if (StringUtils.isEmpty(name)) {
             return;
         }
+        String realName = name.toLowerCase().trim();
         if (values == null) {
-            parameters.remove(name);
+            parameters.remove(realName);
         }
-        parameters.put(name, new CopyOnWriteArrayList<Object>(values));
+        parameters.put(realName, new CopyOnWriteArrayList<Object>(values));
     }
 
     @Override
@@ -299,7 +301,7 @@ public class RenderingContextImpl implements RenderingContext {
         if (StringUtils.isEmpty(name)) {
             return;
         }
-        String realName = name;
+        String realName = name.toLowerCase().trim();
         if (values == null) {
             return;
         }

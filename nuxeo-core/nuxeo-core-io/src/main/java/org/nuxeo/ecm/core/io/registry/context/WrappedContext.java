@@ -158,15 +158,10 @@ public final class WrappedContext {
         String depthKey = DEPTH_CONTROL_KEY_PREFIX + "DEFAULT";
         Integer value = getEntity(ctx, depthKey);
         Integer maxDepth;
-        String depth = ctx.getParameter("depth");
-        if (depth == null) {
+        try {
+            maxDepth = DepthValues.valueOf(ctx.getParameter("depth")).getDepth();
+        } catch (IllegalArgumentException | NullPointerException e) {
             maxDepth = DepthValues.root.getDepth();
-        } else {
-            try {
-                maxDepth = DepthValues.valueOf(ctx.getParameter("depth")).getDepth();
-            } catch (IllegalArgumentException | NullPointerException e) {
-                maxDepth = DepthValues.root.getDepth();
-            }
         }
         if (value == null) {
             value = 0;
