@@ -132,12 +132,19 @@ public class JSONDocumentModelReader implements
             CoreSession session = SessionFactory.getSession(request);
             DocumentModel doc = session.getDocument(new IdRef(uid));
             avoidBlobUpdate(simpleDoc, doc);
-            applyPropertyValues(simpleDoc, doc);
+            applyDirtyPropertyValues(simpleDoc, doc);
             return doc;
+        } else if (type != null) {
+            SimpleDocumentModel createdDoc = new SimpleDocumentModel();
+            if (name != null) {
+                createdDoc.setPathInfo(null, name);
+            }
+            createdDoc.setType(type);
+            applyAllPropertyValues(simpleDoc, createdDoc);
+            return createdDoc;
         } else {
             return simpleDoc;
         }
-
     }
 
     /**
@@ -154,12 +161,19 @@ public class JSONDocumentModelReader implements
         if (uid != null) {
             DocumentModel doc = session.getDocument(new IdRef(uid));
             avoidBlobUpdate(simpleDoc, doc);
-            applyPropertyValues(simpleDoc, doc);
+            applyDirtyPropertyValues(simpleDoc, doc);
             return doc;
+        } else if (type != null) {
+            SimpleDocumentModel createdDoc = new SimpleDocumentModel();
+            if (name != null) {
+                createdDoc.setPathInfo(null, name);
+            }
+            createdDoc.setType(type);
+            applyAllPropertyValues(simpleDoc, createdDoc);
+            return createdDoc;
         } else {
             return simpleDoc;
         }
-
     }
 
     /**
@@ -223,12 +237,25 @@ public class JSONDocumentModelReader implements
         return data == null || "null".equals(data);
     }
 
-    public static void applyPropertyValues(DocumentModel src, DocumentModel dst)
-            throws ClientException {
-        for (String schema : src.getSchemas()) {
+    public static void applyPropertyValues(DocumentModel src, DocumentModel dst) {
+        applyPropertyValues(src, dst, true);
+    }
+
+    public static void applyPropertyValues(DocumentModel src, DocumentModel dst, boolean dirtyOnly) {
+        // if not "dirty only", it handles all the schemas for the given type
+        // so it will trigger the default values initialization
+        if (dirtyOnly) {
+            applyDirtyPropertyValues(src, dst);
+        } else {
+            applyAllPropertyValues(src, dst);
+        }
+    }
+
+    public static void applyDirtyPropertyValues(DocumentModel src, DocumentModel dst) {
+        String[] schemas = src.getSchemas();
+        for (String schema : schemas) {
             DataModelImpl dataModel = (DataModelImpl) dst.getDataModel(schema);
             DataModelImpl fromDataModel = (DataModelImpl) src.getDataModel(schema);
-
             for (String field : fromDataModel.getDirtyFields()) {
                 Serializable data = (Serializable) fromDataModel.getData(field);
                 try {
@@ -237,7 +264,32 @@ public class JSONDocumentModelReader implements
                     } else {
                         dataModel.setData(field, decodeBlob(data));
                     }
-                    // }
+                } catch (PropertyNotFoundException e) {
+                    log.warn(String.format(
+                            "Trying to deserialize unexistent field : {%s}",
+                            field));
+                }
+            }
+        }
+    }
+
+    public static void applyAllPropertyValues(DocumentModel src, DocumentModel dst) {
+        SchemaManager service = Framework.getService(SchemaManager.class);
+        DocumentType type = service.getDocumentType(src.getType());
+        String[] schemas = type.getSchemaNames();
+        for (String schemaName : schemas) {
+            Schema schema = service.getSchema(schemaName);
+            DataModelImpl dataModel = (DataModelImpl) dst.getDataModel(schemaName);
+            DataModelImpl fromDataModel = (DataModelImpl) src.getDataModel(schemaName);
+            for (Field field : schema.getFields()) {
+                String fieldName = field.getName().getLocalName();
+                Serializable data = (Serializable) fromDataModel.getData(fieldName);
+                try {
+                    if (!(dataModel.getDocumentPart().get(fieldName) instanceof BlobProperty)) {
+                        dataModel.setData(fieldName, data);
+                    } else {
+                        dataModel.setData(fieldName, decodeBlob(data));
+                    }
                 } catch (PropertyNotFoundException e) {
                     log.warn(String.format(
                             "Trying to deserialize unexistent field : {%s}",
