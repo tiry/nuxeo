@@ -43,13 +43,20 @@ public class ACLImpl extends ArrayList<ACE>implements ACL {
 
     private static final long serialVersionUID = 5332101749929771434L;
 
+    private static final int DEFAULT_CAPACITY = 10;
+
     private final String name;
 
     private final boolean isReadOnly;
 
-    public ACLImpl(String name, boolean isReadOnly) {
+    public ACLImpl(String name, boolean isReadOnly, int initialCapacity) {
+        super(initialCapacity);
         this.name = name;
         this.isReadOnly = isReadOnly;
+    }
+
+    public ACLImpl(String name, boolean isReadOnly) {
+        this(name, isReadOnly, DEFAULT_CAPACITY);
     }
 
     public ACLImpl() {

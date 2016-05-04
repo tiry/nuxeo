@@ -1357,7 +1357,7 @@ public class DBSSession implements Session {
             if (aceList == null) {
                 continue;
             }
-            ACL acl = new ACLImpl(name);
+            ACL acl = new ACLImpl(name, false, aceList.size());
             for (Serializable aceSer : aceList) {
                 State aceMap = (State) aceSer;
                 String username = (String) aceMap.get(KEY_ACE_USER);
