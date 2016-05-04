@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2013 Nuxeo SA (http://nuxeo.com/) and others.
+ * (C) Copyright 2013-2016 Nuxeo SA (http://nuxeo.com/) and others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  *
  * Contributors:
  *     dmetzler
+ *     Gabriel Barata <gbarata@nuxeo.com>
  */
 package org.nuxeo.ecm.restapi.test;
 
@@ -125,7 +126,6 @@ public class RestServerInit implements RepositoryInit {
         if (um != null) {
             createUsersAndGroups(um);
         }
-
     }
 
     private void createUsersAndGroups(UserManager um) throws UserAlreadyExistsException,

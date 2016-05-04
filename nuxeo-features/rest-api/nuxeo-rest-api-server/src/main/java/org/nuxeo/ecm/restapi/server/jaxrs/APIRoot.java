@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 Nuxeo SA (http://nuxeo.com/) and others.
+ * (C) Copyright 2014-2016 Nuxeo SA (http://nuxeo.com/) and others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  *
  * Contributors:
  *     dmetzler
+ *     Gabriel Barata <gbarata@nuxeo.com>
  */
 
 package org.nuxeo.ecm.restapi.server.jaxrs;
@@ -116,5 +117,13 @@ public class APIRoot extends ModuleRoot {
     @Path("/ext/{otherPath}")
     public Object route(@PathParam("otherPath") String otherPath) {
         return newObject(otherPath);
+    }
+
+    /**
+     * @since 8.3
+     */
+    @Path("/search")
+    public Object doGetSearch() {
+        return newObject("search");
     }
 }

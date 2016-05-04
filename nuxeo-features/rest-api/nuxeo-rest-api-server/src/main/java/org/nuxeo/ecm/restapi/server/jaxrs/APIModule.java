@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2013 Nuxeo SA (http://nuxeo.com/) and others.
+ * (C) Copyright 2013-2016 Nuxeo SA (http://nuxeo.com/) and others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  *
  * Contributors:
  *     dmetzler
+ *     Gabriel Barata <gbarata@nuxeo.com>
  */
 package org.nuxeo.ecm.restapi.server.jaxrs;
 
@@ -27,6 +28,9 @@ import org.nuxeo.ecm.automation.jaxrs.io.operations.MultiPartFormRequestReader;
 import org.nuxeo.ecm.automation.jaxrs.io.operations.MultiPartRequestReader;
 import org.nuxeo.ecm.restapi.jaxrs.io.conversion.ConversionScheduledWriter;
 import org.nuxeo.ecm.restapi.jaxrs.io.conversion.ConversionStatusWriter;
+import org.nuxeo.ecm.restapi.jaxrs.io.search.SavedSearchListWriter;
+import org.nuxeo.ecm.restapi.jaxrs.io.search.SavedSearchRequestReader;
+import org.nuxeo.ecm.restapi.jaxrs.io.search.SavedSearchWriter;
 import org.nuxeo.ecm.restapi.jaxrs.io.types.DocumentTypeWriter;
 import org.nuxeo.ecm.restapi.jaxrs.io.types.DocumentTypesWriter;
 import org.nuxeo.ecm.restapi.jaxrs.io.types.FacetWriter;

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.ecm.restapi.savedsearch.marshallers" version="1.0.0">
+  <documentation>
+    Core IO registered marshallers set.
+  </documentation>
+  <extension target="org.nuxeo.ecm.core.io.MarshallerRegistry" point="marshallers">
+    <register class="org.nuxeo.ecm.restapi.jaxrs.io.search.SavedSearchRequestReader" enable="true" />
+    <register class="org.nuxeo.ecm.restapi.jaxrs.io.search.SavedSearchWriter" enable="true" />
+    <register class="org.nuxeo.ecm.restapi.jaxrs.io.search.SavedSearchListReader" enable="true" />
+    <register class="org.nuxeo.ecm.restapi.jaxrs.io.search.SavedSearchListWriter" enable="true" />
+  </extension>
+</component>
