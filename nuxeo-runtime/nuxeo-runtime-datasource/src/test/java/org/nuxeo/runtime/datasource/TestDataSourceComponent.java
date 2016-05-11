@@ -34,12 +34,18 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.nuxeo.runtime.api.Framework;
-import org.nuxeo.runtime.model.RuntimeContext;
-import org.nuxeo.runtime.test.NXRuntimeTestCase;
+import org.junit.runner.RunWith;
+import org.nuxeo.runtime.test.runner.ConditionalIgnoreRule;
+import org.nuxeo.runtime.test.runner.ContainerFeature;
+import org.nuxeo.runtime.test.runner.Features;
+import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
+import org.nuxeo.runtime.test.runner.RuntimeFeature;
 import org.nuxeo.runtime.transaction.TransactionHelper;
 
-public class TestDataSourceComponent extends NXRuntimeTestCase {
+@RunWith(FeaturesRunner.class)
+@Features({ ContainerFeature.class, RuntimeFeature.class})
+public class TestDataSourceComponent {
 
     protected static final ClassLoader LOADER = TestDataSourceComponent.class.getClassLoader();
 
