@@ -81,21 +81,14 @@
       <groupId>org.nuxeo.ecm.distribution</groupId>
       <artifactId>nuxeo-distribution-resources</artifactId>
       <type>zip</type>
-      <classifier>templates-common</classifier>
+      <classifier>templates-cap</classifier>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.nuxeo.ecm.distribution</groupId>
       <artifactId>nuxeo-distribution-resources</artifactId>
       <type>zip</type>
-      <classifier>templates-tomcat</classifier>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.nuxeo.ecm.distribution</groupId>
-      <artifactId>nuxeo-distribution-resources</artifactId>
-      <type>zip</type>
-      <classifier>templates-tomcat-coreserver</classifier>
+      <classifier>templates-coreserver</classifier>
       <scope>provided</scope>
     </dependency>
     <dependency>

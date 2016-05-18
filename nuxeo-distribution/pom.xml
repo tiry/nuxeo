@@ -216,21 +216,14 @@
         <artifactId>nuxeo-distribution-resources</artifactId>
         <version>${nuxeo.distribution.version}</version>
         <type>zip</type>
-        <classifier>templates-common</classifier>
+        <classifier>templates-cap</classifier>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.distribution</groupId>
         <artifactId>nuxeo-distribution-resources</artifactId>
         <version>${nuxeo.distribution.version}</version>
         <type>zip</type>
-        <classifier>templates-tomcat</classifier>
-      </dependency>
-      <dependency>
-        <groupId>org.nuxeo.ecm.distribution</groupId>
-        <artifactId>nuxeo-distribution-resources</artifactId>
-        <version>${nuxeo.distribution.version}</version>
-        <type>zip</type>
-        <classifier>templates-tomcat-coreserver</classifier>
+        <classifier>templates-coreserver</classifier>
       </dependency>
       <dependency>
         <groupId>org.nuxeo.ecm.distribution</groupId>

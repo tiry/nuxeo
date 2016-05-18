@@ -25,22 +25,13 @@
     <antcall target="build-resources">
       <param name="distribution" value="root" />
     </antcall>
-    <antcall target="build-resources">
-      <param name="distribution" value="jetty-base" />
-    </antcall>
-    <antcall target="build-resources">
-      <param name="distribution" value="templates-common" />
-    </antcall>
     <antcall target="copy-resources-with-jdbc-lib">
-      <param name="distribution" value="templates-tomcat" />
+      <param name="distribution" value="templates-cap" />
       <param name="h2-lib-dir" value="nxserver/lib" />
       <param name="derby-lib-dir" value="nxserver/lib" />
     </antcall>
     <antcall target="build-resources">
-      <param name="distribution" value="templates-tomcat-coreserver" />
-    </antcall>
-    <antcall target="build-resources">
-      <param name="distribution" value="templates-jetty" />
+      <param name="distribution" value="templates-coreserver" />
     </antcall>
   </target>
 

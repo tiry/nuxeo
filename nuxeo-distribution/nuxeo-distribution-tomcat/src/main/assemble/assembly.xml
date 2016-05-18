@@ -90,8 +90,7 @@
     </unzip>
 
     <unzip dest="${tomcat}/templates" overwrite="true">
-      <artifact:file key="org.nuxeo.ecm.distribution:nuxeo-distribution-resources:${nuxeo.distribution.version}:zip:templates-common" />
-      <artifact:file key="org.nuxeo.ecm.distribution:nuxeo-distribution-resources:${nuxeo.distribution.version}:zip:templates-tomcat" />
+      <artifact:file key="org.nuxeo.ecm.distribution:nuxeo-distribution-resources:${nuxeo.distribution.version}:zip:templates-cap" />
     </unzip>
 
     <echo message="tomcat.version=${tomcat.version}" append="true" file="${tomcat}/templates/nuxeo.defaults" />
@@ -121,7 +120,7 @@
 
     <!-- Complementary templates for CoreServer -->
     <unzip dest="${distribution.dir}/templates" overwrite="true">
-      <artifact:file key="org.nuxeo.ecm.distribution:nuxeo-distribution-resources::zip:templates-tomcat-coreserver" />
+      <artifact:file key="org.nuxeo.ecm.distribution:nuxeo-distribution-resources::zip:templates-coreserver" />
     </unzip>
 
     <delete failonerror="false">
