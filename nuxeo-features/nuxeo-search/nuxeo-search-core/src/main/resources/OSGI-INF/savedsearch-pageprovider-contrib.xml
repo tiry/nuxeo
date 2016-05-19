@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.ecm.platform.search.pageproviders">
+
+  <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService"
+             point="providers">
+
+    <coreQueryPageProvider name="GET_SAVED_SEARCHES">
+      <pattern>
+        SELECT * FROM Document WHERE ecm:mixinType = 'SavedSearchX'
+      </pattern>
+      <pageSize>50</pageSize>
+    </coreQueryPageProvider>
+
+    <coreQueryPageProvider name="GET_SAVED_SEARCHES_FOR_PAGE_PROVIDER">
+      <pattern>
+        SELECT * FROM Document WHERE ecm:mixinType = 'SavedSearchX' AND
+        ss:search_type = 'pageProvider' AND ss:lang_or_provider_name = :pageProvider
+      </pattern>
+      <pageSize>50</pageSize>
+    </coreQueryPageProvider>
+
+  </extension>
+
+</component>

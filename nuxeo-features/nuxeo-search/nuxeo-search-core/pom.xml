@@ -3,22 +3,21 @@
 
   <parent>
     <groupId>org.nuxeo.ecm.platform</groupId>
-    <artifactId>nuxeo-rest-api-parent</artifactId>
+    <artifactId>nuxeo-search-parent</artifactId>
     <version>8.3-SNAPSHOT</version>
   </parent>
 
-  <artifactId>nuxeo-rest-api-io</artifactId>
-  <name>Nuxeo Rest API io</name>
-  <description>io part of the Nuxeo REST API</description>
+  <artifactId>nuxeo-search-core</artifactId>
+  <name>Nuxeo Search Core</name>
+  <description>Nuxeo Search Core</description>
   <dependencies>
-
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>org.nuxeo.ecm.core</groupId>
+      <artifactId>nuxeo-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.nuxeo.ecm.automation</groupId>
-      <artifactId>nuxeo-automation-io</artifactId>
+      <groupId>org.nuxeo.ecm.platform</groupId>
+      <artifactId>nuxeo-platform-userworkspace-api</artifactId>
     </dependency>
   </dependencies>
 </project>
