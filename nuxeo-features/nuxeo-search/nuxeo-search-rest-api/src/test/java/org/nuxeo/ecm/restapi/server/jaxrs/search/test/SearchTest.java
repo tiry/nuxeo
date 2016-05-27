@@ -19,9 +19,12 @@
 package org.nuxeo.ecm.restapi.server.jaxrs.search.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.MultivaluedMap;
@@ -49,17 +52,17 @@ import org.nuxeo.runtime.test.runner.LocalDeploy;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-
 /**
  * Test the various ways to perform queries via search endpoint.
  *
  * @since 8.3
  */
 @RunWith(FeaturesRunner.class)
-@Features({RestServerFeature.class, PlatformFeature.class})
+@Features({ RestServerFeature.class, PlatformFeature.class })
 @Jetty(port = 18090)
 @Deploy({ "org.nuxeo.ecm.platform.userworkspace.core", "org.nuxeo.ecm.platform.userworkspace.types",
-    "org.nuxeo.ecm.platform.restapi.server.search", "org.nuxeo.ecm.platform.search.core"})
+        "org.nuxeo.ecm.platform.webapp.types", "org.nuxeo.ecm.platform.contentview.jsf", "org.nuxeo.search.ui",
+        "org.nuxeo.ecm.platform.search.core", "org.nuxeo.ecm.platform.restapi.server.search" })
 @LocalDeploy("org.nuxeo.ecm.platform.restapi.test:pageprovider-test-contrib.xml")
 @RepositoryConfig(cleanup = Granularity.METHOD, init = RestServerInit.class)
 public class SearchTest extends BaseTest {
@@ -97,7 +100,7 @@ public class SearchTest extends BaseTest {
         // Then I get document listing as result
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
-        assertEquals(19, getLogEntries(node).size());
+        assertEquals(20, getLogEntries(node).size());
 
         // Given parameters as page size and ordered parameters
         queryParams.clear();
@@ -121,9 +124,9 @@ public class SearchTest extends BaseTest {
         DocumentModel folder = RestServerInit.getFolder(1, session);
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add("query", "SELECT * FROM Document WHERE " + "ecm:parentId = :parentIdVar AND\n"
-            + "        ecm:mixinType != 'HiddenInNavigation' AND dc:title " + "IN (:note1,:note2)\n"
-            + "        AND ecm:isCheckedInVersion = 0 AND " + "ecm:currentLifeCycleState !=\n"
-            + "        'deleted'");
+                + "        ecm:mixinType != 'HiddenInNavigation' AND dc:title " + "IN (:note1,:note2)\n"
+                + "        AND ecm:isCheckedInVersion = 0 AND " + "ecm:currentLifeCycleState !=\n"
+                + "        'deleted'");
         queryParams.add("note1", "Note 1");
         queryParams.add("note2", "Note 2");
         queryParams.add("parentIdVar", folder.getId());
@@ -157,7 +160,8 @@ public class SearchTest extends BaseTest {
         queryParams.add("note1", "Note 1");
         queryParams.add("note2", "Note 2");
         queryParams.add("parentIdVar", folder.getId());
-        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderExecutePath("TEST_PP_PARAM"), queryParams);
+        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderExecutePath("TEST_PP_PARAM"),
+                queryParams);
 
         // Then I get document listing as result
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -167,22 +171,21 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanPerformPageProviderWithNamedParametersInvalid() throws Exception {
-        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderExecutePath(
-            "namedParamProviderInvalid"));
+        ClientResponse response = getResponse(RequestType.GET,
+                getSearchPageProviderExecutePath("namedParamProviderInvalid"));
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(
-            "Failed to execute query: SELECT * FROM Document where dc:title=:foo, Lexical Error: Illegal character <:> at offset 38",
-            getErrorMessage(node));
+                "Failed to execute query: SELECT * FROM Document where dc:title=:foo, Lexical Error: Illegal character <:> at offset 38",
+                getErrorMessage(node));
     }
 
     @Test
     public void iCanPerformPageProviderWithNamedParametersAndDoc() throws Exception {
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add("np:title", "Folder 0");
-        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderExecutePath(
-                "namedParamProviderWithDoc"),
-            queryParams);
+        ClientResponse response = getResponse(RequestType.GET,
+                getSearchPageProviderExecutePath("namedParamProviderWithDoc"), queryParams);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(1, getLogEntries(node).size());
@@ -192,23 +195,21 @@ public class SearchTest extends BaseTest {
     public void iCanPerformPageProviderWithNamedParametersAndDocInvalid() throws Exception {
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add("np:title", "Folder 0");
-        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderExecutePath(
-                "namedParamProviderWithDocInvalid"),
-            queryParams);
+        ClientResponse response = getResponse(RequestType.GET,
+                getSearchPageProviderExecutePath("namedParamProviderWithDocInvalid"), queryParams);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(
-            "Failed to execute query: SELECT * FROM Document where dc:title=:foo, Lexical Error: Illegal character <:> at offset 38",
-            getErrorMessage(node));
+                "Failed to execute query: SELECT * FROM Document where dc:title=:foo, Lexical Error: Illegal character <:> at offset 38",
+                getErrorMessage(node));
     }
 
     @Test
     public void iCanPerformPageProviderWithNamedParametersInWhereClause() throws Exception {
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add("parameter1", "Folder 0");
-        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderExecutePath(
-                "namedParamProviderWithWhereClause"),
-            queryParams);
+        ClientResponse response = getResponse(RequestType.GET,
+                getSearchPageProviderExecutePath("namedParamProviderWithWhereClause"), queryParams);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(1, getLogEntries(node).size());
@@ -225,14 +226,14 @@ public class SearchTest extends BaseTest {
         MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
         queryParams.add("np:title", "Folder 0");
         ClientResponse response = getResponse(RequestType.GET,
-            getSearchPageProviderExecutePath("namedParamProviderWithWhereClauseWithDoc"), queryParams);
+                getSearchPageProviderExecutePath("namedParamProviderWithWhereClauseWithDoc"), queryParams);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(1, getLogEntries(node).size());
 
         // retry without params
-        response = getResponse(RequestType.GET, getSearchPageProviderExecutePath(
-            "namedParamProviderWithWhereClauseWithDoc"));
+        response = getResponse(RequestType.GET,
+                getSearchPageProviderExecutePath("namedParamProviderWithWhereClauseWithDoc"));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         node = mapper.readTree(response.getEntityInputStream());
         assertEquals(2, getLogEntries(node).size());
@@ -245,9 +246,8 @@ public class SearchTest extends BaseTest {
         queryParams.add("np:isCheckedIn", Boolean.FALSE.toString());
         queryParams.add("np:dateMin", "2007-01-30 01:02:03+04:00");
         queryParams.add("np:dateMax", "2007-03-23 01:02:03+04:00");
-        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderExecutePath(
-                "namedParamProviderComplex"),
-            queryParams);
+        ClientResponse response = getResponse(RequestType.GET,
+                getSearchPageProviderExecutePath("namedParamProviderComplex"), queryParams);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(1, getLogEntries(node).size());
@@ -255,13 +255,15 @@ public class SearchTest extends BaseTest {
         // remove filter on dates
         queryParams.remove("np:dateMin");
         queryParams.remove("np:dateMax");
-        response = getResponse(RequestType.GET, getSearchPageProviderExecutePath("namedParamProviderComplex"), queryParams);
+        response = getResponse(RequestType.GET, getSearchPageProviderExecutePath("namedParamProviderComplex"),
+                queryParams);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         node = mapper.readTree(response.getEntityInputStream());
         assertEquals(1, getLogEntries(node).size());
 
         queryParams.remove("parameter1");
-        response = getResponse(RequestType.GET, getSearchPageProviderExecutePath("namedParamProviderComplex"), queryParams);
+        response = getResponse(RequestType.GET, getSearchPageProviderExecutePath("namedParamProviderComplex"),
+                queryParams);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         node = mapper.readTree(response.getEntityInputStream());
         assertEquals(2, getLogEntries(node).size());
@@ -269,8 +271,7 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanGetPageProviderDefinition() throws IOException {
-        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderPath(
-            "namedParamProviderComplex"));
+        ClientResponse response = getResponse(RequestType.GET, getSearchPageProviderPath("namedParamProviderComplex"));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         PageProviderService pageProviderService = Framework.getLocalService(PageProviderService.class);
@@ -280,18 +281,10 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanSaveSearchByQuery() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"title\": \"search by query\"," +
-                "\"searchType\": \"query\"," +
-                "\"langOrProviderName\": \"NXQL\"," +
-                "\"params\": {" +
-                    "\"pageSize\": \"2\"," +
-                    "\"queryParams\": \"$currentUser\"," +
-                    "\"query\": \"select * from Document where dc:creator = ?\"" +
-                "}" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"title\": \"search by query\","
+                + "\"searchType\": \"query\"," + "\"langOrProviderName\": \"NXQL\"," + "\"params\": {"
+                + "\"pageSize\": \"2\"," + "\"queryParams\": \"$currentUser\","
+                + "\"query\": \"select * from Document where dc:creator = ?\"" + "}" + "}";
 
         ClientResponse response = getResponse(RequestType.POST, SAVED_SEARCH_PATH, data);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -311,16 +304,9 @@ public class SearchTest extends BaseTest {
     @Test
     public void iCanSaveSearchByPageProvider() throws IOException {
         DocumentModel folder = RestServerInit.getFolder(1, session);
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"title\": \"search by page provider\"," +
-                "\"searchType\": \"pageProvider\"," +
-                "\"langOrProviderName\": \"TEST_PP\"," +
-                "\"params\": {" +
-                    "\"queryParams\": \"" + folder.getId() + "\"" +
-                "}" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"title\": \"search by page provider\","
+                + "\"searchType\": \"pageProvider\"," + "\"langOrProviderName\": \"TEST_PP\"," + "\"params\": {"
+                + "\"queryParams\": \"" + folder.getId() + "\"" + "}" + "}";
 
         ClientResponse response = getResponse(RequestType.POST, SAVED_SEARCH_PATH, data);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
@@ -334,53 +320,38 @@ public class SearchTest extends BaseTest {
     }
 
     @Test
-    public void iCanSaveSearchByPageProviderSeveralParams() throws IOException {
-        String data =
-            "{\n" +
-            "   \"entity-type\":\"savedSearch\",\n" +
-            "   \"title\":\"search by page provider 2\",\n" +
-            "   \"searchType\":\"pageProvider\",\n" +
-            "   \"langOrProviderName\":\"default_search\",\n" +
-            "   \"params\":{  \n" +
-            "      \"pageSize\":\"2\",\n" +
-            "      \"ecm_fulltext\":\"test*\",\n" +
-            "      \"dc_modified_agg\":[  \n" +
-            "         \"last24h\",\n" +
-            "         \"lastMonth\"\n" +
-            "      ]\n" +
-            "   }\n" +
-            "}";
-        ClientResponse response = getResponse(RequestType.POST, SAVED_SEARCH_PATH, data);
+    public void iCanSaveDefaultSearch() throws IOException {
+        String data = "{\n" + "   \"entity-type\":\"savedSearch\",\n" + "   \"title\":\"search by page provider 2\",\n"
+                + "   \"searchType\":\"pageProvider\",\n" + "   \"langOrProviderName\":\"default_search\",\n"
+                + "   \"params\":{  \n" + "      \"pageSize\":\"2\",\n" + "      \"ecm_fulltext\":\"Note*\",\n"
+                + "      \"dc_modified_agg\": \"[\\\"last24h\\\"]\"\n" + "   }\n" + "}";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-nxdocumentproperties", "*");
+        ClientResponse response = getResponse(RequestType.POST, SAVED_SEARCH_PATH, data, headers);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals("search by page provider 2", node.get("title").getTextValue());
         assertEquals("pageProvider", node.get("searchType").getTextValue());
         assertEquals("default_search", node.get("langOrProviderName").getTextValue());
-        assertTrue(node.get("params").isContainerNode());
-        assertTrue(node.get("params").has("pageSize"));
-        assertEquals("2", node.get("params").get("pageSize").getTextValue());
-        assertTrue(node.get("params").has("ecm_fulltext"));
-        assertEquals("test*", node.get("params").get("ecm_fulltext").getTextValue());
-        assertTrue(node.get("params").has("dc_modified_agg"));
-        assertTrue(node.get("params").get("dc_modified_agg").isArray());
-        assertEquals(2, node.get("params").get("dc_modified_agg").size());
-        assertEquals("last24h", node.get("params").get("dc_modified_agg").get(0).getTextValue());
-        assertEquals("lastMonth", node.get("params").get("dc_modified_agg").get(1).getTextValue());
+        assertFalse(node.has("params"));
+        assertTrue(node.get("searchDocument").isContainerNode());
+        node = node.get("searchDocument");
+        assertEquals("DefaultSearch", node.get("type").getTextValue());
+        assertTrue(node.get("properties").isContainerNode());
+        node = node.get("properties");
+        assertEquals(2, node.get("cvd:pageSize").getIntValue());
+        assertEquals("Note*", node.get("defaults:ecm_fulltext").getTextValue());
+        assertTrue(node.get("defaults:dc_modified_agg").isContainerNode());
+        assertEquals(1, node.get("defaults:dc_modified_agg").size());
+        assertEquals("last24h", node.get("defaults:dc_modified_agg").get(0).getTextValue());
     }
 
     @Test
     public void iCantSaveSearchInvalidTitle() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"searchType\": \"query\"," +
-                "\"langOrProviderName\": \"NXQL\"," +
-                "\"params\": {" +
-                    "\"pageSize\": \"2\"," +
-                    "\"queryParams\": \"$currentUser\"," +
-                    "\"query\": \"select * from Document where dc:creator = ?\"" +
-                "}" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"searchType\": \"query\","
+                + "\"langOrProviderName\": \"NXQL\"," + "\"params\": {" + "\"pageSize\": \"2\","
+                + "\"queryParams\": \"$currentUser\"," + "\"query\": \"select * from Document where dc:creator = ?\""
+                + "}" + "}";
 
         ClientResponse response = getResponse(RequestType.POST, SAVED_SEARCH_PATH, data);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -390,17 +361,10 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCantSaveSearchInvalidLangOrProviderName() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"title\": \"search by query\"," +
-                "\"searchType\": \"query\"," +
-                "\"params\": {" +
-                    "\"pageSize\": \"2\"," +
-                    "\"queryParams\": \"$currentUser\"," +
-                    "\"query\": \"select * from Document where dc:creator = ?\"" +
-                "}" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"title\": \"search by query\","
+                + "\"searchType\": \"query\"," + "\"params\": {" + "\"pageSize\": \"2\","
+                + "\"queryParams\": \"$currentUser\"," + "\"query\": \"select * from Document where dc:creator = ?\""
+                + "}" + "}";
 
         ClientResponse response = getResponse(RequestType.POST, SAVED_SEARCH_PATH, data);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -410,7 +374,8 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanGetSavedSearchByQuery() throws IOException {
-        ClientResponse response = getResponse(RequestType.GET, getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)));
+        ClientResponse response = getResponse(RequestType.GET,
+                getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals("my saved search 1", node.get("title").getTextValue());
@@ -427,7 +392,8 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanGetSavedSearchByPageProvider() throws IOException {
-        ClientResponse response = getResponse(RequestType.GET, getSavedSearchPath(RestServerInit.getSavedSearchId(2, session)));
+        ClientResponse response = getResponse(RequestType.GET,
+                getSavedSearchPath(RestServerInit.getSavedSearchId(2, session)));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals("my saved search 2", node.get("title").getTextValue());
@@ -449,20 +415,13 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanUpdateSearchByQuery() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"title\": \"my search 1\"," +
-                "\"searchType\": \"query\"," +
-                "\"langOrProviderName\": \"NXQL\"," +
-                "\"params\": {" +
-                    "\"pageSize\": \"1\"," +
-                    "\"queryParams\": \"$currentUser\"," +
-                    "\"query\": \"select * from Document where dc:creator = ?\"" +
-                "}" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"title\": \"my search 1\","
+                + "\"searchType\": \"query\"," + "\"langOrProviderName\": \"NXQL\"," + "\"params\": {"
+                + "\"pageSize\": \"1\"," + "\"queryParams\": \"$currentUser\","
+                + "\"query\": \"select * from Document where dc:creator = ?\"" + "}" + "}";
 
-        ClientResponse response = getResponse(RequestType.PUT, getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)), data);
+        ClientResponse response = getResponse(RequestType.PUT,
+                getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)), data);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals("my search 1", node.get("title").getTextValue());
@@ -479,16 +438,11 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanUpdateSearchByPageProvider() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"title\": \"my search 2\"," +
-                "\"searchType\": \"pageProvider\"," +
-                "\"langOrProviderName\": \"TEST_PP\"" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"title\": \"my search 2\","
+                + "\"searchType\": \"pageProvider\"," + "\"langOrProviderName\": \"TEST_PP\"" + "}";
 
-        ClientResponse response = getResponse(RequestType.PUT, getSavedSearchPath(
-            RestServerInit.getSavedSearchId(2, session)), data);
+        ClientResponse response = getResponse(RequestType.PUT,
+                getSavedSearchPath(RestServerInit.getSavedSearchId(2, session)), data);
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals("my search 2", node.get("title").getTextValue());
@@ -502,18 +456,10 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCantUpdateSearchInvalidId() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"title\": \"my search 1\"," +
-                "\"searchType\": \"query\"," +
-                "\"langOrProviderName\": \"NXQL\"," +
-                "\"params\": {" +
-                    "\"pageSize\": \"1\"," +
-                    "\"queryParams\": \"$currentUser\"," +
-                    "\"query\": \"select * from Document where dc:creator = ?\"" +
-                "}" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"title\": \"my search 1\","
+                + "\"searchType\": \"query\"," + "\"langOrProviderName\": \"NXQL\"," + "\"params\": {"
+                + "\"pageSize\": \"1\"," + "\"queryParams\": \"$currentUser\","
+                + "\"query\": \"select * from Document where dc:creator = ?\"" + "}" + "}";
 
         ClientResponse response = getResponse(RequestType.PUT, getSavedSearchPath("-1"), data);
         assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
@@ -523,18 +469,12 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCantUpdateSearchInvalidTitle() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"searchType\": \"query\"," +
-                "\"langOrProviderName\": \"NXQL\"," +
-                "\"params\": {" +
-                    "\"pageSize\": \"1\"," +
-                    "\"queryParams\": \"$currentUser\"," +
-                    "\"query\": \"select * from Document where dc:creator = ?\"" +
-                "}" +
-            "}";
-        ClientResponse response = getResponse(RequestType.PUT, getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)), data);
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"searchType\": \"query\","
+                + "\"langOrProviderName\": \"NXQL\"," + "\"params\": {" + "\"pageSize\": \"1\","
+                + "\"queryParams\": \"$currentUser\"," + "\"query\": \"select * from Document where dc:creator = ?\""
+                + "}" + "}";
+        ClientResponse response = getResponse(RequestType.PUT,
+                getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)), data);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals("title cannot be empty", getErrorMessage(node));
@@ -542,19 +482,13 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCantUpdateSearchInvalidLangOrProviderName() throws IOException {
-        String data =
-            "{" +
-                "\"entity-type\": \"savedSearch\"," +
-                "\"title\": \"my search 1\"," +
-                "\"searchType\": \"query\"," +
-                "\"params\": {" +
-                    "\"pageSize\": \"1\"," +
-                    "\"queryParams\": \"$currentUser\"," +
-                    "\"query\": \"select * from Document where dc:creator = ?\"" +
-                "}" +
-            "}";
+        String data = "{" + "\"entity-type\": \"savedSearch\"," + "\"title\": \"my search 1\","
+                + "\"searchType\": \"query\"," + "\"params\": {" + "\"pageSize\": \"1\","
+                + "\"queryParams\": \"$currentUser\"," + "\"query\": \"select * from Document where dc:creator = ?\""
+                + "}" + "}";
 
-        ClientResponse response = getResponse(RequestType.PUT, getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)), data);
+        ClientResponse response = getResponse(RequestType.PUT,
+                getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)), data);
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals("language or provider name cannot be empty", getErrorMessage(node));
@@ -562,8 +496,8 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanDeleteSearch() throws IOException {
-        ClientResponse response = getResponse(RequestType.DELETE, getSavedSearchPath(RestServerInit.getSavedSearchId(1,
-            session)));
+        ClientResponse response = getResponse(RequestType.DELETE,
+                getSavedSearchPath(RestServerInit.getSavedSearchId(1, session)));
         assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
     }
 
@@ -575,7 +509,8 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanExecuteSavedSearchByQuery() throws IOException {
-        ClientResponse response = getResponse(RequestType.GET, getSavedSearchExecutePath(RestServerInit.getSavedSearchId(1, session)));
+        ClientResponse response = getResponse(RequestType.GET,
+                getSavedSearchExecutePath(RestServerInit.getSavedSearchId(1, session)));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(2, getLogEntries(node).size());
@@ -583,7 +518,17 @@ public class SearchTest extends BaseTest {
 
     @Test
     public void iCanExecuteSavedSearchByPageProvider() throws IOException {
-        ClientResponse response = getResponse(RequestType.GET, getSavedSearchExecutePath(RestServerInit.getSavedSearchId(2, session)));
+        ClientResponse response = getResponse(RequestType.GET,
+                getSavedSearchExecutePath(RestServerInit.getSavedSearchId(2, session)));
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        JsonNode node = mapper.readTree(response.getEntityInputStream());
+        assertEquals(2, getLogEntries(node).size());
+    }
+
+    @Test
+    public void iCanExecuteDefaultSavedSearch() throws IOException {
+        ClientResponse response = getResponse(RequestType.GET,
+                getSavedSearchExecutePath(RestServerInit.getSavedSearchId(3, session)));
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
         JsonNode node = mapper.readTree(response.getEntityInputStream());
         assertEquals(2, getLogEntries(node).size());
@@ -597,7 +542,7 @@ public class SearchTest extends BaseTest {
         assertTrue(node.isContainerNode());
         assertTrue(node.has("entries"));
         assertTrue(node.get("entries").isArray());
-        assertEquals(2, node.get("entries").size());
+        assertEquals(3, node.get("entries").size());
     }
 
     @Test
@@ -610,8 +555,8 @@ public class SearchTest extends BaseTest {
         assertTrue(node.isContainerNode());
         assertTrue(node.has("entries"));
         assertTrue(node.get("entries").isArray());
-        assertEquals(1, node.get("entries").size());
-        node = node.get("entries").get(0);
+        assertEquals(2, node.get("entries").size());
+        node = node.get("entries").get(1);
         assertEquals("my saved search 2", node.get("title").getTextValue());
         assertEquals("pageProvider", node.get("searchType").getTextValue());
         assertEquals("TEST_PP", node.get("langOrProviderName").getTextValue());

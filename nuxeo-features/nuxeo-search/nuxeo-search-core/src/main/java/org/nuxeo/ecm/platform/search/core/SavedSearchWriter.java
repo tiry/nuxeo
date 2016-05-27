@@ -18,14 +18,20 @@
  */
 package org.nuxeo.ecm.platform.search.core;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.nuxeo.ecm.core.io.registry.reflect.Instantiations.SINGLETON;
 import static org.nuxeo.ecm.core.io.registry.reflect.Priorities.REFERENCE;
 
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.codehaus.jackson.JsonGenerator;
+import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.io.marshallers.json.ExtensibleEntityJsonWriter;
+import org.nuxeo.ecm.core.io.marshallers.json.OutputStreamWithJsonWriter;
+import org.nuxeo.ecm.core.io.marshallers.json.enrichers.Enriched;
+import org.nuxeo.ecm.core.io.registry.Writer;
 import org.nuxeo.ecm.core.io.registry.reflect.Setup;
 
 /**
@@ -47,23 +53,24 @@ public class SavedSearchWriter extends ExtensibleEntityJsonWriter<SavedSearch> {
         jg.writeStringField("searchType", search.getSearchType().toString());
         jg.writeStringField("langOrProviderName", search.getLangOrProviderName());
 
-        if (search.getParams() != null) {
-            jg.writeObjectFieldStart("params");
+        if (search instanceof ParameterizedSavedSearch) {
+            if (search.getParams() != null) {
+                jg.writeObjectFieldStart("params");
 
-            Iterator<String> it = search.getParams().keySet().iterator();
-            while (it.hasNext()) {
-                String param = it.next();
-                if (search.getParams().get(param).size() > 1) {
-                    jg.writeArrayFieldStart(param);
-                    for (String val : search.getParams().get(param)) {
-                        jg.writeString(val);
-                    }
-                    jg.writeEndArray();
-                } else {
-                    jg.writeStringField(param, search.getParams().get(param).get(0));
+                Iterator<String> it = search.getParams().keySet().iterator();
+                while (it.hasNext()) {
+                    String param = it.next();
+                    jg.writeStringField(param, search.getParams().get(param));
                 }
+                jg.writeEndObject();
             }
-            jg.writeEndObject();
+        } else {
+            jg.writeFieldName("searchDocument");
+            Writer<DocumentModel> writer = registry.getWriter(ctx, DocumentModel.class, APPLICATION_JSON_TYPE);
+            OutputStreamWithJsonWriter out = new OutputStreamWithJsonWriter(jg);
+            writer.write(search.getDocument(), Enriched.class, TypeUtils.parameterize(Enriched.class,
+                DocumentModel.class), APPLICATION_JSON_TYPE, out);
         }
+
     }
 }

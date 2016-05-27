@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
@@ -267,9 +266,34 @@ public abstract class QueryExecutor extends AbstractResource<ResourceTypeImpl> {
         return res;
     }
 
-    protected Response getPageProviderDefinition(String pageProviderName) throws IOException {
-        PageProviderDefinition def = pageProviderService.getPageProviderDefinition(pageProviderName);
-        return buildResponse(Response.Status.OK, MediaType.APPLICATION_JSON, def);
+    protected DocumentModelList queryByPageProvider(String pageProviderName,
+        MultivaluedMap<String, String> queryParams, DocumentModel searchDocumentModel)
+        throws RestOperationException {
+        if (pageProviderName == null || langPathMap.containsValue(pageProviderName)) {
+            throw new RestOperationException("invalid page provider name", HttpServletResponse.SC_BAD_REQUEST);
+        }
+
+        Long pageSize = searchDocumentModel.hasSchema("content_view_display") ?
+            (Long)searchDocumentModel.getPropertyValue("cvd:pageSize") :  getPageSize(queryParams);
+        Long currentPageIndex = getCurrentPageIndex(queryParams);
+        Object[] parameters = getParameters(queryParams);
+        List<SortInfo> sortInfo = searchDocumentModel.hasSchema("content_view_display") ?
+            (List<SortInfo>)searchDocumentModel.getPropertyValue("cvd:sortInfos") : getSortInfo(queryParams);
+        Map<String, Serializable> props = getProperties();
+
+        PaginableDocumentModelListImpl res = new PaginableDocumentModelListImpl(
+            (PageProvider<DocumentModel>) pageProviderService.getPageProvider(pageProviderName, searchDocumentModel,
+                sortInfo, pageSize, currentPageIndex, props, parameters), null);
+        if (res.hasError()) {
+            RestOperationException err = new RestOperationException(res.getErrorMessage());
+            err.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            throw err;
+        }
+        return res;
+    }
+
+    protected PageProviderDefinition getPageProviderDefinition(String pageProviderName) throws IOException {
+        return pageProviderService.getPageProviderDefinition(pageProviderName);
     }
 
     protected DocumentModel getSearchDocumentModel(CoreSession session, PageProviderService pps, String providerName,

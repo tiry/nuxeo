@@ -19,19 +19,13 @@
  */
 package org.nuxeo.ecm.restapi.server.jaxrs.search.test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.ws.rs.core.MultivaluedMap;
-
-import org.nuxeo.common.utils.FileUtils;
-import org.nuxeo.ecm.automation.core.util.DocumentHelper;
-import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.Blobs;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.test.annotations.RepositoryInit;
 import org.nuxeo.ecm.platform.search.core.SavedSearch;
@@ -40,8 +34,6 @@ import org.nuxeo.ecm.platform.userworkspace.api.UserWorkspaceService;
 import org.nuxeo.ecm.webengine.JsonFactoryManager;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.transaction.TransactionHelper;
-
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
  * @since 8.3
@@ -84,32 +76,37 @@ public class RestServerInit implements RepositoryInit {
         // Create a file
         DocumentModel doc = session.createDocumentModel("/folder_2", "file", "File");
         doc.setPropertyValue("dc:title", "File");
-        doc = session.createDocument(doc);
-        // upload file blob
-        File fieldAsJsonFile = FileUtils.getResourceFileFromContext("blob.json");
-        try {
-            Blob fb = Blobs.createBlob(fieldAsJsonFile, "image/jpeg");
-            DocumentHelper.addBlob(doc.getProperty("file:content"), fb);
-        } catch (IOException e) {
-            throw new NuxeoException(e);
-        }
-        session.saveDocument(doc);
+        session.createDocument(doc);
 
         // Create some saved searches
         SavedSearchService savedSearchService = Framework.getLocalService(SavedSearchService.class);
+        Map<String, String> params = new HashMap<>();
 
-        MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+        params.put("pageSize", "2");
+        params.put("queryParams", "$currentUser");
+        params.put("query", "select * from Document where " + "dc:creator = ?");
+        try {
+            savedSearchService.saveSearch(session, "my saved search 1", SavedSearch.SavedSearchType.QUERY, "NXQL",
+                params).getId();
+        } catch (IOException e) {}
 
-        params.add("pageSize", "2");
-        params.add("queryParams", "$currentUser");
-        params.add("query", "select * from Document where " + "dc:creator = ?");
-        savedSearchService.saveSearch(session, "my saved search 1", SavedSearch.SavedSearchType.QUERY, "NXQL",
-            params).getId();
+        params = new HashMap<>();
+        params.put("queryParams", RestServerInit.getFolder(1, session).getId());
+        try {
+            savedSearchService.saveSearch(session, "my saved search 2", SavedSearch.SavedSearchType.PAGE_PROVIDER,
+                "TEST_PP", params).getId();
+        } catch (IOException e) {}
 
-        params = new MultivaluedMapImpl();
-        params.add("queryParams", RestServerInit.getFolder(1, session).getId());
-        savedSearchService.saveSearch(session, "my saved search 2", SavedSearch.SavedSearchType.PAGE_PROVIDER,
-            "TEST_PP", params).getId();
+        params = new HashMap<>();
+        params.put("pageSize", "2");
+        params.put("ecm_fulltext", "Note*");
+        params.put("dc_modified_agg", "[\"lastWeek\"]");
+        try {
+            savedSearchService.saveSearch(session, "my saved search 3", SavedSearch.SavedSearchType.PAGE_PROVIDER,
+                "default_search", params).getId();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
 
         TransactionHelper.commitOrRollbackTransaction();
         TransactionHelper.startTransaction();

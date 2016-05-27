@@ -18,7 +18,9 @@
  */
 package org.nuxeo.ecm.platform.search.core;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.Map;
+
+import org.nuxeo.ecm.core.api.DocumentModel;
 
 /**
  * @since 8.3
@@ -33,10 +35,10 @@ public class SavedSearchRequest implements SavedSearch {
 
     protected String langOrProviderName;
 
-    protected MultivaluedMap<String,String> params;
+    protected Map<String,String> params;
 
     public SavedSearchRequest(String id, String title, SavedSearchType searchType, String langOrProviderName,
-        MultivaluedMap<String,String> params) {
+        Map<String,String> params) {
         this.id = id;
         this.title = title;
         this.searchType = searchType;
@@ -55,7 +57,7 @@ public class SavedSearchRequest implements SavedSearch {
     }
 
     @Override
-    public MultivaluedMap<String,String> getParams() {
+    public Map<String,String> getParams() {
         return params;
     }
 
@@ -67,6 +69,11 @@ public class SavedSearchRequest implements SavedSearch {
     @Override
     public String getLangOrProviderName() {
         return langOrProviderName;
+    }
+
+    @Override
+    public DocumentModel getDocument() {
+        return null;
     }
 
     @Override
@@ -85,7 +92,7 @@ public class SavedSearchRequest implements SavedSearch {
     }
 
     @Override
-    public void setParams(MultivaluedMap<String,String> params) {
+    public void setParams(Map<String,String> params) {
         this.params = params;
     }
 }

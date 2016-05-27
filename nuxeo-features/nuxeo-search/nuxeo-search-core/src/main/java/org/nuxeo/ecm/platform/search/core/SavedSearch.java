@@ -18,9 +18,11 @@
  */
 package org.nuxeo.ecm.platform.search.core;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.Map;
 
-import javax.ws.rs.core.MultivaluedMap;
+import org.nuxeo.ecm.core.api.DocumentModel;
 
 /**
  * @since 8.3
@@ -53,15 +55,17 @@ public interface SavedSearch extends Serializable {
 
     String getTitle();
 
-    MultivaluedMap<String,String> getParams();
+    Map<String,String> getParams();
 
     SavedSearchType getSearchType();
 
     String getLangOrProviderName();
 
+    DocumentModel getDocument();
+
     void setTitle(String title);
 
-    void setParams(MultivaluedMap<String,String> params);
+    void setParams(Map<String,String> params) throws IOException;
 
     void setSearchType(SavedSearchType type);
 

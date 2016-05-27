@@ -18,7 +18,8 @@
  */
 package org.nuxeo.ecm.platform.search.core;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.io.IOException;
+import java.util.Map;
 
 import org.nuxeo.ecm.core.api.CoreSession;
 
@@ -27,14 +28,15 @@ import org.nuxeo.ecm.core.api.CoreSession;
  */
 public interface SavedSearchService {
 
-    SavedSearch saveSearch(CoreSession session, SavedSearch search) throws InvalidSearchParameterException;
+    SavedSearch saveSearch(CoreSession session, SavedSearch search) throws InvalidSearchParameterException, IOException;
 
     SavedSearch saveSearch(CoreSession session, String title, SavedSearch.SavedSearchType searchType,
-        String langOrProviderName, MultivaluedMap<String,String> params) throws InvalidSearchParameterException;
+            String langOrProviderName, Map<String, String> params) throws InvalidSearchParameterException, IOException;
 
     SavedSearch getSearch(CoreSession session, String id);
 
-    SavedSearch updateSearch(CoreSession session, String id, SavedSearch search) throws InvalidSearchParameterException;
+    SavedSearch updateSearch(CoreSession session, String id, SavedSearch search)
+            throws InvalidSearchParameterException, IOException;
 
     void deleteSearch(CoreSession session, String id);
 }

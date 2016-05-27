@@ -18,9 +18,9 @@
  */
 package org.nuxeo.ecm.platform.search.core;
 
+import java.io.IOException;
 import java.security.Principal;
-
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.Map;
 
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -30,6 +30,7 @@ import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
+import org.nuxeo.ecm.platform.query.api.PageProviderService;
 import org.nuxeo.ecm.platform.userworkspace.api.UserWorkspaceService;
 import org.nuxeo.runtime.api.Framework;
 
@@ -41,14 +42,16 @@ import com.google.common.base.Strings;
 public class SavedSearchServiceImpl implements SavedSearchService {
 
     @Override
-    public SavedSearch saveSearch(CoreSession session, SavedSearch search) throws InvalidSearchParameterException {
+    public SavedSearch saveSearch(CoreSession session, SavedSearch search)
+        throws InvalidSearchParameterException, IOException {
         return saveSearch(session, search.getTitle(), search.getSearchType(), search.getLangOrProviderName(),
             search.getParams());
     }
 
     @Override
     public SavedSearch saveSearch(CoreSession session, String title, SavedSearch.SavedSearchType searchType,
-        String langOrProviderName, MultivaluedMap<String, String> params) throws InvalidSearchParameterException {
+        String langOrProviderName, Map<String, String> params)
+        throws InvalidSearchParameterException, IOException {
         if (Strings.isNullOrEmpty(title)) {
             throw new InvalidSearchParameterException("invalid title");
         }
@@ -59,11 +62,17 @@ public class SavedSearchServiceImpl implements SavedSearchService {
         UserWorkspaceService userWorkspaceService = Framework.getLocalService(UserWorkspaceService.class);
         DocumentModel uws = userWorkspaceService.getCurrentUserPersonalWorkspace(session, null);
 
+        String searchDocumentType = (searchType == SavedSearch.SavedSearchType.PAGE_PROVIDER) ?
+            Framework.getLocalService(PageProviderService.class).getPageProviderDefinition(langOrProviderName)
+                .getSearchDocumentType() : null;
+
         DocumentModel savedSearchDoc = session.createDocumentModel(uws.getPathAsString(), title,
-            SavedSearchConstants.SAVED_SEARCH_TYPE_NAME);
+            searchDocumentType != null ? searchDocumentType :
+                SavedSearchConstants.PARAMETERIZED_SAVED_SEARCH_TYPE_NAME);
 
         SavedSearch savedSearch = savedSearchDoc.getAdapter(SavedSearch.class);
         savedSearch.setTitle(title);
+
         savedSearch.setLangOrProviderName(langOrProviderName);
         savedSearch.setSearchType(searchType);
         savedSearch.setParams(params);
@@ -99,7 +108,8 @@ public class SavedSearchServiceImpl implements SavedSearchService {
     }
 
     @Override
-    public SavedSearch updateSearch(CoreSession session, String id, SavedSearch search) throws InvalidSearchParameterException {
+    public SavedSearch updateSearch(CoreSession session, String id, SavedSearch search)
+        throws InvalidSearchParameterException, IOException {
         if (Strings.isNullOrEmpty(search.getTitle())) {
             throw new InvalidSearchParameterException("title cannot be empty");
         }

@@ -20,7 +20,6 @@ package org.nuxeo.ecm.platform.search.core;
 
 import static org.nuxeo.ecm.core.io.registry.reflect.Instantiations.SINGLETON;
 import static org.nuxeo.ecm.core.io.registry.reflect.Priorities.REFERENCE;
-import static org.nuxeo.ecm.platform.search.core.SavedSearchListWriter.ENTITY_TYPE;
 
 import org.nuxeo.ecm.core.io.marshallers.json.DefaultListJsonReader;
 import org.nuxeo.ecm.core.io.registry.reflect.Setup;
@@ -32,7 +31,7 @@ import org.nuxeo.ecm.core.io.registry.reflect.Setup;
 public class SavedSearchListReader extends DefaultListJsonReader<SavedSearch> {
 
     public SavedSearchListReader() {
-        super(ENTITY_TYPE, SavedSearch.class);
+        super(SavedSearchListWriter.ENTITY_TYPE, SavedSearch.class);
     }
 
 }

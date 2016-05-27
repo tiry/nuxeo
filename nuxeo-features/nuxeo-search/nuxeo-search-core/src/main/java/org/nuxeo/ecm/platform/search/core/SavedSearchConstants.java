@@ -23,9 +23,15 @@ package org.nuxeo.ecm.platform.search.core;
  */
 public class SavedSearchConstants {
 
-    public static final String SAVED_SEARCH_FACET = "SavedSearchX";
+    public static final String PARAMETERIZED_SAVED_SEARCH_FACET = "ParameterizedSavedSearch";
 
-    public static final String SAVED_SEARCH_TYPE_NAME = "SavedSearchDoc";
+    public static final String PARAMETERIZED_SAVED_SEARCH_TYPE_NAME = "SavedSearchDoc";
+
+    public static final String SAVED_SEARCH_FACET = "SavedSearch";
+
+    public static final String SAVED_SEARCH_TYPE_NAME = "DefaultSearch";
+
+    public static final String SAVED_SEARCH_PROVIDER_NAME_PROPERTY_NAME = "cvd:contentViewName";
 
     public static final String TITLE_PROPERTY_NAME = "dc:title";
 

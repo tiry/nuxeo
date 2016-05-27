@@ -21,6 +21,7 @@ package org.nuxeo.ecm.restapi.server.jaxrs.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -31,6 +32,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -40,11 +42,14 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.DocumentNotFoundException;
 import org.nuxeo.ecm.platform.search.core.InvalidSearchParameterException;
+import org.nuxeo.ecm.platform.search.core.ParameterizedSavedSearch;
 import org.nuxeo.ecm.platform.search.core.SavedSearch;
 import org.nuxeo.ecm.platform.search.core.SavedSearchImpl;
 import org.nuxeo.ecm.platform.search.core.SavedSearchService;
 import org.nuxeo.ecm.webengine.model.WebObject;
 import org.nuxeo.runtime.api.Framework;
+
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
  * @since 8.3 Search endpoint to perform queries via rest api, with support to save and execute saved search queries.
@@ -54,9 +59,9 @@ public class SearchObject extends QueryExecutor {
 
     private static final String APPLICATION_JSON_NXENTITY = "application/json+nxentity";
 
-    public static final String SAVED_SEARCHES_PAGE_PROVIDER = "GET_SAVED_SEARCHES";
+    public static final String SAVED_SEARCHES_PAGE_PROVIDER = "SAVED_SEARCHES_ALL";
 
-    public static final String SAVED_SEARCHES_PAGE_PROVIDER_PARAMS = "GET_SAVED_SEARCHES_FOR_PAGE_PROVIDER";
+    public static final String SAVED_SEARCHES_PAGE_PROVIDER_PARAMS = "SAVED_SEARCHES_ALL_PAGE_PROVIDER";
 
     public static final String PAGE_PROVIDER_NAME_PARAM = "pageProvider";
 
@@ -88,7 +93,7 @@ public class SearchObject extends QueryExecutor {
     @Path("pp/{pageProviderName}")
     public Object doGetPageProviderDefinition(@PathParam("pageProviderName") String pageProviderName)
             throws RestOperationException, IOException {
-        return getPageProviderDefinition(pageProviderName);
+        return buildResponse(Response.Status.OK, MediaType.APPLICATION_JSON, getPageProviderDefinition(pageProviderName));
     }
 
     @GET
@@ -111,7 +116,7 @@ public class SearchObject extends QueryExecutor {
     public Response doSaveSearch(SavedSearch search) throws RestOperationException {
         try {
             return Response.ok(savedSearchService.saveSearch(ctx.getCoreSession(), search)).build();
-        } catch (InvalidSearchParameterException e) {
+        } catch (InvalidSearchParameterException|IOException e) {
             RestOperationException err = new RestOperationException(e.getMessage());
             err.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             throw err;
@@ -142,7 +147,7 @@ public class SearchObject extends QueryExecutor {
         SavedSearch savedSearch;
         try {
             savedSearch = savedSearchService.updateSearch(ctx.getCoreSession(), id, search);
-        } catch (InvalidSearchParameterException e) {
+        } catch (InvalidSearchParameterException|IOException e) {
             RestOperationException err = new RestOperationException(e.getMessage());
             err.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             throw err;
@@ -177,10 +182,18 @@ public class SearchObject extends QueryExecutor {
         if (search == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+        MultivaluedMap<String,String> params = new MultivaluedMapImpl();
+        for (Map.Entry<String,String> pair : search.getParams().entrySet()) {
+            params.putSingle(pair.getKey(), pair.getValue());
+        }
         if (SavedSearchImpl.SavedSearchType.PAGE_PROVIDER.equalsName(search.getSearchType().toString())) {
-            return queryByPageProvider(search.getLangOrProviderName(), search.getParams());
+            if (search instanceof ParameterizedSavedSearch) {
+                return queryByPageProvider(search.getLangOrProviderName(), params);
+            } else {
+                return queryByPageProvider(search.getLangOrProviderName(), params, search.getDocument());
+            }
         } else {
-            return queryByLang(search.getLangOrProviderName(), search.getParams());
+            return queryByLang(search.getLangOrProviderName(), params);
         }
     }
 }

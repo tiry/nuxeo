@@ -4,17 +4,26 @@
   <extension target="org.nuxeo.ecm.platform.query.api.PageProviderService"
              point="providers">
 
-    <coreQueryPageProvider name="GET_SAVED_SEARCHES">
+    <coreQueryPageProvider name="SAVED_SEARCHES_ALL">
       <pattern>
-        SELECT * FROM Document WHERE ecm:mixinType = 'SavedSearchX'
+        SELECT * FROM Document WHERE (ecm:mixinType = 'ParameterizedSavedSearch'
+        OR (ecm:mixinType = 'SavedSearch' AND cvd:contentViewName IS NOT NULL))
+        AND ecm:isProxy = 0
+        AND ecm:isCheckedInVersion = 0
+        AND ecm:currentLifeCycleState != 'deleted'
       </pattern>
       <pageSize>50</pageSize>
     </coreQueryPageProvider>
 
-    <coreQueryPageProvider name="GET_SAVED_SEARCHES_FOR_PAGE_PROVIDER">
+    <coreQueryPageProvider name="SAVED_SEARCHES_ALL_PAGE_PROVIDER">
       <pattern>
-        SELECT * FROM Document WHERE ecm:mixinType = 'SavedSearchX' AND
-        ss:search_type = 'pageProvider' AND ss:lang_or_provider_name = :pageProvider
+        SELECT * FROM Document WHERE ecm:isProxy = 0
+        AND ecm:isCheckedInVersion = 0
+        AND ecm:currentLifeCycleState != 'deleted'
+        AND ((ecm:mixinType = 'ParameterizedSavedSearch'
+              AND ss:search_type = 'pageProvider'
+              AND ss:lang_or_provider_name = :pageProvider)
+        OR (ecm:mixinType = 'SavedSearch' AND cvd:contentViewName IS NOT NULL))
       </pattern>
       <pageSize>50</pageSize>
     </coreQueryPageProvider>

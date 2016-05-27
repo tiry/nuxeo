@@ -20,21 +20,18 @@ package org.nuxeo.ecm.platform.search.core;
 
 import static org.nuxeo.ecm.core.io.registry.reflect.Instantiations.SINGLETON;
 import static org.nuxeo.ecm.core.io.registry.reflect.Priorities.REFERENCE;
-import static org.nuxeo.ecm.platform.search.core.SavedSearchWriter.ENTITY_TYPE;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jackson.JsonNode;
 import org.nuxeo.ecm.core.io.marshallers.json.EntityJsonReader;
 import org.nuxeo.ecm.core.io.registry.reflect.Setup;
 import org.nuxeo.ecm.webengine.WebException;
-
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
  * @since 8.3
@@ -43,7 +40,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class SavedSearchRequestReader extends EntityJsonReader<SavedSearch> {
 
     public SavedSearchRequestReader() {
-        super(ENTITY_TYPE);
+        super(SavedSearchWriter.ENTITY_TYPE);
     }
 
     @Override
@@ -54,21 +51,17 @@ public class SavedSearchRequestReader extends EntityJsonReader<SavedSearch> {
         String langOrProviderName = getStringField(jn, "langOrProviderName");
         JsonNode queryParamsNode = jn.has("params") ? jn.get("params") : null;
 
-        MultivaluedMap<String,String> queryParams = new MultivaluedMapImpl();
+        Map<String, String> queryParams = new HashMap<>();
 
         if (queryParamsNode != null) {
             Iterator<Map.Entry<String, JsonNode>> fields = queryParamsNode.getFields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> fieldEntry = fields.next();
                 if (fieldEntry.getValue().isValueNode()) {
-                    queryParams.putSingle(fieldEntry.getKey(), fieldEntry.getValue().getTextValue());
-                } else if (fieldEntry.getValue().isArray()) {
-                    Iterator<JsonNode> values = fieldEntry.getValue().getElements();
-                    while (values.hasNext()) {
-                        queryParams.add(fieldEntry.getKey(), values.next().getTextValue());
-                    }
+                    queryParams.put(fieldEntry.getKey(), fieldEntry.getValue().getTextValue());
                 } else {
-                    throw new WebException("Invalid query parameters format" + fieldEntry.getKey(), Response.Status.BAD_REQUEST.getStatusCode());
+                    throw new WebException("Invalid query parameters format" + fieldEntry.getKey(),
+                            Response.Status.BAD_REQUEST.getStatusCode());
                 }
             }
         }

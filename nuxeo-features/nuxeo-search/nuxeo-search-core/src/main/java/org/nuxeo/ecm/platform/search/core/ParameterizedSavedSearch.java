@@ -18,24 +18,23 @@
  */
 package org.nuxeo.ecm.platform.search.core;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.nuxeo.ecm.automation.core.util.DocumentHelper;
 import org.nuxeo.ecm.core.api.DocumentModel;
 
 /**
  * @since 8.3
  */
-public class SavedSearchImpl implements SavedSearch {
+public class ParameterizedSavedSearch implements SavedSearch {
 
     private DocumentModel doc;
 
-    public SavedSearchImpl(DocumentModel doc) {
+    public ParameterizedSavedSearch(DocumentModel doc) {
         this.doc = doc;
     }
 
@@ -50,18 +49,30 @@ public class SavedSearchImpl implements SavedSearch {
     }
 
     @Override
-    public Map<String,String> getParams() {
-        return new HashMap<>();
+    public Map<String, String> getParams() {
+        List<Map<String, String>> paramsProperty = getPropertyValue(SavedSearchConstants.PARAMS_PROPERTY_NAME);
+        Map<String, String> params = new HashMap<>();
+        for (Map<String, String> map : paramsProperty) {
+            params.put(map.get("key"), map.get("value"));
+        }
+
+        return params;
     }
 
     @Override
     public SavedSearchType getSearchType() {
-        return SavedSearchType.PAGE_PROVIDER;
+        String typeStr = getPropertyValue(SavedSearchConstants.SEARCH_TYPE_PROPERTY_NAME);
+        ;
+        if (SavedSearchType.PAGE_PROVIDER.equalsName(typeStr)) {
+            return SavedSearchType.PAGE_PROVIDER;
+        } else {
+            return SavedSearchType.QUERY;
+        }
     }
 
     @Override
     public String getLangOrProviderName() {
-        return getPropertyValue(SavedSearchConstants.SAVED_SEARCH_PROVIDER_NAME_PROPERTY_NAME);
+        return getPropertyValue(SavedSearchConstants.LANG_OR_PROVIDER_NAME_PROPERTY_NAME);
     }
 
     @Override
@@ -75,19 +86,32 @@ public class SavedSearchImpl implements SavedSearch {
     }
 
     @Override
-    public void setParams(Map<String,String> params) throws IOException {
+    public void setParams(Map<String, String> params) {
+        // TODO clean up previous values on every setParams
+        List<Map<String, String>> paramsProperty = getPropertyValue(SavedSearchConstants.PARAMS_PROPERTY_NAME);
+        if (paramsProperty == null) {
+            paramsProperty = new ArrayList<>();
+        }
+
+        Map<String, String> variable;
         for (String key : params.keySet()) {
             String value = params.get(key);
-            DocumentHelper.setProperty(doc.getCoreSession(), doc, key, value, true);
+            variable = new HashMap<>(1);
+            variable.put("key", key);
+            variable.put("value", value);
+            paramsProperty.add(variable);
         }
+        doc.setPropertyValue(SavedSearchConstants.PARAMS_PROPERTY_NAME, (Serializable) paramsProperty);
     }
 
     @Override
-    public void setSearchType(SavedSearchType type) {}
+    public void setSearchType(SavedSearchType type) {
+        doc.setPropertyValue(SavedSearchConstants.SEARCH_TYPE_PROPERTY_NAME, type.toString());
+    }
 
     @Override
     public void setLangOrProviderName(String langOrProviderName) {
-        doc.setPropertyValue(SavedSearchConstants.SAVED_SEARCH_PROVIDER_NAME_PROPERTY_NAME, langOrProviderName);
+        doc.setPropertyValue(SavedSearchConstants.LANG_OR_PROVIDER_NAME_PROPERTY_NAME, langOrProviderName);
     }
 
     @SuppressWarnings("unchecked")
