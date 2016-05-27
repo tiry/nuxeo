@@ -8,7 +8,28 @@
       <property name="key">${nuxeo.core.binarymanager_key}</property>
     </blobprovider>
   </extension>
-<#if "${nuxeo.mongodb.server}" == "">
+<#if "${nuxeo.dbnosql.type}" == "mongodb">
+  <extension target="org.nuxeo.ecm.core.storage.mongodb.MongoDBRepositoryService"
+      point="repository">
+    <repository name="default" label="MongoDB Repository">
+      <server>${nuxeo.mongodb.server}</server>
+      <dbname>${nuxeo.mongodb.dbname}</dbname>
+      <fulltext disabled="${nuxeo.vcs.fulltext.disabled}" searchDisabled="${nuxeo.vcs.fulltext.search.disabled}" />
+    </repository>
+  </extension>
+<#elseif "${nuxeo.dbnosql.type}" == "marklogic">
+  <extension target="org.nuxeo.ecm.core.storage.marklogic.MarkLogicRepositoryService"
+      point="repository">
+    <repository name="default" label="MarkLogic Repository">
+      <host>${nuxeo.marklogic.host}</host>
+      <port>${nuxeo.marklogic.port}</port>
+      <dbname>${nuxeo.marklogic.dbname}</dbname>
+      <user>${nuxeo.marklogic.user}</user>
+      <password>${nuxeo.marklogic.password}</password>
+      <fulltext disabled="false" />
+    </repository>
+  </extension>
+<#else>
   <extension target="org.nuxeo.ecm.core.storage.sql.RepositoryService"
     point="repository">
     <repository name="default" label="label.default.repository">
@@ -102,15 +123,6 @@
         <field type="largetext">var_ParallelDocumentReview:review_result</field>
       </schema>
 </#if>
-    </repository>
-  </extension>
-<#else>
-  <extension target="org.nuxeo.ecm.core.storage.mongodb.MongoDBRepositoryService"
-      point="repository">
-    <repository name="default" label="MongoDB Repository">
-      <server>${nuxeo.mongodb.server}</server>
-      <dbname>${nuxeo.mongodb.dbname}</dbname>
-      <fulltext disabled="${nuxeo.vcs.fulltext.disabled}" searchDisabled="${nuxeo.vcs.fulltext.search.disabled}" />
     </repository>
   </extension>
 </#if>

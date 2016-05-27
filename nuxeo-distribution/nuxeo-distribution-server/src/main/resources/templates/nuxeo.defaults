@@ -52,8 +52,8 @@ nuxeo.redis.ha.port=26379
 nuxeo.work.queuing=redis
 nuxeo.lock.manager=redis
 
-# MongoDB
-nuxeo.mongodb.server=
+# NoSQL
+nuxeo.dbnosql.type=
 
 nuxeo.notification.eMailSubjectPrefix=[Nuxeo]
 nuxeo.notification.eMailSigner=The Nuxeo team
