@@ -118,6 +118,10 @@ public class TestSQLRepositoryQuery {
         return coreFeature.getStorageConfiguration().isDBSMongoDB();
     }
 
+    protected boolean isDBSMarkLogic() {
+        return coreFeature.getStorageConfiguration().isDBSMarkLogic();
+    }
+
     protected void waitForFulltextIndexing() {
         nextTransaction();
         coreFeature.getStorageConfiguration().waitForFulltextIndexing();
@@ -134,7 +138,7 @@ public class TestSQLRepositoryQuery {
      * Query of NOT (something) matches docs where (something) did not match because the field was null.
      */
     public boolean notMatchesNull() {
-        return isDBSMongoDB();
+        return isDBSMongoDB() || isDBSMarkLogic();
     }
 
     public boolean supportsDistinct() {
@@ -869,6 +873,7 @@ public class TestSQLRepositoryQuery {
     @Test
     public void testQueryConstantsLeft() throws Exception {
         assumeTrue("DBS MongoDB cannot query const = const", !isDBSMongoDB());
+        assumeTrue("DBS MarkLogic cannot query const = const", !isDBSMarkLogic());
 
         String sql;
         DocumentModelList dml;
