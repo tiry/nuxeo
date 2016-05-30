@@ -1141,6 +1141,7 @@ public class TestSQLRepositoryQuery {
     @Test
     public void testDateNew() throws Exception {
         assumeTrue("MongoDB does not support NXQL DATE casts", !isDBSMongoDB());
+        assumeTrue("MarkLogic does not support NXQL DATE casts", !isDBSMarkLogic());
 
         String sql;
         DocumentModelList dml;
