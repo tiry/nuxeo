@@ -125,6 +125,10 @@ public class TestSQLRepositoryProperties {
 
     DocumentModel doc;
 
+    protected boolean isDBSMarkLogic() {
+        return coreFeature.getStorageConfiguration().isDBSMarkLogic();
+    }
+
     @Before
     public void setUp() throws Exception {
         // set container to temp directory here in case that depends on the OS
@@ -267,6 +271,7 @@ public class TestSQLRepositoryProperties {
 
     @Test
     public void testArrayWithNullFirst() throws Exception {
+        assumeTrue("DBS MarkLogic doesn't handle ‘null' value in stored document.", !isDBSMarkLogic());
         assertNotNull(doc.getPropertyValue("tp:stringArray"));
         String[] values = { null, "bar" };
         doc.setPropertyValue("tp:stringArray", values);
