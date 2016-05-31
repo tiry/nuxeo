@@ -62,7 +62,7 @@ public class CoreInstance {
     /**
      * All open CoreSessionInfo, keyed by session id.
      */
-    private final Map<String, RegistrationInfo> sessions = new ConcurrentHashMap<String, RegistrationInfo>();
+    private final Map<String, RegistrationInfo> sessions = new ConcurrentHashMap<>();
 
     private CoreInstance() {
     }
@@ -261,12 +261,8 @@ public class CoreInstance {
                     throw new RuntimeException("Unsupported principal: " + p.getClass());
                 }
             } else {
-                if (Framework.isTestModeSet()) {
-                    return new SystemPrincipal(null);
-                } else {
-                    throw new NuxeoException("Cannot create a CoreSession outside a security context, "
-                            + " login() missing.");
-                }
+                throw new NuxeoException("Cannot create a CoreSession outside a security context, "
+                        + " login() missing.");
             }
         }
     }
